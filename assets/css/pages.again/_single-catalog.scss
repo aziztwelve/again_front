@@ -1,0 +1,33 @@
+.product {
+  padding-bottom: 7rem;
+}
+
+.product__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  @media (max-width: $tablet) {
+    flex-direction: column;
+  }
+}
+
+.product__gallery {
+  width: 59.7rem;
+  max-width: 100%;
+  margin-right: 6.6rem;
+
+  @media (max-width: $tablet) {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+.product__main {
+  width: calc(100% - 59.7rem);
+
+  @media (max-width: $tablet) {
+    width: 100%;
+    margin-top: 2.1rem;
+  }
+}

@@ -1,0 +1,164 @@
+.product-variables__block {
+  margin-bottom: 3rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: $mobile) {
+    margin-bottom: 2rem;
+  }
+}
+
+.product-variables__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+
+.product-variables__title {
+  color: #616161;
+  opacity: .5;
+}
+
+.product-variables__link {
+  text-decoration: underline;
+  color: #616161;
+}
+
+.product-variables__values {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+[data-type="size"] .product-variables__values {
+  justify-content: flex-start;
+}
+
+.product-variables__values:has( .product-variables__size ) {
+  margin-top: -.9rem;
+}
+
+.product-variables__size {
+  position: relative;
+  margin-right: .9rem;
+  margin-top: .9rem;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+
+    @media(any-hover: hover) {
+      &:hover:not(:checked) + label {
+        color: var(--fg-red);
+      }
+    }
+
+    &:checked + label {
+      background: var(--fg-red);
+      color: var(--fg-white);
+    }
+
+    &:disabled + label {
+      opacity: .45;
+    }
+  }
+
+  & label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 6.2rem;
+    padding: .728rem 0 .875rem;
+    text-transform: uppercase;
+    font-size: 1.638rem;
+    font-weight: 500;
+    color: var(--fg-regular);
+    transition: var(--tr-regular);
+    border-radius: .445rem;
+    background: #F6F6F6;
+  }
+
+  @media (max-width: $mobile) {
+    margin-bottom: .9rem;
+  }
+}
+
+.product-variables__color {
+  position: relative;
+  margin-right: 1.5rem;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 10;
+    margin: 0;
+    cursor: pointer;
+
+    &:hover:not(:checked) + label,
+    &:checked + label {
+      border-color: var(--color);
+    }
+  }
+
+  &._white {
+    & label {
+      border-color: var(--fg-gray) !important;
+    }
+  }
+
+  & label {
+    display: block;
+    width: 3.7rem;
+    height: 3.7rem;
+    border-radius: 50%;
+    border: .168rem solid rgba(0, 0, 0, 0);
+    transition: var(--tr-regular);
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: var(--color);
+    }
+
+    @media (max-width: $mobile) {
+      width: 2.8rem;
+      height: 2.8rem;
+
+      &:after {
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+    }
+  }
+
+  @media (max-width: $mobile) {
+    margin-right: 1rem;
+  }
+}

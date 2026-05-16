@@ -1,0 +1,285 @@
+/* stylelint-disable no-invalid-position-at-import-rule */
+@use "sass:math";
+
+@import "./variables/media";
+@import "./variables/variables";
+@import "./variables/colors";
+@import "./mixins";
+
+
+// Шрифты
+@include font('Manrope', normal, 300, '../resources/fonts/manrope/Manrope-Light');
+@include font('Manrope', normal, 400, '../resources/fonts/manrope/Manrope-Regular');
+@include font('Manrope', normal, 500, '../resources/fonts/manrope/Manrope-Medium');
+@include font('Manrope', normal, 600, '../resources/fonts/manrope/Manrope-Semibold');
+@include font('Manrope', normal, 700, '../resources/fonts/manrope/Manrope-Bold');
+
+@include font('Cormorant', normal, 300, '../resources/fonts/cormorant/Cormorant-Light');
+
+@include font('SF Pro Display', normal, 400, '../resources/fonts/sf-pro-display/SFProDisplay-Regular');
+@include font('SF Pro Display', normal, 500, '../resources/fonts/sf-pro-display/SFProDisplay-Medium');
+
+@include font('HelveticaNeueCyr', normal, 300, '../resources/fonts/helveticaneuecyr/HelveticaNeueCyr-Light');
+@include font('HelveticaNeueCyr', normal, 500, '../resources/fonts/helveticaneuecyr/HelveticaNeueCyr-Roman');
+
+@include font('Mulish', normal, 200, '../resources/fonts/mulish/Mulish-ExtraLight');
+@include font('Mulish', normal, 400, '../resources/fonts/mulish/Mulish-Regular');
+@include font('Mulish', normal, 700, '../resources/fonts/mulish/Mulish-Bold');
+
+:root {
+  --ff-regular: "Manrope", sans-serif;
+  --ff-cormorant: "Cormorant", sans-serif;
+  --ff-sf-pro: "SF Pro Display", sans-serif;
+  --ff-helvetica-neue: "HelveticaNeueCyr", sans-serif;
+  --ff-mulish: "Mulish", sans-serif;
+}
+
+// Сброс CSS
+@import "./reset";
+@import "./normalize";
+
+fieldset {
+  padding: 0;
+  margin: 0;
+}
+
+
+html {
+  overscroll-behavior: none;
+  --fz-modifier: 0.520834;
+  font-size: #{'calc(var(--fz-modifier) * var(--base-size))'};//calc(0.342466 * var(--base-size)); //10px for 1920×1000
+
+  @media (max-width: $desktop-lg) {
+    --fz-modifier: 0.625;
+  }
+
+  @media (max-width: $tablet) {
+    --fz-modifier: 1.323894;
+  }
+  @media (max-width: $mobile-xxlg) {
+    --fz-modifier: 2.666666;
+  }
+
+  @media (max-width: $mobile-xxs) {
+    --fz-modifier: 2.777777;
+  }
+  @media (max-width: $mobile-xxs) {
+    --fz-modifier: 3.125; // min 320
+  }
+}
+
+body {
+  color: var(--fg-regular-85);
+  font-family: var(--ff-regular);
+  font-size: var(--fz-regular);
+  font-weight: 400;
+  line-height: 145%;
+  background: inherit;
+  overscroll-behavior: none;
+}
+
+body._lock {
+  overflow: hidden;
+  touch-action: none;
+}
+
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+
+  @media (max-width: $mobile) {
+    padding-top: 3.7rem;
+  }
+}
+
+.container {
+  max-width: #{'calc(var(--w-container) + 2 * var(--p-container))'};
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--p-container);
+  padding-right: var(--p-container);
+}
+
+.section {
+}
+
+h1 {
+  font-family: var(--ff-cormorant);
+  font-size: var(--fz-h1);
+  font-weight: 300;
+  line-height: var(--fz-h1);
+}
+
+h2, .fz-h2 {
+  font-family: var(--ff-cormorant);
+  font-size: var(--fz-h2);
+  font-weight: 300;
+  line-height: var(--fz-h2);
+}
+
+h3, .fz-h3 {
+  font-size: var(--fz-h3);
+  font-family: var(--ff-cormorant);
+  line-height: var(--fz-h3);
+  font-weight: 300;
+}
+
+h4, .fz-h4 {
+  font-size: var(--fz-h4);
+  font-weight: 700;
+  font-family: var(--ff-sf-pro);
+  line-height: var(--fz-h4);
+}
+
+p {
+  font-size: var(--fz-regular);
+  color: var(--fg-regular-85);
+  line-height: 140%;
+}
+
+.page-padding {
+  padding-bottom: 7rem;
+
+  @media (max-width: $mobile) {
+    padding-bottom: 5rem;
+  }
+}
+
+.img--cover {
+  position: relative;
+
+  & > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-position: center;
+    object-fit: cover;
+  }
+}
+
+.item--center {
+  position: relative;
+
+  & > * {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+a, button {
+  transition: var(--tr-regular);
+}
+
+@media (max-width: $mobile) {
+  .fz-h2--mobile {
+    font-size: var(--fz-h2) !important;
+    line-height: 130% !important;
+  }
+}
+
+._logout {
+  & svg {
+    display: none;
+  }
+
+  @media (max-width: $mobile) {
+    & svg {
+      display: block;
+    }
+
+    & span {
+      display: none;
+    }
+  }
+}
+
+.add-to-fav {
+  & svg,
+  & path {
+    transition: var(--tr-regular);
+  }
+}
+
+.text__content > *:not(h1,h2,h3,h4,h5,h6) {
+  font-size: var(--fz-regular);
+  line-height: 150%;
+  margin-bottom: 4rem;
+
+  @media (max-width: $mobile) {
+    margin-bottom: 1.4rem;
+    --fz-regular: 1.4rem;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.text__content {
+  & h2, & h3, & h4, & h5, & h6 {
+    margin: 4rem 0 1.2rem;
+
+    @media (max-width: $mobile) {
+      margin: 2.9rem 0 1.5rem;
+    }
+  }
+
+  & ol li {
+    list-style-position: outside;
+  }
+
+  & ul li {
+    list-style: disc;
+  }
+
+  & ul,
+  & ol {
+    padding-left: 2rem;
+  }
+
+  & ul li,
+  & ol li {
+    line-height: 150%;
+    margin-bottom: 1.8rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  & img {
+    border-radius: .8rem !important;
+  }
+
+}
+
+.text__content ol li {
+  list-style-position: outside;
+}
+
+.form__error {
+  margin-top: .2rem;
+  color: var(--fg-red);
+  font-size: 1.2rem;
+}
+
+//@import "./libs/swiper";
+@import "./libs/nouislider.min";
+@import "./libs/fancybox";
+
+@import "./keyframes";
+
+@import "./components";
+@import "./sections";
+@import "./pages";
+@import "./modifiers";
+
+@import "./helpers.b/bayan";
+@import "./components.b/b_modal";

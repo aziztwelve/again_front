@@ -1,0 +1,21 @@
+.modal-thanks {
+  width: 53.6rem;
+  padding: 5.5rem 0 8.3rem;
+  text-align: center;
+
+  @media (max-width: $mobile) {
+    padding: 3.3rem 4.4rem 4.7rem;
+  }
+}
+
+.modal-thanks__text {
+  max-width: 33.8rem;
+  margin: 1.6rem auto 0;
+  font-size: 2.3rem;
+  line-height: 140%;
+
+  @media (max-width: $mobile) {
+    font-size: 1.5rem;
+    max-width: 100%;
+  }
+}

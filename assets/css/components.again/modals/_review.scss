@@ -1,0 +1,143 @@
+.modal-review {
+  width: 94.4rem;
+  padding: 5.5rem 12.5rem 7.6rem 6.2rem;
+
+  & textarea {
+    height: 19.2rem;
+
+    @media (max-width: $mobile) {
+      height: 8rem;
+    }
+  }
+
+  @media (max-width: $tablet) {
+    padding: 5.5rem 3rem 7.6rem;
+  }
+
+  @media (max-width: $mobile) {
+    padding: 3.3rem 1rem 2.5rem;
+  }
+}
+
+.modal-review__title {
+  text-align: center;
+  margin-bottom: 6.4rem;
+
+  @media (max-width: $mobile) {
+    margin-bottom: 1.6rem;
+  }
+}
+
+.modal-review__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.2rem;
+
+  @media (max-width: $mobile) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.modal-review__stars {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.9rem;
+
+  @media (max-width: $mobile) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.modal-review__stars-title {
+  font-size: 1.3rem;
+  color: rgba(0,0,0,.29);
+
+  @media (max-width: $mobile) {
+    order: 2;
+    font-size: 1.2rem;
+  }
+}
+
+.modal-review__stars-list {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+
+  @media (max-width: $mobile) {
+    order: 1;
+    margin-bottom: .424rem;
+  }
+}
+
+.modal-review__stars-item {
+  cursor: pointer;
+  margin-right: .239rem;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & path {
+    transition: var(--tr-regular);
+  }
+
+  &._active {
+    & path {
+      fill: #F7BB2B;
+    }
+  }
+
+  &:hover {
+    & path {
+      fill: #F7BB2B;
+    }
+  }
+
+  &:hover ~ & {
+    & path {
+      fill: #F7BB2B;
+    }
+  }
+}
+
+.modal-review__form {
+
+}
+
+.modal-review__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2.1rem;
+
+  @media (max-width: $mobile) {
+    flex-wrap: wrap;
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+}
+
+.modal-review__form-text {
+  font-size: 1.2rem;
+  color: #464646;
+  opacity: .5;
+
+  @media (max-width: $mobile) {
+    order: 2;
+    max-width: 21.2rem;
+    margin: 1.4rem auto 0;
+  }
+}
+
+.modal-review__form-btn {
+  margin: 0;
+  max-width: 36.6rem;
+
+  @media (max-width: $mobile) {
+    order: 1;
+    max-width: 100%;
+  }
+}

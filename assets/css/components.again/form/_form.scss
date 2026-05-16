@@ -1,0 +1,38 @@
+.form__row {
+  margin-bottom: 2.2rem;
+  position: relative;
+
+  &._18 {
+    margin-bottom: 1.8rem;
+  }
+
+  &._15 {
+    margin-bottom: 1.5rem;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: $mobile) {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.form__policy {
+  margin-top: 2rem;
+}
+
+.form__policy .checkbox__label {
+  line-height: 140%;
+  font-size: 1.2rem;
+  color: #464646;
+}
+
+.form__policy .checkbox__icon {
+  top: .1rem;
+}
+
+.form__button {
+  margin-top: 2.5rem;
+}

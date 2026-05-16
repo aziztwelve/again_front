@@ -1,0 +1,29 @@
+.mini-cart__progress {
+  margin-bottom: 3.4rem;
+
+  @media (max-width: $mobile) {
+    margin-bottom: 2rem;
+  }
+}
+
+.mini-cart__btn {
+  width: 100%;
+  margin-top: 3.5rem;
+}
+
+@media (max-width: $mobile) {
+  .mini-cart__bottom {
+    padding: 2.4rem 1rem 2rem;
+    background: #F6F5F3;
+    margin-left: var(--m-m-container);
+    margin-right: var(--m-m-container);
+
+    & .mini-cart__total {
+      margin-top: 0;
+    }
+
+    & .mini-cart__btn {
+      margin-top: 1.9rem;
+    }
+  }
+}

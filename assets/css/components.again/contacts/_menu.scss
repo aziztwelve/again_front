@@ -1,0 +1,25 @@
+.contacts-menu {
+  max-width: 38rem;
+}
+
+.contacts-menu__item {
+  margin-bottom: 1.4rem;
+  display: flex;
+  align-items: center;
+  padding: 1rem 1rem 1rem 1.6rem;
+  border-radius: var(--br-regular);
+  background: var(--fg-gray-light);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.contacts-menu__item-icon {
+  min-width: 2.4rem;
+  margin-right: 1.6rem;
+}
+
+.contacts-menu__item-text {
+  text-decoration: underline;
+}

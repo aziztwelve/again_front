@@ -1,0 +1,35 @@
+.related {
+  padding-top: 7rem;
+}
+
+.related-block__header {
+  margin-bottom: 2rem !important;
+  justify-content: space-between;
+}
+
+.related__button {
+  margin-top: 3rem;
+}
+
+.related__wrapper {
+  @media (min-width: $tablet) {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.8rem;
+    transform: none;
+  }
+}
+
+.related .swiper__nav {
+  display: none;
+
+  @media (max-width: $tablet) {
+    display: flex;
+  }
+}
+
+.related__swiper  {
+  @media (max-width: $tablet) {
+    margin-right: var(--m-m-container);
+  }
+}

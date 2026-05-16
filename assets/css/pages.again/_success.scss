@@ -1,0 +1,151 @@
+.success {
+  padding-bottom: 7rem;
+}
+
+.success__container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  @media (max-width: $tablet) {
+    flex-wrap: wrap;
+  }
+}
+
+.success__content {
+  max-width: 60.9rem;
+
+  @media (max-width: $tablet) {
+    max-width: 100%;
+    order: 2;
+    margin-top: 3rem;
+  }
+}
+
+.success__block {
+  margin-bottom: 4.3rem;
+
+  @media (max-width: $mobile) {
+    margin-bottom: 2.6rem;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.success__block-title {
+  line-height: var(--fz-h1);
+  margin-bottom: 2.1rem;
+
+  @media (max-width: $tablet) {
+    &._hide_mobile {
+      display: none;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    margin-bottom: 1.4rem;
+  }
+}
+
+.success__buttons {
+  display: flex;
+  align-items: center;
+
+  & .btn {
+    width: 29.7rem;
+    margin-right: 1.5rem;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    flex-wrap: wrap;
+
+    & .btn {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 1rem;
+      min-height: 5rem;
+    }
+  }
+}
+
+.success__list {
+  margin-bottom: 3.3rem;
+
+  @media (max-width: $mobile) {
+    margin-bottom: 1.1rem;
+  }
+}
+
+.success__item {
+  margin-bottom: 1.5rem;
+  font-size: var(--fz-1-8);
+  line-height: 150%;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 1.5rem;
+  }
+}
+
+.success__status {
+  font-weight: 700;
+  color: #24BD21;
+}
+
+.success__messengers {
+  margin-top: 3.3rem;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: $mobile) {
+    margin-top: 1.8rem;
+    justify-content: space-between;
+  }
+}
+
+.success__messengers-title {
+  color: var(--fg-gray);
+  margin-right: 1.9rem;
+}
+
+.success__messengers-list {
+  display: flex;
+  align-items: center;
+}
+
+.success__messengers-item {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-whatsapp);
+  margin-right: 1.9rem;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &._viber {
+    background: var(--bg-viber);
+  }
+
+  @media (max-width: $mobile) {
+    width: 3.9rem;
+    height: 3.9rem;
+
+    & svg {
+      max-width: 2rem;
+    }
+  }
+}

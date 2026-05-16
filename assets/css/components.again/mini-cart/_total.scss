@@ -1,0 +1,15 @@
+.mini-cart__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4.2rem;
+}
+
+.mini-cart__total-text {
+  letter-spacing: 0.05rem;
+}
+
+.mini-cart__total-price {
+  font-weight: 300;
+  font-size: 2rem;
+}

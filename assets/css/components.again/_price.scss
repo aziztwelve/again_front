@@ -1,0 +1,28 @@
+.price {
+  display: flex;
+  align-items: flex-end;
+  color: var(--fg-black);
+}
+
+.price__new {
+  font-weight: 300;
+  font-size: 1.6rem;
+  line-height: 100%;
+
+  @media (max-width: $mobile) {
+    font-size: 1.3rem;
+  }
+}
+
+.price__old {
+  margin-left: .8rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  opacity: .3;
+  text-decoration: line-through;
+  line-height: 100%;
+
+  @media (max-width: $mobile) {
+    font-size: .8rem;
+  }
+}

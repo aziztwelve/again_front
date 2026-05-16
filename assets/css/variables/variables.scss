@@ -1,0 +1,52 @@
+
+:root {
+  --base-size: 1vw;//#{"calc(1vw + 1vh)"};
+
+  --tr: 0.3s;
+  --tr-regular: all var(--tr) ease;
+
+  --p-container: 1.5rem;
+  --m-m-container: calc( -1 * var(--p-container) );
+
+  @media (max-width: $tablet) {
+    --p-container: 1rem;
+  }
+
+
+  // Widths
+  --w-container: 116.1rem;
+  @media (max-width: $tablet-xlg) {
+    --w-container: 100%;
+  }
+
+  --fz-regular: 1.6rem;
+
+  --fz-h1: 6rem;
+  --fz-h2: 4rem;
+  --fz-h3: 3rem;
+  --fz-h4: 2rem;
+  --fz-h5: 1.6rem;
+
+  --fz-secondary: 1.4rem;
+  --fz-1-5: 1.5rem;
+  --fz-1-8: 1.8rem;
+
+  @media (max-width: $tablet) {
+    --fz-h1: 3.5rem;
+    --fz-h3: 2.5rem;
+
+    --fz-regular: 1.4rem;
+  }
+
+  @media (max-width: $mobile) {
+    --fz-h2: 2.5rem;
+    --fz-h3: 2.5rem;
+    --fz-h4: 1.6rem;
+
+    --fz-regular: 1.3rem;
+    --fz-secondary: 1.3rem;
+    --fz-1-8: 1.6rem;
+  }
+
+  --br-regular: 2rem;
+}
