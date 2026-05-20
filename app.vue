@@ -15,6 +15,7 @@
   <ClientOnly>
     <OtoBannerInit/>
   </ClientOnly>
+  <Toast/>
 </template>
 
 <script setup lang="ts">

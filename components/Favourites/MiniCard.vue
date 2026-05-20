@@ -42,7 +42,7 @@
         <button
             v-if="product.price"
             class="mini-cart__item-btn"
-            @click="cartStore.addToCart( product, quantity )"
+            @click="handleAddToCart"
         >
           в корзину
         </button>
@@ -63,17 +63,23 @@ const props = defineProps<{
 
 const cartStore = useCartStore();
 const favouritesStore = useFavouritesStore();
+const { show: showToast } = useToast();
 
 const quantity = ref( 1 );
 const getQuantity = ( value: number ) => {
   quantity.value = value;
 }
 
+const handleAddToCart = () => {
+  cartStore.addToCart( props.product, quantity.value );
+  showToast( 'Товар добавлен в корзину' );
+}
+
 const to = computed( () => {
   return {
     name: 'catalog-slug',
     params: {
-      slug: props.product.id
+      slug: props.product.slug || props.product.id
     }
   }
 } )

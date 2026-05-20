@@ -20,14 +20,43 @@
       </div>
     </div>
 
-    <div class="checkout__auth-block" v-else>
-      <NuxtLink to="/login" class="btn">Авторизоваться</NuxtLink>
+    <!--
+      Гостевой режим: блок с email-полем (опционально) и приглашением войти,
+      если у пользователя уже есть аккаунт. Имя/фамилия/телефон собираются
+      в CheckoutRecipient — здесь не дублируем.
+
+      Кнопка «Войти» вынесена в верх блока, слева — так она заметнее
+      и не теряется ниже описательного текста.
+    -->
+    <div class="checkout__auth-block _guest" v-else>
+      <div class="checkout__auth-actions _guest-top">
+        <NuxtLink to="/login" class="checkout__auth-btn _compact btn _border _gray _dark">
+          Войти
+        </NuxtLink>
+      </div>
+      <p class="checkout__auth-guest-hint">
+        Оформляете как гость. Если у вас есть аккаунт — войдите,
+        чтобы автоматически сохранить заказ в личном кабинете
+        и использовать персональные скидки.
+      </p>
+      <div class="checkout__guest-fields">
+        <FormInput
+            name="email"
+            type="email"
+            placeholder="Email (необязательно, для отправки чека)"
+            v-model="email"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const userStore = useAuthStore();
+
+// Email указывается ТОЛЬКО для гостевого заказа.
+// Для авторизованного клиента email берётся из его аккаунта на бэкенде.
+const email = defineModel<string>('email', { default: '' });
 </script>
 
 <style scoped lang="scss">
@@ -55,6 +84,21 @@ const userStore = useAuthStore();
   margin-top: 1.9rem;
   display: flex;
   align-items: center;
+
+  // Вариант для гостя: кнопка «Войти» в самом верху блока, выровнена слева,
+  // без верхнего отступа — чтобы лежала «прямо в углу» формы.
+  &._guest-top {
+    margin-top: 0;
+    margin-bottom: 1.6rem;
+    justify-content: flex-start;
+  }
+}
+
+.checkout__auth-guest-hint {
+  margin-bottom: 1.6rem;
+  font-size: var(--fz-1-5);
+  line-height: 150%;
+  color: var(--fg-gray, #6b6b6b);
 }
 
 .checkout__auth-btn {
@@ -66,6 +110,21 @@ const userStore = useAuthStore();
 
   &:last-child {
     margin-right: 0;
+  }
+
+  // Компактная версия — для гостевой кнопки «Войти», чтобы не доминировала
+  // над email-полем и не «съедала» место.
+  // У базового .btn есть width: 38.8rem и margin: 0 auto — из-за этого
+  // кнопка визуально центрировалась. Переопределяем: ширина по контенту,
+  // прижимаем к левому краю.
+  &._compact {
+    min-height: 4.4rem;
+    width: auto;
+    margin: 0;
+    padding-left: 2.2rem;
+    padding-right: 2.2rem;
+    font-size: 1.4rem;
+    align-self: flex-start;
   }
 
   @media (max-width: $mobile) {

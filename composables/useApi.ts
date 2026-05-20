@@ -12,10 +12,14 @@ export async function useApi<T>(url: string, options: object = {}, slug?: string
     // Проверяем, является ли body FormData
     const isFormData = (options as any).body instanceof FormData;
 
-    // Базовые headers
-    const baseHeaders: Record<string, string> = {
-        'Authorization': `Bearer ${authStore.token}`,
-    };
+    // Базовые headers. Authorization добавляем только при наличии токена —
+    // иначе бэкенд (особенно публичные endpoint'ы вроде /public/orders) видит
+    // строку "Bearer null" и пытается её резолвить, что ломает гостевой режим.
+    const baseHeaders: Record<string, string> = {};
+
+    if (authStore.token) {
+        baseHeaders['Authorization'] = `Bearer ${authStore.token}`;
+    }
 
     // Если НЕ FormData - добавляем Content-Type: application/json
     if (!isFormData) {

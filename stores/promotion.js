@@ -20,6 +20,9 @@ export const usePromotionStore = defineStore('promotionStore', () => {
     // не сбрасывало ранее сделанный выбор размера для другого подарка.
     const selectedGiftVariantByGiftId = ref({});
 
+    // Выбранный цвет для подарка: { giftId: colorId }
+    const selectedGiftColorByGiftId = ref({});
+
     // Выбор пользователя: 'gift' или 'discount'
     const userChoice = ref('gift');
 
@@ -76,6 +79,74 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         const variants = selectedGift.value.variants || [];
         return variants.length > 0;
     });
+
+    /**
+     * Уникальные цвета для конкретного подарка (по giftId).
+     * Возвращает массив { id, name, code } без дублей.
+     */
+    const uniqueColorsForGift = (gift) => {
+        if (!gift?.variants) return [];
+        const seen = new Set();
+        const result = [];
+        for (const v of gift.variants) {
+            const color = v.color;
+            if (!color) continue;
+            if (!seen.has(color.id)) {
+                seen.add(color.id);
+                result.push({ id: color.id, name: color.name, code: color.code });
+            }
+        }
+        return result;
+    };
+
+    const SIZE_ORDER = ['XXS', 'XS', 'S', 'S/M', 'M', 'M/L', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL'];
+
+    const sortBySize = (variants) => {
+        return [...variants].sort((a, b) => {
+            const ai = SIZE_ORDER.indexOf((a.name || '').toUpperCase());
+            const bi = SIZE_ORDER.indexOf((b.name || '').toUpperCase());
+            // Известные размеры — по порядку, неизвестные — в конец по алфавиту
+            if (ai === -1 && bi === -1) return (a.name || '').localeCompare(b.name || '');
+            if (ai === -1) return 1;
+            if (bi === -1) return -1;
+            return ai - bi;
+        });
+    };
+
+    /**
+     * Варианты подарка, отфильтрованные по выбранному цвету и отсортированные по размеру.
+     * Если цвет не выбран — возвращает все варианты.
+     */
+    const variantsForGiftByColor = (gift) => {
+        if (!gift?.variants) return [];
+        const colorId = selectedGiftColorByGiftId.value[gift.id];
+        const filtered = colorId
+            ? gift.variants.filter((v) => v.color?.id === colorId)
+            : gift.variants;
+        return sortBySize(filtered);
+    };
+
+    /**
+     * Выбрать цвет подарка. Сбрасывает выбранный вариант если он не совпадает с новым цветом.
+     */
+    const selectGiftColor = (gift, colorId) => {
+        if (!gift) return;
+        selectedGiftColorByGiftId.value = {
+            ...selectedGiftColorByGiftId.value,
+            [gift.id]: colorId,
+        };
+        // Проверяем, подходит ли текущий вариант к новому цвету
+        const currentVariantId = selectedGiftVariantByGiftId.value[gift.id];
+        if (currentVariantId) {
+            const currentVariant = (gift.variants || []).find((v) => v.id === currentVariantId);
+            if (!currentVariant || currentVariant.color?.id !== colorId) {
+                // Сбрасываем вариант — он другого цвета
+                const newMap = { ...selectedGiftVariantByGiftId.value };
+                delete newMap[gift.id];
+                selectedGiftVariantByGiftId.value = newMap;
+            }
+        }
+    };
 
     // Полностью ли заполнен выбор подарка (готов к отправке)
     const isGiftSelectionComplete = computed(() => {
@@ -210,17 +281,34 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         if (!gift) return;
 
         if (gift.has_variants && Array.isArray(gift.variants) && gift.variants.length > 0) {
+            // Авто-выбор цвета: если цвет ещё не выбран — берём цвет первого варианта
+            if (!selectedGiftColorByGiftId.value[gift.id]) {
+                const firstColor = gift.variants[0]?.color;
+                if (firstColor) {
+                    selectedGiftColorByGiftId.value = {
+                        ...selectedGiftColorByGiftId.value,
+                        [gift.id]: firstColor.id,
+                    };
+                }
+            }
+
+            // Авто-выбор варианта: если вариант ещё не выбран или не подходит к цвету
+            const colorId = selectedGiftColorByGiftId.value[gift.id];
             const alreadyChosen = selectedGiftVariantByGiftId.value[gift.id];
             const stillAvailable = alreadyChosen
-                ? gift.variants.find((v) => v.id === alreadyChosen)
+                ? gift.variants.find((v) => v.id === alreadyChosen && (!colorId || v.color?.id === colorId))
                 : null;
 
             if (!stillAvailable) {
-                // Авто-выбор первого доступного variant'а
-                selectedGiftVariantByGiftId.value = {
-                    ...selectedGiftVariantByGiftId.value,
-                    [gift.id]: gift.variants[0].id,
-                };
+                const firstForColor = colorId
+                    ? gift.variants.find((v) => v.color?.id === colorId)
+                    : gift.variants[0];
+                if (firstForColor) {
+                    selectedGiftVariantByGiftId.value = {
+                        ...selectedGiftVariantByGiftId.value,
+                        [gift.id]: firstForColor.id,
+                    };
+                }
             }
         }
     };
@@ -280,6 +368,7 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         applicablePromotions.value = [];
         selectedGift.value = null;
         selectedGiftVariantByGiftId.value = {};
+        selectedGiftColorByGiftId.value = {};
         userChoice.value = 'gift';
         message.value = '';
         messageClass.value = '';
@@ -291,6 +380,7 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         applicablePromotions,
         selectedGift,
         selectedGiftVariantByGiftId,
+        selectedGiftColorByGiftId,
         userChoice,
         isLoading,
         message,
@@ -305,9 +395,14 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         needsVariantSelection,
         isGiftSelectionComplete,
 
+        // Helpers
+        uniqueColorsForGift,
+        variantsForGiftByColor,
+
         // Actions
         checkApplicable,
         selectGift,
+        selectGiftColor,
         selectGiftVariant,
         selectDiscount,
         getDataForOrder,

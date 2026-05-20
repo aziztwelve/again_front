@@ -19,11 +19,12 @@ const props = withDefaults( defineProps<{
 
 const cartStore = useCartStore();
 const { addToCart } = cartStore;
+const { show: showToast } = useToast();
 const emit = defineEmits(['addToCart']);
 
 const emitAddToCart = () => {
-
   addToCart( props.product, props.quantity, props.variation, props.color );
+  showToast( 'Товар добавлен в корзину' );
   emit( "addToCart" );
 }
 </script>

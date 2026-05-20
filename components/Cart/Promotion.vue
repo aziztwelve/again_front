@@ -63,30 +63,52 @@
             <div v-if="promotionStore.selectedGift?.id === gift.id" class="cart__promotion-gift-check">✓</div>
           </div>
 
-          <!-- Выбор варианта (размер/цвет и т.п.) для подарка с вариативностью -->
+          <!-- Выбор варианта: шаг 1 — цвет, шаг 2 — размер -->
           <div
               v-if="promotionStore.selectedGift?.id === gift.id && gift.has_variants"
               class="cart__promotion-gift-variants"
           >
             <template v-if="gift.variants && gift.variants.length > 0">
-              <div class="cart__promotion-gift-variants-label">
-                Выберите вариант подарка:
-              </div>
-              <div class="cart__promotion-gift-variants-list">
-                <button
-                    v-for="(variant, variantIndex) in gift.variants"
-                    :key="variant.id"
-                    type="button"
-                    class="cart__promotion-gift-variant"
-                    :class="{
-                      '_selected':
-                        promotionStore.selectedGiftVariantByGiftId[gift.id] === variant.id,
-                    }"
-                    @click="promotionStore.selectGiftVariant(variant)"
-                >
-                  {{ formatVariantLabel(variant, variantIndex) }}
-                </button>
-              </div>
+
+              <!-- Шаг 1: Цвет -->
+              <template v-if="uniqueColors(gift).length > 0">
+                <div class="cart__promotion-gift-variants-label">Цвет:</div>
+                <div class="cart__promotion-gift-colors">
+                  <button
+                      v-for="color in uniqueColors(gift)"
+                      :key="color.id"
+                      type="button"
+                      class="cart__promotion-gift-color"
+                      :class="{ '_selected': promotionStore.selectedGiftColorByGiftId[gift.id] === color.id }"
+                      :title="color.name"
+                      @click="promotionStore.selectGiftColor(gift, color.id)"
+                  >
+                    <span
+                        class="cart__promotion-gift-color-swatch"
+                        :style="{ background: color.code || '#ccc' }"
+                    />
+                    <span class="cart__promotion-gift-color-name">{{ color.name }}</span>
+                  </button>
+                </div>
+              </template>
+
+              <!-- Шаг 2: Размер (показывается после выбора цвета) -->
+              <template v-if="promotionStore.selectedGiftColorByGiftId[gift.id] || uniqueColors(gift).length === 0">
+                <div class="cart__promotion-gift-variants-label">Размер:</div>
+                <div class="cart__promotion-gift-variants-list">
+                  <button
+                      v-for="variant in variantsByColor(gift)"
+                      :key="variant.id"
+                      type="button"
+                      class="cart__promotion-gift-variant"
+                      :class="{ '_selected': promotionStore.selectedGiftVariantByGiftId[gift.id] === variant.id }"
+                      @click="promotionStore.selectGiftVariant(variant)"
+                  >
+                    {{ variant.name || variant.sku || '—' }}
+                  </button>
+                </div>
+              </template>
+
               <div
                   v-if="!promotionStore.selectedGiftVariantByGiftId[gift.id]"
                   class="cart__promotion-gift-variants-warn"
@@ -115,27 +137,27 @@ import { usePromotionStore } from '~/stores/promotion';
 
 const promotionStore = usePromotionStore();
 
-interface GiftVariantOptionValue {
+interface GiftVariantColor {
   id: number;
   name: string;
-  value?: string | null;
-  color_code?: string | null;
-  option?: { id: number; name: string };
+  code?: string | null;
 }
 
 interface GiftVariant {
   id: number;
   name?: string | null;
   sku?: string | null;
-  stock_quantity?: number;
-  option_values?: GiftVariantOptionValue[];
+  color?: GiftVariantColor | null;
 }
 
-const formatVariantLabel = (variant: GiftVariant, index: number): string => {
-  const values = variant?.option_values || [];
-  if (values.length > 0) return values.map((v) => v.name).join(' / ');
-  return variant.name || variant.sku || `Вариант ${index + 1}`;
-};
+interface GiftProduct {
+  id: number;
+  has_variants: boolean;
+  variants?: GiftVariant[];
+}
+
+const uniqueColors = (gift: GiftProduct) => promotionStore.uniqueColorsForGift(gift);
+const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByColor(gift);
 </script>
 
 <style scoped lang="scss">
@@ -347,6 +369,9 @@ const formatVariantLabel = (variant: GiftVariant, index: number): string => {
 }
 
 .cart__promotion-gift-variant {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   padding: 0.6rem 1.2rem;
   border-radius: 0.5rem;
   border: 1px solid #d0d0d0;
@@ -364,6 +389,58 @@ const formatVariantLabel = (variant: GiftVariant, index: number): string => {
     background: #4CAF50;
     color: #fff;
   }
+}
+
+.cart__promotion-gift-variant-swatch {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.cart__promotion-gift-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.cart__promotion-gift-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem 0.5rem 0.6rem;
+  border-radius: 2rem;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #4CAF50;
+  }
+
+  &._selected {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.07);
+  }
+}
+
+.cart__promotion-gift-color-swatch {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.cart__promotion-gift-color-name {
+  font-size: 1.2rem;
+  color: #2F2F2F;
 }
 
 .cart__promotion-gift-variants-warn {

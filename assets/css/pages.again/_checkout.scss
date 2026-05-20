@@ -5,10 +5,14 @@
 .checkout__container {
   display: flex;
   justify-content: space-between;
+  // Гарантированный зазор между формой слева и блоком расчёта справа,
+  // чтобы поля формы не «прилипали» к колонке «Итого» при широких полях.
+  gap: 4rem;
 
   @media (max-width: $tablet) {
     flex-wrap: wrap;
     justify-content: center;
+    gap: 0;
   }
 }
 
@@ -40,9 +44,16 @@
 }
 
 .checkout__form {
+  // Ограничиваем ширину формы на десктопе — иначе flex-колонка распирается
+  // и поля «вылезают» в сторону блока расчёта (справа).
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 62rem;
+
   @media (max-width: $tablet) {
     order: 2;
     margin-top: 5rem;
+    max-width: 100%;
   }
 
   @media (max-width: $mobile) {
@@ -63,9 +74,11 @@
     margin-bottom: 0;
   }
 
+  // Поля чуть уже, чтобы оставался воздух справа, и форма точно не задевала
+  // колонку «Итого». Раньше было 36.7rem.
   & .form__input,
   & .select {
-    max-width: 36.7rem;
+    max-width: 34rem;
   }
 }
 

@@ -217,7 +217,7 @@ const to = computed(() => {
   return {
     name: 'catalog-slug',
     params: {
-      slug: props.product.id
+      slug: props.product.slug || props.product.id
     }
   }
 });

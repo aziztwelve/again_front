@@ -15,7 +15,7 @@ export const useBirthdayReminder = () => {
             modal.openModal(ModalsBirthdayReminder, {
                 customClass: 'message',
                 title: 'Заполни дату рождения',
-                text: 'Заполни дату рождения, чтобы получить бесплатный подарок от команды «Again»'
+                text: 'Заполни дату рождения, чтобы получить ПОДАРОК от AGAIN'
             });
         }, 3000);
     };

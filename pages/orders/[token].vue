@@ -101,9 +101,23 @@
             </thead>
             <tbody>
               <tr v-for="item in order.items" :key="item.id">
-                <td data-title="Наименование">{{ item.name }}</td>
+                <td data-title="Наименование">
+                  {{ item.name }}
+                  <span v-if="item.is_gift" class="order-view__gift-badge">🎁 Подарок</span>
+                </td>
                 <td data-title="Кол-во">{{ item.quantity }}</td>
-                <td data-title="Стоимость">{{ formatPrice(item.total) }} ₽</td>
+                <td data-title="Стоимость">
+                  <template v-if="item.is_gift">
+                    <span class="order-view__gift-free">Бесплатно</span>
+                  </template>
+                  <template v-else-if="item.discount > 0">
+                    <span class="order-view__price-original">{{ formatPrice((item.price + item.discount) * item.quantity) }} ₽</span>
+                    <span class="order-view__price-discounted">{{ formatPrice(item.price * item.quantity) }} ₽</span>
+                  </template>
+                  <template v-else>
+                    {{ formatPrice(item.price * item.quantity) }} ₽
+                  </template>
+                </td>
               </tr>
 
               <tr v-if="order.discount_amount > 0">
@@ -129,42 +143,17 @@
 </template>
 
 <script setup lang="ts">
+import type { PublicOrder, PublicOrderResponse } from '~/types/order';
+import { getPaymentMethodLabel } from '~/constants/payment';
+
 definePageMeta({
   title: 'Заказ',
 });
 
-interface PublicOrderItem {
-  id: number;
-  name: string;
-  sku: string | null;
-  quantity: number;
-  unit_price: number;
-  total: number;
-  image: string | null;
-}
-
-interface PublicOrder {
-  view_token: string;
-  order_number: string;
-  created_at: string;
-  status: { value: string; label: string | null };
-  payment_status: { value: string; label: string | null };
-  payment_method: string | null;
-  total_amount: number;
-  discount_amount: number;
-  delivery_cost: number;
-  delivery_method: string | null;
-  delivery_target: string | null;
-  delivery_address: string | null;
-  recipient: { name: string | null; phone: string | null; email: string | null };
-  items: PublicOrderItem[];
-  tracking_number: string | null;
-}
-
 const route = useRoute();
 const token = route.params.token as string;
 
-const { data, pending } = await useApi<{ success: boolean; order: PublicOrder }>(
+const { data, pending } = await useApi<PublicOrderResponse>(
     `/public/orders/${token}`,
 );
 
@@ -174,36 +163,10 @@ useHead(() => ({
   title: order.value ? `Заказ № ${order.value.order_number}` : 'Заказ',
 }));
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  // Актуальные коды (после нормализации)
-  card_ru: 'Оплата картой РФ',
-  sberpay: 'SberPay, рассрочка, иностранная карта',
-  yandex_pay_split: 'Яндекс Пэй и Сплит',
-  cash_on_delivery: 'Наличными или картой при получении',
-  pickup_payment: 'Оплата в точке самовывоза',
-  podeli: 'Подели',
-  robokassa_mokka: 'Robokassa X Мокка',
-  robokassa_yandex_split: 'Robokassa X Яндекс Сплит',
-  // Легаси-коды
-  card: 'Оплата картой РФ',
-  yookassa: 'Оплата картой РФ',
-  online: 'Оплата картой РФ',
-  yandex_pay: 'Яндекс Пэй и Сплит',
-  split: 'Яндекс Пэй и Сплит',
-  cash: 'Наличными или картой при получении',
-  cod: 'Наличными или картой при получении',
-  sbp: 'SberPay, рассрочка, иностранная карта',
-  bank_transfer: 'Оплата картой РФ',
-};
-
 const orderStatusLabel = computed(() => order.value?.status?.label || null);
 const paymentStatusLabel = computed(() => order.value?.payment_status?.label || null);
 
-const paymentMethodLabel = computed(() => {
-  const m = order.value?.payment_method;
-  if (!m) return '';
-  return PAYMENT_METHOD_LABELS[m] || m;
-});
+const paymentMethodLabel = computed(() => getPaymentMethodLabel(order.value?.payment_method));
 
 const deliveryMethodLine = computed(() => {
   const m = order.value?.delivery_method;
@@ -220,12 +183,11 @@ const recipientLine = computed(() => {
 
 const hasMessengerSubscribe = computed(() => !!order.value?.view_token);
 
-const formatPrice = (value: number) => {
-  return new Intl.NumberFormat('ru-RU', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Number(value || 0));
-};
+const formatPrice = (value: number) =>
+    new Intl.NumberFormat('ru-RU', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Number(value || 0));
 
 const formatDateTime = (value: string) => {
   if (!value) return '';
@@ -313,6 +275,35 @@ const mapUrl = (addr: string) =>
 
 .order-view__price {
   font-weight: 600;
+}
+
+.order-view__price-original {
+  text-decoration: line-through;
+  color: #aaa;
+  font-size: 0.9em;
+  margin-right: 0.4rem;
+}
+
+.order-view__price-discounted {
+  font-weight: 600;
+  color: #c0392b;
+}
+
+.order-view__gift-badge {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: #fde8e8;
+  color: #c0392b;
+  font-size: 1.1rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.order-view__gift-free {
+  font-weight: 600;
+  color: #c0392b;
 }
 
 .order-view__state {

@@ -50,12 +50,7 @@
 
 <script setup lang="ts">
 import { getMarketingConsentLink, getPrivacyPolicyLink, getOfertaLink } from '~/utils/getPolicyLink';
-
-interface PaymentOption {
-  code: string,
-  title: string,
-  text?: string,
-}
+import { PAYMENT_OPTIONS, type PaymentOption } from '~/constants/payment';
 
 withDefaults(defineProps<{
   isLoading?: boolean,
@@ -70,19 +65,10 @@ const isDisabled = ref(true);
 
 const paymentMethod = defineModel<string>('paymentMethod');
 
-// Список соответствует тому, что бэк сейчас принимает в Order.payment_method
-// (свободная строка). При появлении enum/таблицы платежных методов —
-// загрузим список с API.
-const paymentOptions: PaymentOption[] = [
-  { code: 'card_ru', title: 'Оплата картой РФ' },
-  { code: 'sberpay', title: 'SberPay, рассрочка, иностранная карта' },
-  { code: 'yandex_pay_split', title: 'Яндекс Пэй и Сплит' },
-  { code: 'cash_on_delivery', title: 'Наличными или картой при получении' },
-  { code: 'pickup_payment', title: 'Оплата в точке самовывоза' },
-  { code: 'podeli', title: 'Подели' },
-  { code: 'robokassa_mokka', title: 'Robokassa X Мокка' },
-  { code: 'robokassa_yandex_split', title: 'Robokassa X Яндекс Сплит' },
-];
+// Список — единый источник правды (см. ~/constants/payment.ts). Тот же
+// справочник используется в pages/orders/[token].vue для маппинга кода
+// в человекочитаемое название.
+const paymentOptions = PAYMENT_OPTIONS;
 
 const selectPayment = (opt: PaymentOption) => {
   paymentMethod.value = opt.code;

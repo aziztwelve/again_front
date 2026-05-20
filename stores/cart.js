@@ -357,6 +357,106 @@ export const useCartStore = defineStore('cartStore', () => {
         countCartTotal();
     };
 
+    /**
+     * Запрашивает у бэка актуальные цены/скидки для товаров в корзине и
+     * обновляет item.price/old_price/total_discount в localStorage.
+     *
+     * Зачем: корзина у нас сугубо локальная (см. useLocalStorage('cart')),
+     * поэтому если на бэке поменялась скидка после того, как товар лежал в
+     * корзине, у пользователя останется «старая» цена → бэк на чекауте
+     * вернёт PRICE_MISMATCH. Вызываем этот метод на /checkout (а также
+     * перед сабмитом), чтобы синхронизировать.
+     *
+     * @returns {Promise<{ changed: boolean, removed: number }>}
+     *   changed — поменялась ли цена хотя бы у одного товара;
+     *   removed — сколько товаров стало недоступно и было удалено из корзины.
+     */
+    const refreshPrices = async () => {
+        if (!cart.value.length) {
+            return { changed: false, removed: 0 };
+        }
+
+        const items = cart.value.map((item) => ({
+            product_id: item.id,
+            product_variant_id: item.product_variant_id ?? null,
+        }));
+
+        try {
+            const { data, error } = await useApi('/public/cart/refresh-prices', {
+                body: { items },
+            }, '', 'POST');
+
+            if (error.value || !data.value?.success) {
+                console.warn('[Cart] refreshPrices failed', error.value);
+                return { changed: false, removed: 0 };
+            }
+
+            const fresh = data.value.items || [];
+            let changed = false;
+            let removed = 0;
+
+            // Удаляем недоступные товары и обновляем цены оставшимся
+            cart.value = cart.value.filter((item) => {
+                const match = fresh.find(
+                    (f) => f.product_id === item.id
+                        && (f.product_variant_id ?? null) === (item.product_variant_id ?? null),
+                );
+
+                if (!match || match.available === false) {
+                    removed += 1;
+                    return false;
+                }
+
+                // Если на товаре висел применённый промокод — НЕ трогаем item.price,
+                // т.к. её насчитал /public/promotions или промокод-эндпоинт.
+                // Просто обновим «справочные» поля, чтобы UI показывал свежий old_price.
+                if (item.promo_code_applied) {
+                    if (item.old_price !== match.old_price) {
+                        item.old_price = match.old_price;
+                        changed = true;
+                    }
+                    return true;
+                }
+
+                const newPrice = match.price;
+                if (Math.abs((parseFloat(item.price) || 0) - newPrice) > 0.01) {
+                    item.price = newPrice;
+                    changed = true;
+                }
+
+                if ((item.old_price ?? null) !== match.old_price) {
+                    item.old_price = match.old_price;
+                    changed = true;
+                }
+
+                item.discount_percentage = match.discount_percentage;
+                item.total_discount = match.total_discount;
+
+                // Если у товара есть selected_variant — синхронизируем и там,
+                // т.к. getCartForCheckout() предпочитает selected_variant.price.
+                if (item.selected_variant && item.product_variant_id === match.product_variant_id) {
+                    if (Math.abs((parseFloat(item.selected_variant.price) || 0) - newPrice) > 0.01) {
+                        item.selected_variant.price = newPrice;
+                        changed = true;
+                    }
+                    item.selected_variant.old_price = match.old_price;
+                }
+
+                return true;
+            });
+
+            if (changed || removed) {
+                countCartTotal();
+                countInCart();
+            }
+
+            return { changed, removed };
+        } catch (e) {
+            console.warn('[Cart] refreshPrices threw', e);
+            return { changed: false, removed: 0 };
+        }
+    };
+
     const getItemInfo = (item) => {
         return {
             hasPromo: item.promo_code_applied || false,
@@ -386,6 +486,7 @@ export const useCartStore = defineStore('cartStore', () => {
         countCartPromocode,
         applyPromoToCart,
         removePromoFromCart,
+        refreshPrices,
         getItemInfo,
         quantity,
         subtotal,

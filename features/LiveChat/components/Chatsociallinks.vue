@@ -73,7 +73,7 @@
 
     <!-- Max -->
     <a
-        href="https://max.ru/id660108499492_bot"
+        href="https://max.ru/id4707052811_bot"
         target="_blank"
         rel="noopener noreferrer"
         class="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 overflow-hidden"
