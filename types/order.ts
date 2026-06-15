@@ -23,6 +23,10 @@ export interface PublicOrderRecipient {
     email: string | null;
 }
 
+export interface PublicOrderPromoCode {
+    code: string;
+}
+
 export interface PublicOrder {
     view_token: string;
     order_number: string;
@@ -31,7 +35,14 @@ export interface PublicOrder {
     payment_status: PublicOrderStatusInfo;
     payment_method: string | null;
     total_amount: number;
+    /** items_discount + promo_discount (на бэке = order.discount_amount). */
     discount_amount: number;
+    /** Скидка на товары (auto + ручные) без промокода. */
+    items_discount: number;
+    /** Сумма скидки от промокода (если был привязан). */
+    promo_discount: number;
+    /** Применённый промокод (если был). */
+    promo_code: PublicOrderPromoCode | null;
     delivery_cost: number;
     delivery_method: string | null;
     delivery_target: string | null;
@@ -78,6 +89,16 @@ export interface CheckoutForm {
     delivery_method_name: string;
     delivery_method_code: string;
     payment_method: string;
+    yandex_offer?: {
+        offer_id: string;
+        tariff_name?: string;
+        price: number;
+        delivery_date?: string;
+    } | null;
+    /** ID выбранного пункта выдачи Яндекс.Доставки (только для yandex_pickup). */
+    pvz_code?: string | null;
+    /** Адрес выбранного ПВЗ. */
+    pvz_address?: string | null;
 }
 
 // Тело POST /public/orders.

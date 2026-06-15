@@ -41,6 +41,9 @@
                   v-model:delivery-method-id="form.delivery_method_id"
                   v-model:delivery-method-name="form.delivery_method_name"
                   v-model:delivery-method-code="form.delivery_method_code"
+                  v-model:yandex-offer="form.yandex_offer"
+                  v-model:pvz-code="form.pvz_code"
+                  v-model:pvz-address="form.pvz_address"
               />
               <CheckoutRecipient
                   ref="recipientRef"
@@ -161,6 +164,9 @@ const form = reactive<CheckoutForm>({
   delivery_method_name: '',
   delivery_method_code: '',
   payment_method: '',
+  yandex_offer: null,
+  pvz_code: null,
+  pvz_address: null,
 });
 
 // Вся валидация + сборка payload'а + POST живут в composable.

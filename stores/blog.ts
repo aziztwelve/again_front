@@ -4,7 +4,7 @@ const list: BlogArticle[] = [
     {
         title: 'Менструальное белье для подростков: первый опыт без травмы',
         slug: 'menstrualnoe-bele-dlya-podrostkov-pervyy-opyt-bez-travmy',
-        date: '6 Ноября 2025',
+        date: '25 Мая 2026',
         banner: '/img/blog/article-1/banner.png',
         images: [
             {
@@ -49,7 +49,7 @@ const list: BlogArticle[] = [
     {
         title: 'Послеродовое белье: поддержка для быстрого восстановления',
         slug: 'poslerodovoe-bele-podderzhka-dlya-bystrogo-vosstanovleniya',
-        date: '3 Октября 2025',
+        date: '20 Апреля 2026',
         banner: '/img/blog/article-2/banner.png',
         images: [
             {
@@ -92,7 +92,7 @@ const list: BlogArticle[] = [
     {
         title: 'Белье для недержания: Защита, которая блокирует запахи',
         slug: 'bele-dlya-nederzhaniya-zashchita--kotoraya-blokiruet-zapakhi',
-        date: '1 Сентября 2025',
+        date: '16 Марта 2026',
         banner: '/img/blog/article-3/banner.png',
         images: [
             {
@@ -148,7 +148,7 @@ const list: BlogArticle[] = [
     {
         title: 'Спортивное менструальное белье: бегай, прыгай — не протекай!',
         slug: 'sportivnoe-menstrualnoe-bele--begay--prygay---ne-protekay',
-        date: '29 Июня 2025',
+        date: '10 Февраля 2026',
         banner: '/img/blog/article-4/banner.png',
         images: [
             {
@@ -201,7 +201,7 @@ const list: BlogArticle[] = [
     {
         title: 'Белье для сна во время месячных: ночь без сюрпризов',
         slug: 'bele-dlya-sna-vo-vremya-mesyachnykh--noch-bez-syurprizov',
-        date: '25 Мая 2025',
+        date: '5 Января 2026',
         banner: '/img/blog/article-5/banner.png',
         images: [
             {
@@ -251,7 +251,7 @@ const list: BlogArticle[] = [
     {
         title: 'Идеальное белье для путешествий в критические дни',
         slug: 'idealnoe-bele-dlya-puteshestviy-v-kriticheskie-dni',
-        date: '20 Апреля 2025',
+        date: '6 Ноября 2025',
         banner: '/img/blog/article-6/banner.png',
         images: [
             {
@@ -292,7 +292,7 @@ const list: BlogArticle[] = [
     {
         title: 'Менструальное белье для чувствительной кожи: защита от раздражений',
         slug: 'menstrualnoe-bele-dlya-chuvstvitelnoy-kozhi--zashchita-ot-razdrazheniy',
-        date: '16 Марта 2025',
+        date: '3 Октября 2025',
         banner: '/img/blog/article-7/banner.png',
         images: [
             {
@@ -335,7 +335,7 @@ const list: BlogArticle[] = [
     {
         title: 'Многоразовое белье для месячных: экономь на прокладках, заботься о планете',
         slug: 'mnogorazovoe-bele-dlya-mesyachnykh--ekonom-na-prokladkakh--zabotsya-o-planete',
-        date: '10 Февраля 2025',
+        date: '1 Сентября 2025',
         banner: '/img/blog/article-8/banner.png',
         images: [
             {
@@ -388,7 +388,7 @@ const list: BlogArticle[] = [
     {
         title: 'Спорт и месячные? Белье, которое поддержит в любом темпе',
         slug: 'sport-i-mesyachnye--bele--kotoroe-podderzhit-v-lyubom-tempe',
-        date: '5 Января 2025',
+        date: '29 Июня 2025',
         banner: '/img/blog/article-9/banner.png',
         images: [
             {
@@ -437,7 +437,7 @@ const list: BlogArticle[] = [
     {
         title: 'Менструальное белье на каждый день: забудь про ежедневки',
         slug: 'menstrualnoe-bele-na-kazhdyy-den--zabud-pro-ezhednevki',
-        date: '25 Декабря 2024',
+        date: '25 Декабря 2025',
         banner: '/img/blog/article-10/banner.png',
         images: [
             {
@@ -482,7 +482,7 @@ const list: BlogArticle[] = [
     {
         title: 'Герпес и раздражение в интимной зоне: причины, симптомы, решение',
         slug: 'gerpes-i-razdrazhenie-v-intimnoy-zone--prichiny--simptomy--reshenie',
-        date: '16 Ноября 2024',
+        date: '16 Ноября 2025',
         banner: '/img/blog/article-11/banner.png',
         images: [
             {
@@ -559,7 +559,7 @@ const list: BlogArticle[] = [
     {
         title: 'Молочница перед месячными: как избавиться',
         slug: 'molochnitsa-pered-mesyachnymi--kak-izbavitsya',
-        date: '12 Октября 2024',
+        date: '12 Октября 2025',
         banner: '/img/blog/article-12/banner.png',
         images: [
             {
@@ -612,7 +612,7 @@ const list: BlogArticle[] = [
     {
         title: 'Менструальные трусы: удобное решение, вдохновленное прошлым',
         slug: 'menstrualnye-trusy--udobnoe-reshenie--vdokhnovlennoe-proshlym',
-        date: '9 Сентября 2024',
+        date: '9 Сентября 2025',
         banner: '/img/blog/article-13/banner.png',
         images: [
             {
@@ -652,7 +652,7 @@ const list: BlogArticle[] = [
     {
         title: 'Почему хлопок и бамбук — лучшие материалы для менструального белья',
         slug: 'pochemu-khlopok-i-bambuk---luchshie-materialy-dlya-menstrualnogo-belya',
-        date: '5 Августа 2024',
+        date: '23 Августа 2025',
         banner: '/img/blog/article-14/banner.png',
         images: [
             {
@@ -698,7 +698,7 @@ const list: BlogArticle[] = [
     {
         title: 'Вред тампонов: чем они опасны и как менструальные трусы решают проблему',
         slug: 'vred-tamponov--chem-oni-opasny-i-kak-menstrualnye-trusy-reshayut-problemu',
-        date: '23 Августа 2024',
+        date: '5 Августа 2025',
         banner: '/img/blog/article-15/banner.png',
         images: [
             {

@@ -143,6 +143,19 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             payload.delivery_method = { name: form.delivery_method_name };
         }
 
+        // Яндекс.Доставка: передаём выбранный тариф
+        if (form.yandex_offer) {
+            payload.yandex_offer = form.yandex_offer;
+        }
+
+        // Яндекс.Доставка (ПВЗ): передаём выбранный пункт выдачи.
+        if (form.pvz_code) {
+            payload.pvz_code = form.pvz_code;
+            if (form.pvz_address) {
+                payload.pvz_address = form.pvz_address;
+            }
+        }
+
         // Сертификат — собираем данные для отправки получателю.
         // Для гостя fallback'ом используем email/телефон из самой формы:
         // у неавторизованного покупателя нет authStore.user.
