@@ -120,9 +120,16 @@
                 </td>
               </tr>
 
-              <tr v-if="order.discount_amount > 0">
+              <tr v-if="order.items_discount > 0">
                 <td colspan="2">Скидка</td>
-                <td>−{{ formatPrice(order.discount_amount) }} ₽</td>
+                <td>−{{ formatPrice(order.items_discount) }} ₽</td>
+              </tr>
+
+              <tr v-if="order.promo_discount > 0">
+                <td colspan="2">
+                  Промокод<template v-if="order.promo_code?.code"> {{ order.promo_code.code }}</template>
+                </td>
+                <td>−{{ formatPrice(order.promo_discount) }} ₽</td>
               </tr>
 
               <tr v-if="order.delivery_cost > 0">

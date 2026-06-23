@@ -17,7 +17,7 @@
           name="country"
           :list="countries.countries"
           placeholder="Страна"
-          :selected-id="useMyAddress ? userStore.user?.profile?.delivery_country_id : undefined"
+          :selected-id="useMyAddress ? userStore.user?.profile?.delivery_country_id : defaultCountryId"
           @get-selected-value="setCountry"
       />
       <FormSelect
@@ -92,8 +92,11 @@
               v-if="canPickOnMap"
               type="button"
               class="checkout__delivery-map-btn btn _border _thin"
+              :disabled="isYandexPickup && (!cityName || pvzGeoIdLoading)"
+              :title="isYandexPickup && !cityName ? 'Укажите город для выбора ПВЗ' : undefined"
               @click="onPickOnMap"
           >
+            <span v-if="isYandexPickup && pvzGeoIdLoading" class="checkout__pvz-btn-spinner"></span>
             {{ isYandexPickup ? 'Выбрать ПВЗ' : 'Выбрать на карте' }}
           </button>
         </div>
@@ -186,6 +189,7 @@
 </template>
 
 <script setup lang="ts">
+import { until } from '@vueuse/core';
 import type { Cities, Countries } from '~/types/countries';
 
 interface DeliveryMethod {
@@ -279,6 +283,9 @@ const setCity = (object: any) => {
 };
 
 const { data: countries } = await useCountries();
+const defaultCountryId = computed(() =>
+  countries.value?.countries?.find((c: any) => c.code === 'RU')?.id ?? undefined
+);
 const { data: cities }    = await useApi<Cities>('/countries/cities', {
   query: { country_id: countryId },
   watch: [countryId],
@@ -337,13 +344,16 @@ const canPickOnMap = computed(() =>
 );
 
 // ─── geo_id для фильтрации ПВЗ ────────────────────────────────────────────────
-const yandexGeoId = ref<number | null>(null);
+const yandexGeoId       = ref<number | null>(null);
+const pvzGeoIdLoading   = ref(false);
 
 watch([isYandexDelivery, cityName], async ([isYandex, city]) => {
   if (!isYandex || !city) { yandexGeoId.value = null; return; }
+  pvzGeoIdLoading.value = true;
   const { detectLocation } = useYandexDelivery();
   const loc = await detectLocation(String(city));
   yandexGeoId.value = loc?.geo_id ?? loc?.variants?.[0]?.geo_id ?? null;
+  pvzGeoIdLoading.value = false;
 }, { immediate: false });
 
 // ─── Тарифы ────────────────────────────────────────────────────────────────────
@@ -464,7 +474,13 @@ const selectYandexOffer = (offer: YandexOffer) => {
 const showPvzModal = ref(false);
 const selectedPvz  = ref<{ id: string; name: string; address: string; pvzApiId?: string } | null>(null);
 
-const onPickOnMap = () => { showPvzModal.value = true; };
+const onPickOnMap = async () => {
+  if (isYandexPickup.value && pvzGeoIdLoading.value) {
+    // Ждём завершения определения geo_id
+    await until(pvzGeoIdLoading).toBe(false);
+  }
+  showPvzModal.value = true;
+};
 
 const formatPvzAddress = (point: PvzPoint): string => {
   if (typeof point.address === 'string') return point.address;
@@ -572,10 +588,28 @@ const formatPrice = (price: number): string => {
   margin: 0;
   padding: 0 2rem;
   min-height: 5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   @media (max-width: $mobile) {
     width: 100%;
   }
+}
+
+.checkout__pvz-btn-spinner {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
 .checkout__delivery-comment {
