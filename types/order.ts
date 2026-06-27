@@ -63,8 +63,9 @@ export interface CheckoutFormUser {
     last_name: string;
     phone: string;
     /**
-     * Email опционален. Используется только для гостевого заказа —
-     * для авторизованного клиента бэк подтянет email из его профиля.
+     * Email. Обязателен для гостевого заказа (на него уходит чек и ссылка
+     * на заказ) — валидируется в useCheckoutSubmit.validateEmail. Для
+     * авторизованного клиента поле скрыто и бэк подтянет email из профиля.
      */
     email: string;
 }
@@ -118,6 +119,17 @@ export interface CheckoutPayload {
     delivery_address: Record<string, unknown>;
     delivery_method?: { name: string };
     payment_method?: string;
+    /**
+     * Применённые акции (мультиакционная/стекируемая модель). По одному элементу
+     * на каждую применённую акцию: выбранный подарок (+ вариант, если есть размеры)
+     * или «скидка вместо подарка».
+     */
+    promotions?: Array<{
+        promotion_id: number;
+        use_discount_instead: boolean;
+        gift_product_id?: number;
+        gift_product_variant_id?: number;
+    }>;
     [key: string]: unknown;
 }
 

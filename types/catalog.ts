@@ -35,7 +35,9 @@ export interface Product {
     item_key?: string,
     selected_variant?: Product,
     selected_color?: object,
-    stock_quantity: number
+    stock_quantity: number,
+    in_stock?: boolean,
+    cta?: 'add_to_cart' | 'notify_restock'
 }
 
 export interface Color {

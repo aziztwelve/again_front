@@ -18,6 +18,10 @@ export interface CheckoutSubmitDeps {
     setPhoneError: (msg: string) => void;
     /** DOM-узел блока «Получатель» — чтобы доскроллить к ошибке телефона. */
     getRecipientEl: () => HTMLElement | null;
+    /** Сетает ошибку email в CheckoutUser (только для гостевого заказа). */
+    setEmailError: (msg: string) => void;
+    /** DOM-узел блока «Покупатель/гость» — чтобы доскроллить к ошибке email. */
+    getUserEl: () => HTMLElement | null;
     /** Валидация модалки данных подарочной карты (если в корзине есть сертификат). */
     validateGiftCardData: () => boolean;
     /** DOM-узел блока «Подарочная карта» — для прокрутки. */
@@ -84,6 +88,36 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             return false;
         }
         deps.setPhoneError('');
+        return true;
+    };
+
+    const validateEmail = async (): Promise<boolean> => {
+        // Email обязателен ТОЛЬКО для гостя: у авторизованного клиента он
+        // берётся из профиля на бэкенде, поле в форме не показывается.
+        if (authStore.isAuthenticated) {
+            deps.setEmailError('');
+            return true;
+        }
+
+        const email = (deps.form.user.email ?? '').trim();
+        const scrollToUser = () =>
+            deps.getUserEl()?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        if (!email) {
+            deps.setEmailError('Укажите email — на него отправим чек и ссылку на заказ');
+            scrollToUser();
+            return false;
+        }
+
+        // Простая, но достаточная проверка формата: один @ и точка в домене.
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRe.test(email)) {
+            deps.setEmailError('Введите корректный email');
+            scrollToUser();
+            return false;
+        }
+
+        deps.setEmailError('');
         return true;
     };
 
@@ -167,13 +201,15 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             );
         }
 
-        // Акция (если активна). Поведение должно соответствовать тому,
-        // что было в pages/checkout/index.vue до рефактора.
+        // Акции (мультиакционная/стекируемая модель): в заказ уходит массив
+        // promotions[] — по одному элементу на каждую применённую акцию.
         if (promotionStore.hasPromotion) {
-            const promotionData = promotionStore.getDataForOrder();
-            Object.assign(payload, promotionData);
+            payload.promotions = promotionStore.getDataForOrder().promotions;
 
-            if (!promotionStore.useDiscountInstead) {
+            // Промокод несовместим с набором, если хотя бы одна применённая акция
+            // запрещает промокоды (агрегированный вердикт — зеркалит серверную
+            // валидацию). Иначе промокод и подарки сосуществуют.
+            if (!promotionStore.allowPromoCodes) {
                 delete payload.promo_code;
             }
         }
@@ -181,13 +217,36 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         return payload;
     };
 
+    // Бэк (Laravel) отдаёт сообщения валидации по-английски, напр.
+    // «The user.email field must be a valid email address.» Переводим самые
+    // частые формулировки на русский; всё незнакомое оставляем как есть.
+    const translateMessage = (msg: string): string => {
+        const m = (msg ?? '').trim();
+        if (!m) return m;
+        if (/valid email address/i.test(m)) return 'Введите корректный email';
+        if (/email .*(required|обязательн)/i.test(m) || /(required|обязательн).* email/i.test(m)) {
+            return 'Укажите email — на него отправим чек и ссылку на заказ';
+        }
+        if (/\bfield is required\b/i.test(m)) return 'Заполните все обязательные поля';
+        return m;
+    };
+
+    /** Есть ли в ответе бэка ошибка валидации по email-полю. */
+    const hasEmailError = (errPayload: any): boolean => {
+        const errs = errPayload?.errors;
+        if (errs && typeof errs === 'object') {
+            if (Object.keys(errs).some((k) => /(^|\.)email$/i.test(k))) return true;
+        }
+        return /valid email address/i.test(errPayload?.message ?? '');
+    };
+
     /** Парсит ответ бэка в человеко-читаемое сообщение. */
     const extractErrorMessage = (errPayload: any, fallback: string): string => {
         if (errPayload?.errors && typeof errPayload.errors === 'object') {
             const messages = Object.values(errPayload.errors).flat() as string[];
-            if (messages.length && messages[0]) return messages[0];
+            if (messages.length && messages[0]) return translateMessage(messages[0]);
         }
-        if (errPayload?.message) return errPayload.message;
+        if (errPayload?.message) return translateMessage(errPayload.message);
         return fallback;
     };
 
@@ -212,24 +271,27 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         // 2. Телефон
         if (!validatePhone()) return { success: false };
 
-        // 3. Обязательные поля
+        // 3. Email (обязателен для гостя, на него уходит чек/ссылка на заказ)
+        if (!await validateEmail()) return { success: false };
+
+        // 4. Обязательные поля
         if (!await validateRequired()) return { success: false };
 
-        // 4. Акция: если есть подарки с вариантами — должны быть выбраны
+        // 5. Акция: если есть подарки с вариантами — должны быть выбраны
         if (promotionStore.hasPromotion && !promotionStore.isGiftSelectionComplete) {
             await showError('Пожалуйста, выберите вариант для подарка по акции');
             await scrollTo('.cart__promotion');
             return { success: false };
         }
 
-        // 5. Освежим цены в корзине перед оформлением — на случай если юзер
+        // 6. Освежим цены в корзине перед оформлением — на случай если юзер
         // долго сидел на /checkout и за это время на бэке поменялась скидка.
         // Если цена реально изменилась, показываем ошибку и просим клиента
         // пересмотреть итог. Сервер также толерантен к «лишней» цене,
         // но мы хотим, чтобы юзер увидел реальную сумму ДО клика.
         await cartStore.refreshPrices();
 
-        // 6. POST на единый публичный endpoint /public/orders.
+        // 7. POST на единый публичный endpoint /public/orders.
         isLoading.value = true;
         const body = buildPayload();
         const { data, error } = await useApi<{ success: boolean; order: { id: number; view_token: string } }>(
@@ -251,6 +313,18 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         }
 
         const payload: any = (error.value as any)?.data ?? data.value;
+
+        // Если бэк забраковал именно email — показываем ошибку прямо у поля
+        // (для гостя оно видно), нормальной русской формулировкой вместо
+        // «The user.email field must be a valid email address.».
+        if (!authStore.isAuthenticated && hasEmailError(payload)) {
+            const emailMsg = 'Введите корректный email';
+            deps.setEmailError(emailMsg);
+            deps.getUserEl()?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (process.dev) console.error('Order error:', error.value ?? data.value);
+            return { success: false, error: emailMsg };
+        }
+
         const message = extractErrorMessage(payload, 'Не удалось оформить заказ');
         await showError(message);
         if (process.dev) console.error('Order error:', error.value ?? data.value);

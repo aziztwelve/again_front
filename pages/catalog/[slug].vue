@@ -87,7 +87,11 @@
 
 
               <div class="product__stock--not" v-else>
-                Нет в наличии
+                <ProductActionsNotifyRestock
+                    :product="product"
+                    :variation="selectedSize"
+                    :color="selectedColor"
+                />
               </div>
 
 

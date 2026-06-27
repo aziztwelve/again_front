@@ -1,15 +1,10 @@
 <template>
-  <!-- Блокировка промокода если акция не разрешает промокоды -->
+  <!-- Блокировка промокода: хотя бы одна применённая акция запрещает промокоды.
+       Промокод разрешён только если ВСЕ применённые акции его допускают
+       (агрегированный вердикт, зеркалит серверную валидацию). -->
   <div v-if="promotionStore.hasPromotion && !promotionStore.allowPromoCodes" class="cart__promo">
     <div class="cart__promo-blocked">
-      Промокоды и скидки недоступны — действует акция «{{ promotionStore.activePromotion?.name }}»
-    </div>
-  </div>
-
-  <!-- Блокировка промокода если пользователь выбрал подарок (а не скидку) -->
-  <div v-else-if="promotionStore.hasPromotion && promotionStore.allowPromoCodes && promotionStore.userChoice === 'gift'" class="cart__promo">
-    <div class="cart__promo-blocked _info">
-      Вы выбрали подарок. Чтобы использовать промокод, переключитесь на «Промокод / скидка» выше.
+      Промокоды и скидки недоступны — {{ blockingPromotionsText }}
     </div>
   </div>
 
@@ -76,6 +71,14 @@ const cart = useCartStore();
 const promotionStore = usePromotionStore();
 const promoCodeInput = ref('');
 const isLoading = ref(false);
+
+// Перечисление акций, блокирующих промокод, для пояснения пользователю.
+const blockingPromotionsText = computed(() => {
+  const names = promotionStore.promoBlockingPromotions.map((p) => `«${p.name}»`);
+  if (names.length === 0) return 'действует акция';
+  if (names.length === 1) return `действует акция ${names[0]}`;
+  return `действуют акции ${names.join(', ')}`;
+});
 
 const checkAndApplyPromoCode = async () => {
 

@@ -36,6 +36,10 @@ export async function useApi<T>(url: string, options: object = {}, slug?: string
         ...options,
         method: finalMethod,
         headers: finalHeaders,
+        // Отправляем cookie (в т.ч. HttpOnly guest_token универсальной корзины,
+        // см. docs/tasks/universal-cart.md). Требует на бэке CORS
+        // supports_credentials=true (уже включено).
+        credentials: 'include' as RequestCredentials,
     };
 
     return useFetch<T>(DEV_URI + url, finalOptions);

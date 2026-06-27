@@ -18,6 +18,7 @@
                   Имя/фамилия/телефон собираются в CheckoutRecipient ниже.
                 -->
                 <CheckoutUser
+                    ref="userRef"
                     v-model:email="form.user.email"
                 />
               </div>
@@ -127,6 +128,7 @@ onMounted(async () => {
 watch(() => [cartStore.cart.length, cartStore.total], runPromotionCheck);
 
 const giftCardDataRef = ref<{ validate: () => boolean; $el: HTMLElement } | null>(null);
+const userRef = ref<{ setEmailError: (msg: string) => void; $el: HTMLElement } | null>(null);
 const recipientRef = ref<{
   selectedCountry: Country | null,
   setPhoneError: (msg: string) => void,
@@ -144,9 +146,10 @@ const form = reactive<CheckoutForm>({
     first_name: '',
     last_name: '',
     phone: '',
-    // Email опционален. Используется только для гостевого заказа (для отправки
-    // чека/ссылки на /orders/{view_token}). Для авторизованного клиента
-    // подтягивается на бэкенде из его профиля.
+    // Email обязателен для гостевого заказа (на него уходит чек и ссылка
+    // на /orders/{view_token}). Для авторизованного клиента поле скрыто и
+    // email подтягивается на бэкенде из его профиля. Валидация — в
+    // useCheckoutSubmit.validateEmail.
     email: '',
   },
   country_code: '',
@@ -176,6 +179,8 @@ const { isLoading, submitError, submit } = useCheckoutSubmit({
   getSelectedCountry: () => recipientRef.value?.selectedCountry ?? null,
   setPhoneError: (msg) => recipientRef.value?.setPhoneError(msg),
   getRecipientEl: () => recipientRef.value?.$el ?? null,
+  setEmailError: (msg) => userRef.value?.setEmailError(msg),
+  getUserEl: () => userRef.value?.$el ?? null,
   validateGiftCardData: () => giftCardDataRef.value?.validate() ?? true,
   getGiftCardDataEl: () => giftCardDataRef.value?.$el ?? null,
 });

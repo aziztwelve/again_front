@@ -43,9 +43,23 @@
         <FormInput
             name="email"
             type="email"
-            placeholder="Email (необязательно, для отправки чека)"
+            placeholder="Email (для отправки чека)"
             v-model="email"
+            :error="emailError"
         />
+
+        <!--
+          Opt-in на рассылку (универсальная корзина): по умолчанию выключен.
+          Сохраняет согласие в серверной корзине гостя → делает её eligible для
+          напоминаний о брошенной корзине. См. docs/tasks/universal-cart.md.
+        -->
+        <label class="checkout__consent">
+          <input type="checkbox" v-model="consent" />
+          <span>
+            Хочу получать напоминания о корзине и акции — согласие на
+            <NuxtLink to="/marketing-consent" target="_blank">рекламную рассылку</NuxtLink>.
+          </span>
+        </label>
       </div>
     </div>
   </div>
@@ -54,9 +68,42 @@
 <script setup lang="ts">
 const userStore = useAuthStore();
 
-// Email указывается ТОЛЬКО для гостевого заказа.
+// Email указывается ТОЛЬКО для гостевого заказа и ОБЯЗАТЕЛЕН — на него
+// отправляется чек и ссылка на заказ (/orders/{view_token}).
 // Для авторизованного клиента email берётся из его аккаунта на бэкенде.
 const email = defineModel<string>('email', { default: '' });
+
+// Ошибка валидации email. Выставляется из useCheckoutSubmit при сабмите
+// и показывается инлайн под полем (аналогично ошибке телефона в Recipient).
+const emailError = ref('');
+const setEmailError = (msg: string) => {
+  emailError.value = msg;
+};
+
+// Сбрасываем ошибку, как только пользователь начал править поле.
+watch(email, () => {
+  if (emailError.value) emailError.value = '';
+});
+
+// Opt-in на рассылку (гость). Сохраняем контакты+согласие в серверной корзине
+// заранее (до оформления), чтобы при брошенной корзине было кому/с правом слать.
+const consent = ref(false);
+const { saveContact } = useServerCart();
+
+const emailIsValid = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+watchDebounced(
+  [email, consent],
+  () => {
+    if (userStore.isAuthenticated) return;
+    const value = (email.value ?? '').trim();
+    if (!emailIsValid(value)) return; // не шлём мусорный/неполный email
+    saveContact({ email: value, consent: consent.value });
+  },
+  { debounce: 700 },
+);
+
+defineExpose({ setEmailError });
 </script>
 
 <style scoped lang="scss">
@@ -141,6 +188,29 @@ const email = defineModel<string>('email', { default: '' });
       min-height: 5rem;
       border-radius: 50%;
     }
+  }
+}
+
+.checkout__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+  font-size: var(--fz-1-5);
+  line-height: 140%;
+  color: var(--fg-gray, #6b6b6b);
+  cursor: pointer;
+
+  & input {
+    margin-top: 0.3rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  & a {
+    text-decoration: underline;
   }
 }
 
