@@ -140,7 +140,22 @@
           :marketplace-links="product.marketplace_links"
       />
 
-      <NuxtLink :to="to" class="catalog-item__btn">
+      <button
+          v-if="shouldNotifyRestock"
+          type="button"
+          class="catalog-item__btn catalog-item__btn--notify"
+          @click="openRestockNotify"
+      >
+        <span>Сообщить о поступлении</span>
+        <svg class="catalog-item__btn-bell" width="18" height="20" viewBox="0 0 18 20" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <path
+              d="M9 0C8.17 0 7.5 0.67 7.5 1.5V2.1C4.91 2.74 3 5.09 3 7.9V12.5L1.29 14.21C0.66 14.84 1.1 15.92 1.99 15.92H16.01C16.9 15.92 17.35 14.84 16.72 14.21L15 12.5V7.9C15 5.09 13.09 2.74 10.5 2.1V1.5C10.5 0.67 9.83 0 9 0ZM9 20C10.1 20 11 19.1 11 18H7C7 19.1 7.9 20 9 20Z"
+              fill="currentColor"/>
+        </svg>
+      </button>
+
+      <NuxtLink v-else :to="to" class="catalog-item__btn">
         <span>Заказать</span>
         <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -155,6 +170,7 @@
 <script setup lang="ts">
 import type {Product} from "~/types/catalog";
 import MarketplaceLinksButtons from "~/components/Catalog/MarketplaceLinksButtons.vue";
+import {CatalogRestockNotify} from "#components";
 
 const props = defineProps<{
   product: Product
@@ -169,6 +185,7 @@ function checkLinkMarketplace(links: Record<string, any>): boolean {
 
 const {formattedPrice, getNormalPrice} = getFormatPrice();
 const favouritesStore = useFavouritesStore();
+const asideMenuStore = useAsideMenuStore();
 
 // Image display logic
 const currentImageIndex = ref(0);
@@ -225,6 +242,17 @@ const to = computed(() => {
 const isFavourite = computed(() => {
   return favouritesStore.isFavorite(props.product.id)
 });
+
+const shouldNotifyRestock = computed(() => {
+  return props.product.cta === 'notify_restock' || Number(props.product.stock_quantity || 0) <= 0;
+});
+
+const openRestockNotify = () => {
+  asideMenuStore.open(CatalogRestockNotify, {
+    title: 'Узнать о поступлении',
+    product: props.product,
+  });
+};
 
 const isPrintColor = (code: string) => {
   return code && code.toLowerCase().includes('print');
@@ -665,6 +693,8 @@ onMounted(() => {
 
 
   &__btn {
+    appearance: none;
+    cursor: pointer;
     bottom: 0;
     left: 0;
     width: 100%;
@@ -676,14 +706,42 @@ onMounted(() => {
     border-radius: 5.3rem;
     color: #3F3F3F;
 
+    & span {
+      min-width: 0;
+    }
+
+    &--notify {
+      gap: 1rem;
+      border-color: #CB0B13;
+      background: #CB0B13;
+      color: var(--fg-white);
+      text-align: left;
+
+      & span {
+        line-height: 1.2;
+      }
+    }
+
+    &-bell {
+      width: 1.8rem;
+      height: 2rem;
+      flex-shrink: 0;
+    }
+
     @media(any-hover: hover) {
-      &:hover {
+      &:not(.catalog-item__btn--notify):hover {
         background: #3F3F3F;
         color: var(--fg-white);
 
         & path {
           fill: var(--fg-white);
         }
+      }
+
+      &--notify:hover {
+        background: #A60910;
+        border-color: #A60910;
+        color: var(--fg-white);
       }
     }
 
@@ -697,7 +755,7 @@ onMounted(() => {
       font-size: 1rem;
 
       & svg {
-        margin-left: 2rem;
+        margin-left: 1rem;
       }
     }
   }
