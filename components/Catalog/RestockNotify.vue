@@ -70,7 +70,9 @@ const variation = computed<any>(() => asideMenuStore.props?.variation);
 
 const productImage = computed(() => {
   const img = product.value?.main_image as any;
-  return img?.url || img?.path || null;
+  if (!img) return null;
+
+  return img.url || (img.path ? getImage(img.path) : null);
 });
 
 const consentLabel =
