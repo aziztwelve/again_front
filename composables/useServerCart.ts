@@ -16,10 +16,20 @@ export function useServerCart() {
      * POST /cart/items/bulk → backend sync(delete_others=true).
      */
     const mirrorCart = async (): Promise<void> => {
-        const items = cartStore.getCartForCheckout();
-        if (!items.length) {
+        const raw = cartStore.getCartForCheckout();
+        if (!raw.length) {
             return; // пустую корзину не синкаем — заказ/детект разрулят сами
         }
+
+        // Бэкенд (/cart/items/bulk) ожидает поле `qty`, а getCartForCheckout()
+        // отдаёт `quantity` (его формат — для /public/orders). Маппим, иначе 422.
+        const items = raw.map((i: any) => ({
+            product_id: i.product_id,
+            product_variant_id: i.product_variant_id ?? null,
+            color_id: i.color_id ?? null,
+            qty: i.quantity,
+            price: i.price,
+        }));
 
         try {
             await useApi('/cart/items/bulk', { body: { items } }, '', 'POST');
