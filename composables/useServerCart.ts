@@ -59,18 +59,29 @@ export function useServerCart() {
      * GET /public/cart/recovery/{token}.
      */
     const fetchRecovery = async (token: string): Promise<any[] | null> => {
-        const { data, error } = await useApi<{ success: boolean; items: any[] }>(
-            `/public/cart/recovery/${encodeURIComponent(token)}`,
-            {},
-            '',
-            'GET',
-        );
+        // Императивный клиентский запрос (вызывается из onMounted страницы
+        // восстановления) — используем $fetch напрямую, а не useApi/useFetch:
+        // useFetch завязан на Nuxt-контекст/SSR-ключ и в onMounted при полной
+        // загрузке страницы может вернуть пусто. $fetch работает где угодно.
+        const base = useRuntimeConfig().public.DEV_URI as string;
+        const url = `${base}/public/cart/recovery/${encodeURIComponent(token)}`;
 
-        if (error.value || !data.value?.success) {
+        try {
+            const res = await $fetch<{ success: boolean; items: any[] }>(url, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!res?.success) {
+                return null;
+            }
+
+            return res.items ?? [];
+        } catch (e) {
+            if (process.dev) console.warn('[serverCart] fetchRecovery failed', e);
             return null;
         }
-
-        return data.value.items ?? [];
     };
 
     return { mirrorCart, saveContact, fetchRecovery };
