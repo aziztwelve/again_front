@@ -58,12 +58,12 @@ onMounted(async () => {
         return;
     }
 
-    // Заменяем локальную корзину восстановленным составом и ведём на /cart.
+    // Заменяем локальную корзину восстановленным составом и ведём на оформление.
     cartStore.cart.length = 0;
     items.forEach((raw) => cartStore.cart.push(mapItem(raw)));
     cartStore.init();
 
-    await navigateTo('/cart');
+    await navigateTo('/checkout');
 });
 </script>
 
