@@ -148,14 +148,14 @@ const submit = async () => {
 .restock {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
 }
 
 .restock__subtitle {
   font-size: 1.6rem;
   line-height: 140%;
   color: var(--fg-gray);
-  margin-bottom: 2.4rem;
+  margin-bottom: 1.6rem;
 
   @media (max-width: $mobile) {
     font-size: 1.4rem;
@@ -165,16 +165,16 @@ const submit = async () => {
 .restock__product {
   display: flex;
   align-items: center;
-  gap: 1.6rem;
-  padding: 1.6rem;
+  gap: 1.2rem;
+  padding: 1.2rem;
   background: var(--bg-light, #f5f3f2);
-  border-radius: 1.6rem;
-  margin-bottom: 2.4rem;
+  border-radius: 1.2rem;
+  margin-bottom: 1.8rem;
 }
 
 .restock__product-image {
-  width: 7rem;
-  height: 9rem;
+  width: 6rem;
+  height: 7.8rem;
   flex-shrink: 0;
   border-radius: 1rem;
   overflow: hidden;
@@ -191,7 +191,7 @@ const submit = async () => {
   font-size: 1.6rem;
   line-height: 130%;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: .8rem;
 }
 
 .restock__product-badge {
@@ -206,16 +206,14 @@ const submit = async () => {
 .restock__fields {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
 }
 
 .restock__consent {
-  margin-top: 2rem;
+  margin-top: 1.4rem;
 }
 
 .restock__bottom {
-  margin-top: auto;
-  padding-top: 2.4rem;
+  margin-top: 1.8rem;
 }
 
 .restock__btn {
