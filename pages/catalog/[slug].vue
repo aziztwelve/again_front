@@ -130,6 +130,10 @@
   const route = useRoute();
   const {data: product} = await useApi<Product>(`/public/catalog/products/${route.params.slug}`)
 
+  if (product.value?.slug && product.value.slug !== String(route.params.slug)) {
+    await navigateTo(`/catalog/${product.value.slug}`, {redirectCode: 301});
+  }
+
 
   function checkLinkMarketplace(links: Record<string, any>): boolean {
     if (!links || typeof links !== 'object') return false;
