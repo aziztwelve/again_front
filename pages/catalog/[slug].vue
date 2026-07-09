@@ -131,7 +131,10 @@
   const {data: product} = await useApi<Product>(`/public/catalog/products/${route.params.slug}`)
 
   if (product.value?.slug && product.value.slug !== String(route.params.slug)) {
-    await navigateTo(`/catalog/${product.value.slug}`, {redirectCode: 301});
+    await navigateTo({
+      path: `/catalog/${product.value.slug}`,
+      query: route.query,
+    }, {redirectCode: 301});
   }
 
 
