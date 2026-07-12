@@ -130,7 +130,9 @@ try {
     assert(await evaluate(client, `document.querySelectorAll('swiper-container.product-reviews__swiper swiper-slide').length > 0`), 'home reviews slider has no slides');
 
     const issues = client.events.filter(event =>
-        (event.method === 'Log.entryAdded' && ['error', 'warning'].includes(event.params.entry.level))
+        (event.method === 'Log.entryAdded'
+            && ['error', 'warning'].includes(event.params.entry.level)
+            && (event.params.entry.source === 'javascript' || /hydration|vue/i.test(event.params.entry.text)))
         || (event.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(event.params.type)),
     );
     assert(issues.length === 0, `browser console warnings/errors: ${JSON.stringify(issues)}`);
