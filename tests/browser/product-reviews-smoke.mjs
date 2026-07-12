@@ -83,8 +83,9 @@ try {
 
     await evaluate(client, `document.querySelector('.product-reviews__header .product-reviews__button').click()`);
     await waitFor(client, `document.querySelector('.modal')?.classList.contains('modal--active')`);
-    await waitFor(client, `document.querySelector('.modal-review__title')?.innerText.length > 0`);
-    assert(await evaluate(client, `Boolean(document.querySelector('.modal-review__form, .modal-review__message'))`), 'review modal has neither form nor auth path');
+    await delay(1000);
+    const modalState = await evaluate(client, `({ title:document.querySelector('.modal-review__title')?.innerText || null, branch:Boolean(document.querySelector('.modal-review__form, .modal-review__message')), html:document.querySelector('.modal__content')?.innerHTML || null })`);
+    assert(modalState.title && modalState.branch, `review modal content failed: ${JSON.stringify({ modalState, events: client.events })}`);
     await evaluate(client, `document.querySelector('.modal__close').click()`);
 
     const widths = [[1440, 4], [991, 2], [575, 1], [320, 1]];
