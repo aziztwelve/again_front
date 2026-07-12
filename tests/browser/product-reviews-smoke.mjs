@@ -83,7 +83,8 @@ try {
 
     await evaluate(client, `document.querySelector('.product-reviews__header .product-reviews__button').click()`);
     await waitFor(client, `document.querySelector('.modal')?.classList.contains('modal--active')`);
-    assert(await evaluate(client, `document.querySelector('.modal')?.innerText.includes('Авторизруйтесь')`), 'guest review modal does not show the auth path');
+    await waitFor(client, `document.querySelector('.modal-review__message')?.innerText.length > 0`);
+    assert(await evaluate(client, `document.querySelector('.modal-review__message')?.innerText.includes('оставить отзыв')`), 'guest review modal does not show the auth path');
     await evaluate(client, `document.querySelector('.modal__close').click()`);
 
     const widths = [[1440, 4], [991, 2], [575, 1], [320, 1]];
