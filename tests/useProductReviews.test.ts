@@ -143,6 +143,40 @@ describe('useProductReviews', () => {
         stop();
     });
 
+    it('exposes terminal initial HTTP errors without retry', async () => {
+        const api = vi.fn<ApiClient>().mockRejectedValueOnce({ statusCode: 404 });
+        const { state, stop } = await mountComposable(api);
+
+        expect(state.initialError.value).toMatchObject({ status: 404, kind: 'http', retryable: false });
+        expect(state.isInitialLoading.value).toBe(false);
+        expect(state.hasInitialResult.value).toBe(false);
+        expect(state.hasMore.value).toBe(false);
+        stop();
+    });
+
+    it('refresh resets errors, out-of-sync state and loading flags', async () => {
+        const refreshed = deferred<ProductReviewsResponse>();
+        const api = vi.fn<ApiClient>()
+            .mockResolvedValueOnce(page(1, [1, 2, 3, 4, 5, 6, 7, 8], 9, 2))
+            .mockResolvedValueOnce(page(2, [9], 10, 2))
+            .mockImplementationOnce(() => refreshed.promise);
+        const { state, stop } = await mountComposable(api);
+
+        await state.loadMore();
+        expect(state.isOutOfSync.value).toBe(true);
+        const refreshPromise = state.refresh();
+        expect(state.items.value).toEqual([]);
+        expect(state.isInitialLoading.value).toBe(true);
+        expect(state.isOutOfSync.value).toBe(false);
+        expect(state.loadMoreError.value).toBeNull();
+
+        refreshed.resolve(page(1, [20], 1));
+        await refreshPromise;
+        expect(state.items.value.map(({ id }) => id)).toEqual([20]);
+        expect(state.isInitialLoading.value).toBe(false);
+        stop();
+    });
+
     it('ignores stale success and finally after switching products', async () => {
         const stalePage = deferred<ProductReviewsResponse>();
         const refreshPage = deferred<ProductReviewsResponse>();
@@ -166,6 +200,27 @@ describe('useProductReviews', () => {
         await vi.waitFor(() => expect(state.isInitialLoading.value).toBe(false));
         expect(state.items.value.map(({ id }) => id)).toEqual([101]);
         expect(api.mock.calls[2][0]).toContain('/241/reviews');
+        stop();
+    });
+
+    it('ignores stale errors after switching products', async () => {
+        const stalePage = deferred<ProductReviewsResponse>();
+        const api = vi.fn<ApiClient>()
+            .mockResolvedValueOnce(page(1, [1, 2, 3, 4, 5, 6, 7, 8], 9, 2))
+            .mockImplementationOnce(() => stalePage.promise)
+            .mockResolvedValueOnce(page(1, [101], 1));
+        const { state, productId, stop } = await mountComposable(api, ref(252));
+
+        const staleRequest = state.loadMore();
+        productId.value = 241;
+        await nextTick();
+        stalePage.reject({ status: 503 });
+        await staleRequest;
+        await vi.waitFor(() => expect(state.isInitialLoading.value).toBe(false));
+
+        expect(state.items.value.map(({ id }) => id)).toEqual([101]);
+        expect(state.loadMoreError.value).toBeNull();
+        expect(state.initialError.value).toBeNull();
         stop();
     });
 });

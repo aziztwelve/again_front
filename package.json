@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "smoke:reviews": "node tests/browser/product-reviews-smoke.mjs",
     "test": "vitest run",
     "typecheck": "nuxi typecheck"
   },
