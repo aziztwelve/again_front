@@ -127,6 +127,9 @@
   import MarketplaceLinksButtons from "~/components/Catalog/MarketplaceLinksButtons.vue";
   import {GIFT_CERTIFICATE} from "~/constants";
 
+  useResponseHeader('Cache-Control', 'private, no-store');
+  useResponseHeader('Vary', 'Authorization, Cookie');
+
   const route = useRoute();
   const {data: product} = await useApi<Product>(`/public/catalog/products/${route.params.slug}`)
 

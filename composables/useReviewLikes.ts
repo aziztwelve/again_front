@@ -1,66 +1,27 @@
+interface ReviewLikeResponse {
+    success: boolean;
+    likes_count: number;
+    message?: string;
+}
+
 export const useReviewLikes = () => {
+    const apiClient = useApiClient();
     const authStore = useAuthStore();
 
-    /**
-     * Поставить лайк отзыву
-     */
-    const likeReview = async (reviewId: number) => {
+    const toggleLike = async (reviewId: number, isLiked: boolean): Promise<ReviewLikeResponse> => {
         if (!authStore.isAuthenticated) {
-            return {
-                success: false,
-                message: 'Необходима авторизация'
-            };
+            return { success: false, likes_count: 0, message: 'Необходима авторизация' };
         }
 
-        const { data, error } = await useApi(`/reviews/${reviewId}/like`, {}, '', 'POST');
-
-        if (error.value) {
-            return {
-                success: false,
-                message: 'Ошибка при добавлении лайка'
-            };
-        }
-
-        return data.value;
-    };
-
-    /**
-     * Убрать лайк с отзыва
-     */
-    const unlikeReview = async (reviewId: number) => {
-        if (!authStore.isAuthenticated) {
-            return {
-                success: false,
-                message: 'Необходима авторизация'
-            };
-        }
-
-        const { data, error } = await useApi(`/reviews/${reviewId}/unlike`, {}, '', 'DELETE');
-
-        if (error.value) {
-            return {
-                success: false,
-                message: 'Ошибка при удалении лайка'
-            };
-        }
-
-        return data.value;
-    };
-
-    /**
-     * Переключить лайк (лайкнуть или убрать лайк)
-     */
-    const toggleLike = async (review: any) => {
-        if (review.is_liked) {
-            return await unlikeReview(review.id);
-        } else {
-            return await likeReview(review.id);
+        try {
+            return await apiClient<ReviewLikeResponse>(
+                `/reviews/${reviewId}/${isLiked ? 'unlike' : 'like'}`,
+                { method: isLiked ? 'DELETE' : 'POST' },
+            );
+        } catch {
+            return { success: false, likes_count: 0, message: 'Не удалось обновить отметку' };
         }
     };
 
-    return {
-        likeReview,
-        unlikeReview,
-        toggleLike
-    };
+    return { toggleLike };
 };

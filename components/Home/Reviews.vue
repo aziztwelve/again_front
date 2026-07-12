@@ -45,10 +45,6 @@
         >
           <swiper-slide v-for="review in reviewsList" :key="review.id">
             <ReviewsCard
-                :rating="review.rating"
-                :content="review.content"
-                :user-name="review?.client?.name"
-                :date="review.created_at"
                 :review="review"
             />
           </swiper-slide>
@@ -81,7 +77,7 @@ const openModal = () => {
 }
 
 const reviewsList = computed( () => {
-  return reviews.value.data.reverse();
+  return [...(reviews.value?.data ?? [])].reverse();
 } );
 </script>
 
