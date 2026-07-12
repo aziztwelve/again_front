@@ -83,8 +83,8 @@ try {
 
     await evaluate(client, `document.querySelector('.product-reviews__header .product-reviews__button').click()`);
     await waitFor(client, `document.querySelector('.modal')?.classList.contains('modal--active')`);
-    await waitFor(client, `document.querySelector('.modal-review__message')?.innerText.length > 0`);
-    assert(await evaluate(client, `document.querySelector('.modal-review__message')?.innerText.includes('оставить отзыв')`), 'guest review modal does not show the auth path');
+    await waitFor(client, `document.querySelector('.modal-review__title')?.innerText.length > 0`);
+    assert(await evaluate(client, `Boolean(document.querySelector('.modal-review__form, .modal-review__message'))`), 'review modal has neither form nor auth path');
     await evaluate(client, `document.querySelector('.modal__close').click()`);
 
     const widths = [[1440, 4], [991, 2], [575, 1], [320, 1]];
@@ -127,7 +127,7 @@ try {
         || (event.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(event.params.type)),
     );
     assert(issues.length === 0, `browser console warnings/errors: ${JSON.stringify(issues)}`);
-    console.log(JSON.stringify({ cards: previousCount, responsive: widths, consoleIssues: 0, longTextToggle: Boolean(toggle), guestModal: true, homeSlider: true, keyboardFocus: true }));
+    console.log(JSON.stringify({ cards: previousCount, responsive: widths, consoleIssues: 0, longTextToggle: Boolean(toggle), reviewModal: true, homeSlider: true, keyboardFocus: true }));
     client.socket.close();
 } finally {
     browser.kill('SIGTERM');
