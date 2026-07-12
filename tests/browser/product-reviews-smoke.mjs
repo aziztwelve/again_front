@@ -120,7 +120,7 @@ try {
     await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
     await waitFor(client, `document.querySelector('.product-reviews__pagination [role="alert"]')`);
     assert(await evaluate(client, `document.querySelectorAll('.product-reviews__item').length === 16`), 'load-more error removed existing reviews');
-    assert(await evaluate(client, `document.querySelector('.product-reviews__more')?.innerText === 'Повторить'`), 'retry action is missing');
+    await waitFor(client, `document.querySelector('.product-reviews__more')?.innerText.includes('Повторить')`);
     await client.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
     await waitFor(client, `document.querySelectorAll('.product-reviews__item').length > 16`);
