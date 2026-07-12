@@ -81,9 +81,15 @@ try {
     assert(await evaluate(client, `document.querySelector('.product-reviews__more').disabled === false`), 'load-more is unexpectedly disabled');
     assert(await evaluate(client, `(() => { const button=document.querySelector('.product-reviews__more'); button.focus(); return document.activeElement === button; })()`), 'load-more cannot receive keyboard focus');
 
+    await delay(1200);
+    if (await evaluate(client, `document.querySelector('.modal')?.classList.contains('modal--active')`)) {
+        await evaluate(client, `document.querySelector('.modal__close').click()`);
+        await waitFor(client, `!document.querySelector('.modal')?.classList.contains('modal--active')`);
+        await delay(350);
+    }
+    client.events.length = 0;
     await evaluate(client, `document.querySelector('.product-reviews__header .product-reviews__button').click()`);
-    await waitFor(client, `document.querySelector('.modal')?.classList.contains('modal--active')`);
-    await delay(1000);
+    await waitFor(client, `document.querySelector('.modal-review__title')?.innerText.length > 0`);
     const modalState = await evaluate(client, `({ title:document.querySelector('.modal-review__title')?.innerText || null, branch:Boolean(document.querySelector('.modal-review__form, .modal-review__message')), html:document.querySelector('.modal__content')?.innerHTML || null })`);
     assert(modalState.title && modalState.branch, `review modal content failed: ${JSON.stringify({ modalState, events: client.events })}`);
     await evaluate(client, `document.querySelector('.modal__close').click()`);
