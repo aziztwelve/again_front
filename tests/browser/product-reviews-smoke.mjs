@@ -76,6 +76,16 @@ try {
     await waitFor(client, `document.readyState === 'complete'`);
     await waitFor(client, `document.querySelectorAll('.product-reviews__item').length === 8`);
 
+    assert(await evaluate(client, `document.querySelectorAll('.product-reviews__item-stars svg').length === 40`), 'five-star markup is incomplete');
+    assert(await evaluate(client, `Boolean(document.querySelector('[aria-live="polite"]'))`), 'aria-live status is missing');
+    assert(await evaluate(client, `document.querySelector('.product-reviews__more').disabled === false`), 'load-more is unexpectedly disabled');
+    assert(await evaluate(client, `(() => { const button=document.querySelector('.product-reviews__more'); button.focus(); return document.activeElement === button; })()`), 'load-more cannot receive keyboard focus');
+
+    await evaluate(client, `document.querySelector('.product-reviews__header .product-reviews__button').click()`);
+    await waitFor(client, `document.querySelector('.modal')?.classList.contains('modal--active')`);
+    assert(await evaluate(client, `document.querySelector('.modal')?.innerText.includes('Авторизруйтесь')`), 'guest review modal does not show the auth path');
+    await evaluate(client, `document.querySelector('.modal__close').click()`);
+
     const widths = [[1440, 4], [991, 2], [575, 1], [320, 1]];
     for (const [width, columns] of widths) {
         await client.send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width <= 575 });
@@ -106,12 +116,17 @@ try {
         assert(await evaluate(client, `!document.querySelector('.product-reviews__item-text-content').classList.contains('_clamped')`), 'expanded review remains clamped');
     }
 
+    await client.send('Page.navigate', { url: baseUrl + '/' });
+    await waitFor(client, `document.readyState === 'complete'`);
+    await waitFor(client, `Boolean(document.querySelector('swiper-container.product-reviews__swiper'))`);
+    assert(await evaluate(client, `document.querySelectorAll('swiper-container.product-reviews__swiper swiper-slide').length > 0`), 'home reviews slider has no slides');
+
     const issues = client.events.filter(event =>
         (event.method === 'Log.entryAdded' && ['error', 'warning'].includes(event.params.entry.level))
         || (event.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(event.params.type)),
     );
     assert(issues.length === 0, `browser console warnings/errors: ${JSON.stringify(issues)}`);
-    console.log(JSON.stringify({ cards: previousCount, responsive: widths, consoleIssues: 0, longTextToggle: Boolean(toggle) }));
+    console.log(JSON.stringify({ cards: previousCount, responsive: widths, consoleIssues: 0, longTextToggle: Boolean(toggle), guestModal: true, homeSlider: true, keyboardFocus: true }));
     client.socket.close();
 } finally {
     browser.kill('SIGTERM');
