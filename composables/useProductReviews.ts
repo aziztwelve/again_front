@@ -75,6 +75,7 @@ export const useProductReviews = async (productId: MaybeRefOrGetter<number>) => 
 
     try {
         if (ssrError.value) throw ssrError.value;
+        if (!ssrData.value) throw new Error('Invalid product reviews response');
         applyInitial(ssrData.value);
     } catch (error) {
         initialError.value = normalizeError(error, !ssrError.value);

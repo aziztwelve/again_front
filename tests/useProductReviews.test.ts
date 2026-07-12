@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    computed, effectScope, nextTick, onScopeDispose, ref, toValue, watch,
+    computed, effectScope, nextTick, ref, toValue, watch,
 } from 'vue';
 import type { ProductReviewsResponse, Review } from '../types/review';
 import { useProductReviews } from '../composables/useProductReviews';
@@ -50,7 +50,7 @@ const mountComposable = async (apiClient: ApiClient, productId = ref(252)) => {
     vi.stubGlobal('computed', computed);
     vi.stubGlobal('watch', watch);
     vi.stubGlobal('toValue', toValue);
-    vi.stubGlobal('onScopeDispose', onScopeDispose);
+    vi.stubGlobal('onScopeDispose', vi.fn());
     vi.stubGlobal('useApiClient', () => apiClient);
     vi.stubGlobal('useAsyncData', async (_key: string, handler: () => Promise<ProductReviewsResponse>) => {
         try {
