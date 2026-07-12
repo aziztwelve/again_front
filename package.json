@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "smoke:reviews": "node tests/browser/product-reviews-smoke.mjs",
+    "smoke:reviews:auth": "node tests/browser/product-reviews-auth-smoke.mjs",
     "test": "vitest run",
     "typecheck": "nuxi typecheck"
   },
