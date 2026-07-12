@@ -80,7 +80,7 @@ try {
     for (const [width, columns] of widths) {
         await client.send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width <= 575 });
         await delay(150);
-        const layout = await evaluate(client, `(() => { const grid=document.querySelector('.product-reviews__grid'); return { columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length, overflow:document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
+        const layout = await evaluate(client, `(() => { const grid=document.querySelector('.product-reviews__grid'); const bounds=grid.getBoundingClientRect(); const cards=[...grid.querySelectorAll('.product-reviews__item')]; return { columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length, overflow:grid.scrollWidth > grid.clientWidth + 1 || cards.some(card => { const rect=card.getBoundingClientRect(); return rect.left < bounds.left - 1 || rect.right > bounds.right + 1; }) }; })()`);
         assert(layout.columns === columns, `${width}px: expected ${columns} columns, got ${layout.columns}`);
         assert(!layout.overflow, `${width}px: horizontal overflow detected`);
     }
