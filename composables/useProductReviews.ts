@@ -11,7 +11,8 @@ const PER_PAGE = 8;
 
 const normalizeError = (error: any, contract = false): ProductReviewsError => {
     const rawStatus = error?.statusCode ?? error?.status ?? error?.response?.status ?? null;
-    const status = rawStatus === 0 ? null : rawStatus;
+    const numericStatus = Number(rawStatus);
+    const status = Number.isFinite(numericStatus) && numericStatus > 0 ? numericStatus : null;
     return {
         status,
         retryable: !contract && (status === null || status === 408 || status === 429 || status >= 500),
