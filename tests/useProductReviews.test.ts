@@ -110,6 +110,19 @@ describe('useProductReviews', () => {
         stop();
     });
 
+    it('treats browser status 0 as a retryable network error', async () => {
+        const api = vi.fn<ApiClient>()
+            .mockResolvedValueOnce(page(1, [1, 2, 3, 4, 5, 6, 7, 8], 9, 2))
+            .mockRejectedValueOnce({ status: 0 });
+        const { state, stop } = await mountComposable(api);
+
+        await state.loadMore();
+
+        expect(state.loadMoreError.value).toEqual({ status: null, retryable: true, kind: 'network' });
+        expect(state.hasMore.value).toBe(true);
+        stop();
+    });
+
     it.each([
         ['changed total', page(2, [9], 10, 2)],
         ['empty intermediate page', page(2, [], 17, 3)],
