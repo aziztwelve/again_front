@@ -41,7 +41,7 @@
               <div class="order-view__value">
                 <div class="order-view__messengers">
                   <a
-                      :href="`tg://resolve?domain=again8help_bot&start=${order.view_token}`"
+                      :href="`tg://resolve?domain=againdev_test_bot&start=${order.view_token}`"
                       target="_blank"
                       class="order-view__messenger"
                   >

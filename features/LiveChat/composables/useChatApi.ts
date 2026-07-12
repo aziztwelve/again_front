@@ -78,3 +78,45 @@ export async function useMarkConversationAsRead(
         method: 'POST',
     })
 }
+
+export interface MessengerLinks {
+    token: string
+    links: {
+        telegram?: string
+        max?: string
+        vk?: string
+    }
+}
+
+/**
+ * Получить deeplink-ссылки мессенджеров с токеном привязки переписки к
+ * клиенту/заказу. См. docs/tasks/messenger-deeplink-binding.md
+ *
+ * Использует $fetch (вызывается на клиенте в onMounted), передаёт external_id
+ * веб-чата и, опционально, view_token заказа.
+ */
+export async function useGetMessengerLinks(
+    externalId: string | number,
+    orderToken?: string | null
+): Promise<MessengerLinks> {
+    const DEV_URI = useRuntimeConfig().public.DEV_URI
+    const authStore = useAuthStore()
+
+    const params = new URLSearchParams()
+    if (externalId) params.append('external_id', String(externalId))
+    if (orderToken) params.append('order_token', orderToken)
+
+    const headers: Record<string, string> = {}
+    if (authStore.token) {
+        headers['Authorization'] = `Bearer ${authStore.token}`
+    }
+
+    const queryString = params.toString()
+    const url = `${DEV_URI}/public/chat/messenger-links${queryString ? '?' + queryString : ''}`
+
+    return $fetch<MessengerLinks>(url, {
+        method: 'GET',
+        headers,
+        credentials: 'include',
+    })
+}

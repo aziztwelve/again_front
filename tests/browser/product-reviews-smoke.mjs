@@ -123,7 +123,7 @@ try {
     assert(await evaluate(client, `document.querySelectorAll('.product-reviews__item').length === 16`), 'load-more error removed existing reviews');
     await delay(300);
     const retryState = await evaluate(client, `(() => { const button=document.querySelector('.product-reviews__more'); const alert=document.querySelector('.product-reviews__pagination [role="alert"]'); return { buttonExists:!!button, buttonText:button?.innerText ?? null, buttonDisabled:button?.disabled ?? null, alertText:alert?.innerText ?? null }; })()`);
-    assert(retryState.buttonText?.includes('Повторить'), `retry action is missing: ${JSON.stringify(retryState)}`);
+    assert(retryState.buttonText?.toLocaleLowerCase('ru-RU').includes('повторить'), `retry action is missing: ${JSON.stringify(retryState)}`);
     await client.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
     await waitFor(client, `document.querySelectorAll('.product-reviews__item').length > 16`);

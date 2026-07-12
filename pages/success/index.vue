@@ -153,8 +153,8 @@ if (idParam) {
 const viewToken = computed(() => order.value?.view_token || tokenParam || null);
 const telegramUrl = computed(() =>
     viewToken.value
-        ? `tg://resolve?domain=again8help_bot&start=${viewToken.value}`
-        : 'https://t.me/again8help_bot',
+        ? `tg://resolve?domain=againdev_test_bot&start=${viewToken.value}`
+        : 'https://t.me/againdev_test_bot',
 );
 
 const recipientName = computed(() => {

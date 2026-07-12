@@ -25,7 +25,7 @@
 
     <!-- VK -->
     <a
-        href="https://vk.com/im/convo/-221071922?entrypoint=vkcom_right_column_menu&tab=all"
+        :href="vkUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="w-[50px] h-[50px] rounded-full   flex items-center justify-center transition-all duration-300 hover:scale-110  overflow-hidden"
@@ -38,22 +38,9 @@
       </svg>
     </a>
 
-    <!-- WhatsApp -->
-    <a
-        href="https://wa.me/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="w-[45px] h-[45px] rounded-full text-white flex items-center justify-center transition-all duration-300 hover:scale-110  overflow-hidden"
-        title="WhatsApp"
-    >
-
-      <img src="/icons/chat/whatsapp.svg" alt="" class="">
-
-    </a>
-
     <!-- Telegram -->
     <a
-        href="https://t.me/againChilla_bot"
+        :href="telegramUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="w-[50px] h-[50px] rounded-full  text-white flex items-center justify-center transition-all duration-300 hover:scale-110  overflow-hidden"
@@ -73,7 +60,7 @@
 
     <!-- Max -->
     <a
-        href="https://max.ru/id4707052811_bot"
+        :href="maxUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 overflow-hidden"
@@ -117,7 +104,9 @@
 
 <script setup lang="ts">
 import {useLiveChatStore} from "~/features/LiveChat/stores/useLiveChatStore";
-import {computed, ref} from "vue";
+import {onMounted, ref} from "vue";
+import {getExternalIdClient} from "~/features/LiveChat/composables/useChatFunctions";
+import {useGetMessengerLinks} from "~/features/LiveChat/composables/useChatApi";
 
 const emit = defineEmits<{
   openChat: []
@@ -127,7 +116,23 @@ const emit = defineEmits<{
 
 const store = useLiveChatStore()
 
-// const unreadCount = computed(() => store.unreadCount)
+// Fallback-ссылки без токена (если API недоступен). Токен-привязка добавляется
+// после загрузки ссылок с бэкенда. См. docs/tasks/messenger-deeplink-binding.md
+const telegramUrl = ref('https://t.me/againdev_test_bot')
+const maxUrl = ref('https://max.ru/id4707052811_bot')
+const vkUrl = ref('https://vk.me/public228837691')
+
+onMounted(async () => {
+  try {
+    const externalId = await getExternalIdClient()
+    const {links} = await useGetMessengerLinks(externalId)
+    if (links?.telegram) telegramUrl.value = links.telegram
+    if (links?.max) maxUrl.value = links.max
+    if (links?.vk) vkUrl.value = links.vk
+  } catch (e) {
+    // Оставляем fallback-ссылки без токена
+  }
+})
 
 </script>
 
