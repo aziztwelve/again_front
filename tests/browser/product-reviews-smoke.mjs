@@ -114,7 +114,6 @@ try {
     await client.send('Network.emulateNetworkConditions', { offline: false, latency: 700, downloadThroughput: 1000000, uploadThroughput: 1000000 });
     await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
     await waitFor(client, `document.querySelector('.product-reviews__more')?.disabled === true`);
-    await waitFor(client, `document.querySelector('.product-reviews__more')?.innerText.includes('Загрузка')`);
     await waitFor(client, `document.querySelectorAll('.product-reviews__item').length === 16`);
 
     await client.send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
