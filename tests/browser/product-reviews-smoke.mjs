@@ -94,6 +94,12 @@ try {
     assert(modalState.title && modalState.branch, `review modal content failed: ${JSON.stringify({ modalState, events: client.events })}`);
     await evaluate(client, `document.querySelector('.modal__close').click()`);
 
+    await client.send('Page.navigate', { url: baseUrl + '/catalog/box-belya-teens' });
+    await waitFor(client, `document.readyState === 'complete'`);
+    await waitFor(client, `document.body.innerText.includes('У этого товара пока нет отзывов')`);
+    await client.send('Page.navigate', { url: baseUrl + productPath });
+    await waitFor(client, `document.querySelectorAll('.product-reviews__item').length === 8`);
+
     const widths = [[1440, 4], [991, 2], [575, 1], [320, 1]];
     for (const [width, columns] of widths) {
         await client.send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width <= 575 });
@@ -104,7 +110,23 @@ try {
     }
 
     await client.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-    let previousCount = 8;
+    await client.send('Network.enable');
+    await client.send('Network.emulateNetworkConditions', { offline: false, latency: 700, downloadThroughput: 1000000, uploadThroughput: 1000000 });
+    await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
+    await waitFor(client, `document.querySelector('.product-reviews__more')?.disabled === true`);
+    assert(await evaluate(client, `document.querySelector('.product-reviews__more')?.innerText.includes('Загрузка')`), 'load-more loading label is missing');
+    await waitFor(client, `document.querySelectorAll('.product-reviews__item').length === 16`);
+
+    await client.send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
+    await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
+    await waitFor(client, `document.querySelector('.product-reviews__pagination [role="alert"]')`);
+    assert(await evaluate(client, `document.querySelectorAll('.product-reviews__item').length === 16`), 'load-more error removed existing reviews');
+    assert(await evaluate(client, `document.querySelector('.product-reviews__more')?.innerText === 'Повторить'`), 'retry action is missing');
+    await client.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+    await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
+    await waitFor(client, `document.querySelectorAll('.product-reviews__item').length > 16`);
+
+    let previousCount = await evaluate(client, `document.querySelectorAll('.product-reviews__item').length`);
     for (let click = 0; click < 20; click += 1) {
         const hasButton = await evaluate(client, `Boolean(document.querySelector('.product-reviews__more'))`);
         if (!hasButton) break;
