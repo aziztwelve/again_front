@@ -115,6 +115,7 @@ try {
     await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
     await waitFor(client, `document.querySelector('.product-reviews__more')?.disabled === true`);
     await waitFor(client, `document.querySelectorAll('.product-reviews__item').length === 16`);
+    await waitFor(client, `document.querySelector('.product-reviews__more')?.disabled === false`);
 
     await client.send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
     await evaluate(client, `document.querySelector('.product-reviews__more').click()`);
