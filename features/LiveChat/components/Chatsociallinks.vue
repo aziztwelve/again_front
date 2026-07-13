@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import {useLiveChatStore} from "~/features/LiveChat/stores/useLiveChatStore";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {getExternalIdClient} from "~/features/LiveChat/composables/useChatFunctions";
 import {useGetMessengerLinks} from "~/features/LiveChat/composables/useChatApi";
 
@@ -118,6 +118,12 @@ const emit = defineEmits<{
 
 
 const store = useLiveChatStore()
+const route = useRoute()
+const orderToken = computed(() =>
+  route.path.startsWith('/orders/') && typeof route.params.token === 'string'
+    ? route.params.token
+    : null
+)
 
 // Не показываем кнопки мессенджеров, пока API не вернёт deeplink с токеном.
 // Иначе пользователь может успеть открыть бот по ссылке без привязки чата.
@@ -128,7 +134,7 @@ const vkUrl = ref<string | null>(null)
 onMounted(async () => {
   try {
     const externalId = await getExternalIdClient()
-    const {links} = await useGetMessengerLinks(externalId)
+    const {links} = await useGetMessengerLinks(externalId, orderToken.value)
     if (links?.telegram) telegramUrl.value = links.telegram
     if (links?.max) maxUrl.value = links.max
     if (links?.vk) vkUrl.value = links.vk

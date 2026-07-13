@@ -152,6 +152,8 @@
 <script setup lang="ts">
 import type { PublicOrder, PublicOrderResponse } from '~/types/order';
 import { getPaymentMethodLabel } from '~/constants/payment';
+import { getExternalIdClient } from '~/features/LiveChat/composables/useChatFunctions';
+import { useGetMessengerLinks } from '~/features/LiveChat/composables/useChatApi';
 
 definePageMeta({
   title: 'Заказ',
@@ -165,6 +167,18 @@ const { data, pending } = await useApi<PublicOrderResponse>(
 );
 
 const order = computed<PublicOrder | null>(() => data.value?.order ?? null);
+
+// Обновляем токен текущей сессии сразу после оформления заказа. Поэтому
+// deeplink из виджета на этой странице несёт именно этот order_id, даже если
+// пользователь открывает меню мессенджеров позднее.
+onMounted(async () => {
+  try {
+    const externalId = await getExternalIdClient();
+    await useGetMessengerLinks(externalId, token);
+  } catch {
+    // Виджет повторит запрос при открытии; страница заказа остаётся доступной.
+  }
+});
 
 useHead(() => ({
   title: order.value ? `Заказ № ${order.value.order_number}` : 'Заказ',
