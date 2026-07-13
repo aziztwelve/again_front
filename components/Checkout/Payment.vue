@@ -37,13 +37,20 @@
             v-model="isCheckedOferta"
         />
 
+        <FormCheckbox
+            class="form__marketing"
+            name="marketing_consent"
+            :label="getMarketingConsentLink()"
+            v-model="isCheckedMarketing"
+        />
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getPrivacyPolicyLink, getOfertaLink } from '~/utils/getPolicyLink';
+import { getMarketingConsentLink, getPrivacyPolicyLink, getOfertaLink } from '~/utils/getPolicyLink';
 import { PAYMENT_OPTIONS, type PaymentOption } from '~/constants/payment';
 
 withDefaults(defineProps<{
@@ -77,6 +84,8 @@ onMounted(() => {
 
 const isCheckedPolicy = ref(false);
 const isCheckedOferta = ref(false);
+const isCheckedMarketing = ref(false);
+
 watch(isCheckedPolicy, (newValue) => {
   isDisabled.value = !newValue;
 }, {
