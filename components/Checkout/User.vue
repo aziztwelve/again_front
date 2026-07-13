@@ -47,19 +47,6 @@
             v-model="email"
             :error="emailError"
         />
-
-        <!--
-          Opt-in на рассылку (универсальная корзина): по умолчанию выключен.
-          Сохраняет согласие в серверной корзине гостя → делает её eligible для
-          напоминаний о брошенной корзине. См. docs/tasks/universal-cart.md.
-        -->
-        <label class="checkout__consent">
-          <input type="checkbox" v-model="consent" />
-          <span>
-            Хочу получать напоминания о корзине и акции — согласие на
-            <NuxtLink to="/marketing-consent" target="_blank">рекламную рассылку</NuxtLink>.
-          </span>
-        </label>
       </div>
     </div>
   </div>
@@ -84,24 +71,6 @@ const setEmailError = (msg: string) => {
 watch(email, () => {
   if (emailError.value) emailError.value = '';
 });
-
-// Opt-in на рассылку (гость). Сохраняем контакты+согласие в серверной корзине
-// заранее (до оформления), чтобы при брошенной корзине было кому/с правом слать.
-const consent = ref(false);
-const { saveContact } = useServerCart();
-
-const emailIsValid = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-watchDebounced(
-  [email, consent],
-  () => {
-    if (userStore.isAuthenticated) return;
-    const value = (email.value ?? '').trim();
-    if (!emailIsValid(value)) return; // не шлём мусорный/неполный email
-    saveContact({ email: value, consent: consent.value });
-  },
-  { debounce: 700 },
-);
 
 defineExpose({ setEmailError });
 </script>
@@ -188,29 +157,6 @@ defineExpose({ setEmailError });
       min-height: 5rem;
       border-radius: 50%;
     }
-  }
-}
-
-.checkout__consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.8rem;
-  margin-top: 1.4rem;
-  font-size: var(--fz-1-5);
-  line-height: 140%;
-  color: var(--fg-gray, #6b6b6b);
-  cursor: pointer;
-
-  & input {
-    margin-top: 0.3rem;
-    width: 1.8rem;
-    height: 1.8rem;
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-
-  & a {
-    text-decoration: underline;
   }
 }
 
