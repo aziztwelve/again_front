@@ -76,9 +76,7 @@ const openModal = () => {
   } )
 }
 
-const reviewsList = computed( () => {
-  return [...(reviews.value?.data ?? [])].reverse();
-} );
+const reviewsList = computed(() => reviews.value?.data ?? []);
 </script>
 
 <style scoped lang="scss">
@@ -88,6 +86,12 @@ const reviewsList = computed( () => {
   @media (max-width: $mobile) {
     padding: 2.5rem 0 2.25rem;
   }
+}
+
+// У главного слайдера отзывы должны пролистываться и на desktop. Базовый
+// product-reviews__header скрывает стрелки только для карточки товара.
+.reviews .product-reviews__header .swiper__nav {
+  display: flex;
 }
 
 .reviews__row {
