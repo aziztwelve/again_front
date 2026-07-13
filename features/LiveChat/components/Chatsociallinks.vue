@@ -25,6 +25,7 @@
 
     <!-- VK -->
     <a
+        v-if="vkUrl"
         :href="vkUrl"
         target="_blank"
         rel="noopener noreferrer"
@@ -40,6 +41,7 @@
 
     <!-- Telegram -->
     <a
+        v-if="telegramUrl"
         :href="telegramUrl"
         target="_blank"
         rel="noopener noreferrer"
@@ -60,6 +62,7 @@
 
     <!-- Max -->
     <a
+        v-if="maxUrl"
         :href="maxUrl"
         target="_blank"
         rel="noopener noreferrer"
@@ -116,11 +119,11 @@ const emit = defineEmits<{
 
 const store = useLiveChatStore()
 
-// Fallback-ссылки без токена (если API недоступен). Токен-привязка добавляется
-// после загрузки ссылок с бэкенда. См. docs/tasks/messenger-deeplink-binding.md
-const telegramUrl = ref('https://t.me/againdev_test_bot')
-const maxUrl = ref('https://max.ru/id4707052811_bot')
-const vkUrl = ref('https://vk.me/public228837691')
+// Не показываем кнопки мессенджеров, пока API не вернёт deeplink с токеном.
+// Иначе пользователь может успеть открыть бот по ссылке без привязки чата.
+const telegramUrl = ref<string | null>(null)
+const maxUrl = ref<string | null>(null)
+const vkUrl = ref<string | null>(null)
 
 onMounted(async () => {
   try {
@@ -130,7 +133,8 @@ onMounted(async () => {
     if (links?.max) maxUrl.value = links.max
     if (links?.vk) vkUrl.value = links.vk
   } catch (e) {
-    // Оставляем fallback-ссылки без токена
+    // Без токена не даём перейти в бот: при следующем открытии виджета запрос
+    // будет повторён, так как компонент создаётся заново.
   }
 })
 
