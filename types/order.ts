@@ -4,9 +4,17 @@
 
 export interface PublicOrderItem {
     id: number;
+    product_id: number | null;
+    product_variant_id: number | null;
+    color_id: number | null;
+    product_name: string | null;
+    variant_name: string | null;
+    color_name: string | null;
     name: string;
     sku: string | null;
     quantity: number;
+    price: number;
+    discount: number;
     unit_price: number;
     total: number;
     image: string | null;

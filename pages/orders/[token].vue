@@ -33,6 +33,22 @@
                     v-if="paymentStatusLabel"
                     class="order-view__state order-view__state--minor"
                 >{{ paymentStatusLabel }}</span>
+                <button
+                    v-if="canBePaid"
+                    type="button"
+                    class="order-view__pay-button"
+                    @click="showPaymentStub"
+                >
+                  Перейти к оплате
+                </button>
+                <button
+                    type="button"
+                    class="order-view__repeat-button"
+                    :disabled="isReordering"
+                    @click="repeatOrder"
+                >
+                  {{ isReordering ? 'Добавляем…' : 'Повторить заказ' }}
+                </button>
               </div>
             </div>
 
@@ -65,7 +81,12 @@
             <div v-if="order.delivery_address" class="order-view__row">
               <div class="order-view__label">Адрес доставки</div>
               <div class="order-view__value">
-                <a :href="mapUrl(order.delivery_address)" target="_blank" rel="noopener noreferrer">
+                <a
+                    :href="mapUrl(order.delivery_address)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="order-view__address-link"
+                >
                   {{ order.delivery_address }}
                 </a>
               </div>
@@ -167,6 +188,9 @@ const { data, pending } = await useApi<PublicOrderResponse>(
 );
 
 const order = computed<PublicOrder | null>(() => data.value?.order ?? null);
+const cartStore = useCartStore();
+const { show: showToast } = useToast();
+const isReordering = ref(false);
 
 // Обновляем токен текущей сессии сразу после оформления заказа. Поэтому
 // deeplink из виджета на этой странице несёт именно этот order_id, даже если
@@ -186,6 +210,7 @@ useHead(() => ({
 
 const orderStatusLabel = computed(() => order.value?.status?.label || null);
 const paymentStatusLabel = computed(() => order.value?.payment_status?.label || null);
+const canBePaid = computed(() => ['pending', 'failed'].includes(order.value?.payment_status?.value ?? ''));
 
 const paymentMethodLabel = computed(() => getPaymentMethodLabel(order.value?.payment_method));
 
@@ -220,6 +245,47 @@ const formatDateTime = (value: string) => {
 
 const mapUrl = (addr: string) =>
     `https://yandex.ru/maps/?text=${encodeURIComponent(addr)}`;
+
+const showPaymentStub = () => {
+  showToast('Онлайн-оплата скоро будет доступна.');
+};
+
+const repeatOrder = async () => {
+  const items = order.value?.items.filter((item) => !item.is_gift && item.product_id) ?? [];
+
+  if (!items.length) {
+    showToast('В этом заказе нет товаров, которые можно добавить в корзину.');
+    return;
+  }
+
+  isReordering.value = true;
+
+  try {
+    await cartStore.setEmptyCart();
+
+    for (const item of items) {
+      const price = Number(item.price || 0);
+      const oldPrice = price + Number(item.discount || 0);
+      const variant = item.product_variant_id
+          ? { id: item.product_variant_id, name: item.variant_name, price, old_price: oldPrice }
+          : null;
+      const color = item.color_id ? { id: item.color_id, name: item.color_name } : null;
+
+      await cartStore.addToCart({
+        id: item.product_id,
+        name: item.product_name || item.name,
+        price,
+        old_price: oldPrice,
+      }, item.quantity, variant, color);
+    }
+
+    await navigateTo('/cart');
+  } catch {
+    showToast('Не удалось повторить заказ. Попробуйте ещё раз.');
+  } finally {
+    isReordering.value = false;
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -296,6 +362,40 @@ const mapUrl = (addr: string) =>
 
 .order-view__price {
   font-weight: 600;
+}
+
+.order-view__pay-button,
+.order-view__repeat-button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.order-view__pay-button {
+  padding: 0.8rem 1.4rem;
+  border-radius: 0.4rem;
+  background: #f1e8d5;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.order-view__repeat-button {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.55;
+  }
+}
+
+.order-view__address-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .order-view__price-original {
