@@ -22,6 +22,13 @@
           row-class="_15"
       />
 
+      <FormPhone
+          placeholder="+7 (___) ___-__-__"
+          v-model="form.phone.value"
+          :error="form.phone.error"
+          row-class="_15"
+      />
+
       <FormInput
           type="email"
           placeholder="Эл. почта"
@@ -52,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import {FormInput, FormCheckbox} from "#components";
+import {FormInput, FormPhone, FormCheckbox} from "#components";
 import type {Product} from "~/types/catalog";
 
 const asideMenuStore = useAsideMenuStore();
@@ -74,6 +81,7 @@ const consentLabel =
 
 const form = ref({
   name: {value: '', error: ''},
+  phone: {value: '', error: ''},
   email: {value: '', error: ''},
 });
 
@@ -82,6 +90,7 @@ const isLoading = ref(false);
 
 const resetErrors = () => {
   form.value.name.error = '';
+  form.value.phone.error = '';
   form.value.email.error = '';
 };
 
@@ -110,6 +119,7 @@ const submit = async () => {
       product_id: product.value.id,
       product_variant_id: variation.value?.id ?? null,
       name: form.value.name.value || null,
+      phone: form.value.phone.value || null,
       email,
       consent: isConsent.value,
     }
