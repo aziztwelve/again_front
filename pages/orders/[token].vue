@@ -304,7 +304,7 @@ const repeatOrder = async () => {
       }, item.quantity, variant, color);
     }
 
-    await navigateTo('/cart');
+    await navigateTo('/checkout');
   } catch {
     showToast('Не удалось повторить заказ. Попробуйте ещё раз.');
   } finally {
