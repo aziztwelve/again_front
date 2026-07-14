@@ -75,11 +75,20 @@ const thumbsSwiperEl = ref<HTMLElement | null>(null);
 
 const images = computed(() => {
   const sel = props.selectedSize;
-  if (sel && Array.isArray(sel.images) && sel.images.length > 0) {
+  const productImages = Array.isArray(props.product?.images) ? props.product.images : [];
+
+  // A size can have only its cover image configured. Do not let that one image
+  // replace the complete product gallery when several product images exist.
+  if (
+    sel
+    && Array.isArray(sel.images)
+    && sel.images.length > 0
+    && !(sel.images.length === 1 && productImages.length > 1)
+  ) {
     return sel.images;
   }
-  if (Array.isArray(props.product?.images) && props.product.images.length > 0) {
-    return props.product.images;
+  if (productImages.length > 0) {
+    return productImages;
   }
   if (props.product?.main_image) {
     return [props.product.main_image];
