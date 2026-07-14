@@ -9,7 +9,8 @@
              @mouseleave="handleMouseLeave"
              @touchstart="handleTouchStart"
              @touchmove="handleTouchMove"
-             @touchend="handleTouchEnd">
+             @touchend="handleTouchEnd"
+             @touchcancel="resetTouchGesture">
           <picture class="catalog-item__media-pic">
             <img
                 :src="getImage( product.main_image?.path ? product.main_image?.path : '' )"
@@ -193,7 +194,8 @@ const isHovering = ref(false);
 const mouseX = ref(0);
 const containerWidth = ref(0);
 const touchStartX = ref(0);
-const touchEndX = ref(0);
+const touchStartY = ref(0);
+const touchDirection = ref<'none' | 'horizontal' | 'vertical'>('none');
 const isMobile = ref(false);
 
 // Limit images to maximum 7 (main + 6 additional)
@@ -305,26 +307,55 @@ const thumbStyle = computed(() => {
 // Touch swipe for mobile
 const handleTouchStart = (e: TouchEvent) => {
   if (!isMobile.value || displayedImages.value.length === 0) return;
-  touchStartX.value = e.changedTouches[0].screenX;
+  const touch = e.touches[0];
+  if (!touch) return;
+
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  touchDirection.value = 'none';
 };
 
 const handleTouchMove = (e: TouchEvent) => {
-  e.preventDefault(); // Prevent scrolling while swiping
+  if (!isMobile.value || displayedImages.value.length === 0 || touchDirection.value === 'vertical') return;
+
+  const touch = e.touches[0];
+  if (!touch) return;
+
+  const deltaX = touch.clientX - touchStartX.value;
+  const deltaY = touch.clientY - touchStartY.value;
+
+  // Определяем жест только после небольшого смещения, чтобы обычный тап
+  // продолжал открывать товар.
+  if (touchDirection.value === 'none' && Math.max(Math.abs(deltaX), Math.abs(deltaY)) >= 8) {
+    touchDirection.value = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+  }
+
+  // Блокируем нативный жест только во время горизонтального перелистывания.
+  // Вертикальное движение остаётся прокруткой страницы.
+  if (touchDirection.value === 'horizontal') {
+    e.preventDefault();
+  }
 };
 
 const handleTouchEnd = (e: TouchEvent) => {
-  if (!isMobile.value || displayedImages.value.length === 0) return;
-  touchEndX.value = e.changedTouches[0].screenX;
-  handleSwipe();
+  if (!isMobile.value || displayedImages.value.length === 0 || touchDirection.value !== 'horizontal') {
+    resetTouchGesture();
+    return;
+  }
+
+  const touch = e.changedTouches[0];
+  if (!touch) return;
+
+  handleSwipe(touch.clientX - touchStartX.value);
+  resetTouchGesture();
 };
 
-const handleSwipe = () => {
+const handleSwipe = (deltaX: number) => {
   const swipeThreshold = 50;
-  const diff = touchStartX.value - touchEndX.value;
   const total = displayedImagesWithMain.value.length; // включает main
 
-  if (Math.abs(diff) > swipeThreshold && total > 0) {
-    if (diff > 0) {
+  if (Math.abs(deltaX) > swipeThreshold && total > 0) {
+    if (deltaX < 0) {
       // Swipe left - next image
       currentImageIndex.value = (currentImageIndex.value + 1) % total;
     } else {
@@ -332,6 +363,10 @@ const handleSwipe = () => {
       currentImageIndex.value = currentImageIndex.value === 0 ? total - 1 : currentImageIndex.value - 1;
     }
   }
+};
+
+const resetTouchGesture = () => {
+  touchDirection.value = 'none';
 };
 
 // Check if device is mobile
@@ -374,6 +409,7 @@ onMounted(() => {
       position: relative;
       overflow: hidden;
       cursor: pointer;
+      touch-action: pan-y;
     }
 
     &-pic {
