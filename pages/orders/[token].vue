@@ -57,12 +57,34 @@
               <div class="order-view__value">
                 <div class="order-view__messengers">
                   <a
-                      :href="`tg://resolve?domain=againdev_test_bot&start=${order.view_token}`"
+                      v-if="messengerLinks.telegram"
+                      :href="messengerLinks.telegram"
                       target="_blank"
+                      rel="noopener noreferrer"
                       class="order-view__messenger"
                   >
                     <img src="/icons/chat/telegram.svg" alt="Telegram" width="30" height="29" />
                     <span>Telegram</span>
+                  </a>
+                  <a
+                      v-if="messengerLinks.max"
+                      :href="messengerLinks.max"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="order-view__messenger"
+                  >
+                    <img src="/icons/chat/max.svg" alt="Max" width="30" height="29" />
+                    <span>Max</span>
+                  </a>
+                  <a
+                      v-if="messengerLinks.vk"
+                      :href="messengerLinks.vk"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="order-view__messenger"
+                  >
+                    <img src="/icons/chat/vk.svg" alt="ВКонтакте" width="30" height="29" />
+                    <span>ВКонтакте</span>
                   </a>
                 </div>
               </div>
@@ -175,6 +197,7 @@ import type { PublicOrder, PublicOrderResponse } from '~/types/order';
 import { getPaymentMethodLabel } from '~/constants/payment';
 import { getExternalIdClient } from '~/features/LiveChat/composables/useChatFunctions';
 import { useGetMessengerLinks } from '~/features/LiveChat/composables/useChatApi';
+import type { MessengerLinks } from '~/features/LiveChat/composables/useChatApi';
 
 definePageMeta({
   title: 'Заказ',
@@ -191,6 +214,7 @@ const order = computed<PublicOrder | null>(() => data.value?.order ?? null);
 const cartStore = useCartStore();
 const { show: showToast } = useToast();
 const isReordering = ref(false);
+const messengerLinks = ref<MessengerLinks['links']>({});
 
 // Обновляем токен текущей сессии сразу после оформления заказа. Поэтому
 // deeplink из виджета на этой странице несёт именно этот order_id, даже если
@@ -198,7 +222,8 @@ const isReordering = ref(false);
 onMounted(async () => {
   try {
     const externalId = await getExternalIdClient();
-    await useGetMessengerLinks(externalId, token);
+    const response = await useGetMessengerLinks(externalId, token);
+    messengerLinks.value = response.links ?? {};
   } catch {
     // Виджет повторит запрос при открытии; страница заказа остаётся доступной.
   }
@@ -227,7 +252,7 @@ const recipientLine = computed(() => {
   return [r.name, r.phone].filter(Boolean).join(' ');
 });
 
-const hasMessengerSubscribe = computed(() => !!order.value?.view_token);
+const hasMessengerSubscribe = computed(() => Object.keys(messengerLinks.value).length > 0);
 
 const formatPrice = (value: number) =>
     new Intl.NumberFormat('ru-RU', {
