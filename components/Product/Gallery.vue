@@ -9,6 +9,9 @@
               ref="mainSwiperEl"
               thumbs-swiper=".my-thumbs"
               :spaceBetween="15"
+              :touchStartPreventDefault="false"
+              :preventClicks="false"
+              :preventClicksPropagation="false"
           >
             <swiper-slide v-for="(image, index) in images" :key="image.id ?? index">
               <a :href="getImage(image.path)" data-fancybox="gallery">
@@ -153,6 +156,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+swiper-container,
 swiper-container::part(container) {
   touch-action: pan-y;
 }
