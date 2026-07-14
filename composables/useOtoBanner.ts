@@ -36,7 +36,8 @@ export const useOtoBanner = () => {
 
 
         modal.openModal(ModalsOtoBanner, {
-            banner: otoBannerStore.banner
+            banner: otoBannerStore.banner,
+            customClass: 'oto',
         })
 
         // Трекаем просмотр

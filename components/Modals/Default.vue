@@ -213,6 +213,19 @@ const close = ( event : any ) => {
     }
   }
 
+  &--oto {
+    @media (max-width: $mobile) {
+      & .modal__content {
+        padding: 4.8rem 1.4rem 2.5rem;
+      }
+
+      & .modal__close--mobile {
+        top: 1rem;
+        right: 1rem;
+      }
+    }
+  }
+
   &--scrollable {
     :deep(.modal__overflow) {
       align-items: flex-start;
