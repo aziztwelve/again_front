@@ -58,13 +58,13 @@ export function useServerCart() {
      * Получить состав корзины по recovery_token (ссылка из письма).
      * GET /public/cart/recovery/{token}.
      */
-    const fetchRecovery = async (token: string): Promise<any[] | null> => {
+    const fetchRecovery = async (token: string, communication?: string): Promise<any[] | null> => {
         // Императивный клиентский запрос (вызывается из onMounted страницы
         // восстановления) — используем $fetch напрямую, а не useApi/useFetch:
         // useFetch завязан на Nuxt-контекст/SSR-ключ и в onMounted при полной
         // загрузке страницы может вернуть пусто. $fetch работает где угодно.
         const base = useRuntimeConfig().public.DEV_URI as string;
-        const url = `${base}/public/cart/recovery/${encodeURIComponent(token)}`;
+        const url = `${base}/public/cart/recovery/${encodeURIComponent(token)}${communication ? `?communication=${encodeURIComponent(communication)}` : ''}`;
 
         try {
             const res = await $fetch<{ success: boolean; items: any[] }>(url, {

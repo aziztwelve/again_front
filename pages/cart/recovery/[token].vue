@@ -51,7 +51,7 @@ onMounted(async () => {
         return;
     }
 
-    const items = await fetchRecovery(token);
+    const items = await fetchRecovery(token, typeof route.query.communication === 'string' ? route.query.communication : undefined);
 
     if (!items || !items.length) {
         status.value = 'error';
