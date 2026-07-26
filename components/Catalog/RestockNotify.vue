@@ -15,6 +15,16 @@
 
     <!-- Поля -->
     <div class="restock__fields">
+      <div v-if="availableColors.length" class="restock__colors">
+        <p class="restock__colors-title">Выберите цвет, о поступлении которого сообщить</p>
+        <label v-for="color in availableColors" :key="color.id" class="restock__color">
+          <input v-model="selectedColorIds" type="checkbox" :value="color.id">
+          <span class="restock__color-dot" :style="{backgroundColor: color.code}"></span>
+          {{ color.name }}
+        </label>
+        <p v-if="colorError" class="restock__color-error">{{ colorError }}</p>
+      </div>
+
       <FormInput
           placeholder="Ваше имя"
           v-model="form.name.value"
@@ -49,7 +59,7 @@
       <button
           class="restock__btn btn _wide _loader"
           :class="{ '_load': isLoading }"
-          :disabled="!isConsent || isLoading"
+          :disabled="!isConsent || isLoading || (availableColors.length > 0 && !selectedColorIds.length)"
           @click="submit"
       >
         Подписаться
@@ -60,7 +70,7 @@
 
 <script setup lang="ts">
 import {FormInput, FormPhone, FormCheckbox} from "#components";
-import type {Product} from "~/types/catalog";
+import type {Color, Product} from "~/types/catalog";
 
 const asideMenuStore = useAsideMenuStore();
 const {show: showToast} = useToast();
@@ -87,6 +97,22 @@ const form = ref({
 
 const isConsent = ref(false);
 const isLoading = ref(false);
+const selectedColorIds = ref<number[]>([]);
+const colorError = ref('');
+
+const availableColors = computed<Color[]>(() => product.value?.colors ?? []);
+
+watch([availableColors, variation], ([colors, currentVariation]) => {
+  if (!colors.length) {
+    selectedColorIds.value = [];
+    return;
+  }
+
+  const selectedId = Number(currentVariation?.color_id);
+  selectedColorIds.value = selectedId && colors.some(color => color.id === selectedId)
+      ? [selectedId]
+      : colors.map(color => color.id);
+}, {immediate: true});
 
 const resetErrors = () => {
   form.value.name.error = '';
@@ -98,6 +124,7 @@ const submit = async () => {
   if (!isConsent.value || isLoading.value) return;
 
   resetErrors();
+  colorError.value = '';
 
   // Минимальная клиентская валидация — email обязателен (#1).
   const email = form.value.email.value.trim();
@@ -111,6 +138,10 @@ const submit = async () => {
   }
 
   if (!product.value?.id) return;
+  if (availableColors.value.length && !selectedColorIds.value.length) {
+    colorError.value = 'Выберите хотя бы один цвет';
+    return;
+  }
 
   isLoading.value = true;
 
@@ -118,6 +149,7 @@ const submit = async () => {
     body: {
       product_id: product.value.id,
       product_variant_id: variation.value?.id ?? null,
+      color_ids: selectedColorIds.value,
       name: form.value.name.value || null,
       phone: form.value.phone.value || null,
       email,
@@ -207,6 +239,34 @@ const submit = async () => {
   display: flex;
   flex-direction: column;
 }
+
+.restock__colors {
+  margin-bottom: 1.6rem;
+}
+
+.restock__colors-title {
+  margin-bottom: .8rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.restock__color {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin-top: .7rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.restock__color-dot {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid #bbb;
+  border-radius: 50%;
+}
+
+.restock__color-error { color: var(--fg-red); margin-top: .5rem; font-size: 1.2rem; }
 
 .restock__consent {
   margin-top: 1.4rem;

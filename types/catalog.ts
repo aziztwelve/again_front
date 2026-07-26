@@ -52,6 +52,7 @@ export interface AvailableVariation {
     size: string,
     quantity: number,
     price: number
+    in_stock?: boolean
 }
 
 export interface Variation {
