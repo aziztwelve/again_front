@@ -220,8 +220,13 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
     // Бэк (Laravel) отдаёт сообщения валидации по-английски, напр.
     // «The user.email field must be a valid email address.» Переводим самые
     // частые формулировки на русский; всё незнакомое оставляем как есть.
-    const translateMessage = (msg: string): string => {
-        const m = (msg ?? '').trim();
+    const translateMessage = (msg: unknown): string => {
+        const value = typeof msg === 'string'
+            ? msg
+            : msg && typeof msg === 'object' && 'message' in msg && typeof msg.message === 'string'
+                ? msg.message
+                : '';
+        const m = value.trim();
         if (!m) return m;
         if (/valid email address/i.test(m)) return 'Введите корректный email';
         if (/email .*(required|обязательн)/i.test(m) || /(required|обязательн).* email/i.test(m)) {
