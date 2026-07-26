@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button class="btn _border _gray" @click="emitLoadMore">Показать еще</button>
+    <button class="btn loadmore__button" @click="emitLoadMore">Показать еще</button>
   </div>
 </template>
 
@@ -14,5 +14,9 @@ const emitLoadMore = () => {
 </script>
 
 <style scoped lang="scss">
+.loadmore__button {
+  border-color: var(--bg-filter-button);
+  background-color: var(--bg-filter-button);
+}
 
 </style>

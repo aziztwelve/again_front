@@ -8,14 +8,21 @@
 </template>
 
 <script setup lang="ts">
-// Алиас старого формата ссылки из писем: /cart/restore/{token}
-// Канонический путь — /cart/recovery/{token}. Просто редиректим, сохраняя токен.
+// Алиас старого формата ссылки из писем: /cart/restore/{token}.
+// Канонический путь — /cart/recovery/{token}; сохраняем параметр коммуникации,
+// чтобы учитывалась конверсия по уже отправленным письмам.
 definePageMeta({ title: 'Восстановление корзины' });
 
 const route = useRoute();
 const token = String(route.params.token ?? '');
+const communication = typeof route.query.communication === 'string' ? route.query.communication : undefined;
 
-await navigateTo(token ? `/cart/recovery/${token}` : '/cart', { redirectCode: 302 });
+await navigateTo(
+  token
+    ? { path: `/cart/recovery/${token}`, query: communication ? { communication } : undefined }
+    : '/cart',
+  { redirectCode: 302 }
+);
 </script>
 
 <style scoped lang="scss">
