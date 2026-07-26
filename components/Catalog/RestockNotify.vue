@@ -29,7 +29,7 @@
           >
             <span class="restock__color-dot" :style="{backgroundColor: color.code}"></span>
             <span>{{ color.name }}</span>
-            <Check v-if="selectedColorIds.includes(color.id)" class="restock__color-check"/>
+            <span v-if="selectedColorIds.includes(color.id)" class="restock__color-check">✓</span>
           </button>
         </div>
         <p v-if="colorError" class="restock__color-error">{{ colorError }}</p>
@@ -81,7 +81,6 @@
 <script setup lang="ts">
 import {FormInput, FormPhone, FormCheckbox} from "#components";
 import type {Color, Product} from "~/types/catalog";
-import {Check} from 'lucide-vue-next';
 
 const asideMenuStore = useAsideMenuStore();
 const {show: showToast} = useToast();
@@ -301,9 +300,10 @@ const submit = async () => {
 }
 
 .restock__color-check {
-  width: 1.6rem;
-  height: 1.6rem;
   color: var(--fg-red);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .restock__color-error { color: var(--fg-red); margin-top: .5rem; font-size: 1.2rem; }
