@@ -17,11 +17,21 @@
     <div class="restock__fields">
       <div v-if="availableColors.length" class="restock__colors">
         <p class="restock__colors-title">Выберите цвет, о поступлении которого сообщить</p>
-        <label v-for="color in availableColors" :key="color.id" class="restock__color">
-          <input v-model="selectedColorIds" type="checkbox" :value="color.id">
-          <span class="restock__color-dot" :style="{backgroundColor: color.code}"></span>
-          {{ color.name }}
-        </label>
+        <div class="restock__color-list">
+          <button
+              v-for="color in availableColors"
+              :key="color.id"
+              type="button"
+              class="restock__color"
+              :class="{'_selected': selectedColorIds.includes(color.id)}"
+              :aria-pressed="selectedColorIds.includes(color.id)"
+              @click="toggleColor(color.id)"
+          >
+            <span class="restock__color-dot" :style="{backgroundColor: color.code}"></span>
+            <span>{{ color.name }}</span>
+            <Check v-if="selectedColorIds.includes(color.id)" class="restock__color-check"/>
+          </button>
+        </div>
         <p v-if="colorError" class="restock__color-error">{{ colorError }}</p>
       </div>
 
@@ -71,6 +81,7 @@
 <script setup lang="ts">
 import {FormInput, FormPhone, FormCheckbox} from "#components";
 import type {Color, Product} from "~/types/catalog";
+import {Check} from 'lucide-vue-next';
 
 const asideMenuStore = useAsideMenuStore();
 const {show: showToast} = useToast();
@@ -113,6 +124,12 @@ watch([availableColors, variation], ([colors, currentVariation]) => {
       ? [selectedId]
       : colors.map(color => color.id);
 }, {immediate: true});
+
+const toggleColor = (colorId: number) => {
+  selectedColorIds.value = selectedColorIds.value.includes(colorId)
+      ? selectedColorIds.value.filter(id => id !== colorId)
+      : [...selectedColorIds.value, colorId];
+};
 
 const resetErrors = () => {
   form.value.name.error = '';
@@ -250,13 +267,30 @@ const submit = async () => {
   font-weight: 600;
 }
 
-.restock__color {
+.restock__color-list {
   display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+}
+
+.restock__color {
+  display: inline-flex;
   align-items: center;
   gap: .7rem;
-  margin-top: .7rem;
+  min-height: 3.8rem;
+  padding: .7rem 1rem;
+  border: 1px solid #d5d1ce;
+  border-radius: 99px;
+  background: var(--fg-white);
+  color: var(--fg-dark);
   font-size: 1.4rem;
   cursor: pointer;
+  transition: border-color .2s ease, background-color .2s ease;
+
+  &._selected {
+    border-color: var(--fg-red);
+    background: rgba(203, 11, 19, .06);
+  }
 }
 
 .restock__color-dot {
@@ -264,6 +298,12 @@ const submit = async () => {
   height: 1.4rem;
   border: 1px solid #bbb;
   border-radius: 50%;
+}
+
+.restock__color-check {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--fg-red);
 }
 
 .restock__color-error { color: var(--fg-red); margin-top: .5rem; font-size: 1.2rem; }
