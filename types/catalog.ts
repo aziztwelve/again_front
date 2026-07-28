@@ -52,6 +52,7 @@ export interface AvailableVariation {
     size: string,
     quantity: number,
     price: number
+    images?: Image[]
     in_stock?: boolean
 }
 

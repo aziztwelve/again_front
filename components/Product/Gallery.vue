@@ -80,14 +80,9 @@ const images = computed(() => {
   const sel = props.selectedSize;
   const productImages = Array.isArray(props.product?.images) ? props.product.images : [];
 
-  // A size can have only its cover image configured. Do not let that one image
-  // replace the complete product gallery when several product images exist.
-  if (
-    sel
-    && Array.isArray(sel.images)
-    && sel.images.length > 0
-    && !(sel.images.length === 1 && productImages.length > 1)
-  ) {
+  // Изображения варианта всегда имеют приоритет: покупатель выбрал именно
+  // этот цвет/размер и должен увидеть его, даже если у варианта одно фото.
+  if (sel && Array.isArray(sel.images) && sel.images.length > 0) {
     return sel.images;
   }
   if (productImages.length > 0) {
