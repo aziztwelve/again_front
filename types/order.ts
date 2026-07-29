@@ -58,6 +58,11 @@ export interface PublicOrder {
     recipient: PublicOrderRecipient;
     items: PublicOrderItem[];
     tracking_number: string | null;
+    delivery_tracking?: {
+        status: string | null;
+        status_raw: string | null;
+        tracking_url: string | null;
+    } | null;
 }
 
 export interface PublicOrderResponse {

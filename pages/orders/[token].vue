@@ -126,7 +126,16 @@
 
             <div v-if="order.tracking_number" class="order-view__row">
               <div class="order-view__label">Трек-номер</div>
-              <div class="order-view__value">{{ order.tracking_number }}</div>
+              <div class="order-view__value">
+                <a v-if="order.delivery_tracking?.tracking_url" :href="order.delivery_tracking.tracking_url" target="_blank" rel="noopener noreferrer" class="order-view__address-link">
+                  {{ order.tracking_number }} · Отследить доставку
+                </a>
+                <template v-else>{{ order.tracking_number }}</template>
+              </div>
+            </div>
+            <div v-if="order.delivery_tracking?.status" class="order-view__row">
+              <div class="order-view__label">Статус доставки</div>
+              <div class="order-view__value">{{ yandexStatusLabel(order.delivery_tracking.status) }}</div>
             </div>
           </div>
         </section>
@@ -267,6 +276,16 @@ const formatDateTime = (value: string) => {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
+
+const yandexStatusLabel = (status: string) => ({
+  created: 'Заявка создана',
+  courier_assigned: 'Курьер назначен',
+  picked_up: 'Заказ передан в доставку',
+  delivered: 'Заказ доставлен',
+  returning: 'Оформляется возврат',
+  cancelled: 'Доставка отменена',
+  failed: 'Не удалось оформить доставку',
+}[status] ?? status);
 
 const mapUrl = (addr: string) =>
     `https://yandex.ru/maps/?text=${encodeURIComponent(addr)}`;
