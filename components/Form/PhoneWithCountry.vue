@@ -14,6 +14,7 @@
 
       <!-- Поле ввода телефона -->
       <input
+          v-if="isMounted"
           :type="type"
           :name="name"
           class="phone-input__field"
@@ -21,6 +22,15 @@
           v-model="phoneValue"
           v-mask="currentMask"
           @input="handleInput"
+          :autocomplete="autocomplete"
+      >
+      <input
+          v-else
+          :type="type"
+          :name="name"
+          class="phone-input__field"
+          :placeholder="placeholder"
+          :value="phoneValue"
           :autocomplete="autocomplete"
       >
     </div>
@@ -56,6 +66,7 @@ const model = defineModel<string>();
 
 const phoneValue = ref('');
 const selectedCountry = ref<Country | null>(null);
+const isMounted = ref(false);
 
 const {generateMask} = usePhoneMask();
 
@@ -79,6 +90,7 @@ const currentMask = computed(() => {
 });
 
 onMounted(() => {
+  isMounted.value = true;
   const defaultCountry = props.countries.find(c => c.id === props.defaultCountryId);
   if (defaultCountry) {
     selectedCountry.value = defaultCountry;
