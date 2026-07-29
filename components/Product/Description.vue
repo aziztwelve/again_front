@@ -12,5 +12,9 @@ defineProps<{
 </script>
 
 <style scoped lang="scss">
-
+.product__description-text {
+  // Описание приходит из админки обычным текстом или HTML. Сохраняем переносы
+  // строк у текстовых описаний, не меняя уже размеченный HTML.
+  white-space: pre-line;
+}
 </style>
