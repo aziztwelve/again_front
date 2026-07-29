@@ -46,6 +46,7 @@
                   v-model:yandex-delivery-data="form.yandex_delivery_data"
                   v-model:pvz-code="form.pvz_code"
                   v-model:pvz-address="form.pvz_address"
+                  :recipient="form.user"
               />
               <CheckoutRecipient
                   ref="recipientRef"

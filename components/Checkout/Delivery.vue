@@ -218,6 +218,10 @@ interface PvzPoint {
   operator_station_id?: string;
 }
 
+const props = defineProps<{
+  recipient?: { first_name?: string; last_name?: string; phone?: string; email?: string };
+}>();
+
 // ─── v-model связки с родителем ───────────────────────────────────────────────
 const userStore = useAuthStore();
 const countryId = ref(0);
@@ -385,6 +389,11 @@ const fetchYandexOffers = async (params: {
   pvzCoords?: [number, number];
   destination?: { address: string; coordinates: [number, number] };
 }) => {
+  if (!props.recipient?.phone) {
+    yandexOffers.value = [];
+    yandexError.value = 'Укажите телефон получателя, чтобы рассчитать Яндекс.Доставку.';
+    return;
+  }
   yandexOffersLoading.value = true;
   yandexError.value         = '';
   yandexOffers.value        = [];
@@ -407,6 +416,11 @@ const fetchYandexOffers = async (params: {
     const body: Record<string, unknown> = {
       delivery_type: params.deliveryType,
       items,
+      recipient: {
+        name: [props.recipient?.first_name, props.recipient?.last_name].filter(Boolean).join(' ') || 'Покупатель',
+        phone: props.recipient?.phone || '',
+        email: props.recipient?.email,
+      },
     };
     if (params.pvzId)        body.pvz_id      = params.pvzId;
     if (params.pvzCoords)    body.pvz_coords  = params.pvzCoords;
