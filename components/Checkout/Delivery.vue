@@ -508,11 +508,8 @@ const formatPvzAddress = (point: PvzPoint): string => {
 const onPvzSelect = async (point: PvzPoint) => {
   const addr = formatPvzAddress(point);
 
-  // Формируем id для Platform API:
-  // operator_id:operator_station_id — подтверждённый формат
-  const pvzApiId = (point.operator_id && point.operator_station_id)
-      ? `${point.operator_id}:${point.operator_station_id}`
-      : point.id;
+  // Platform API принимает именно id точки из pickup-points/list.
+  const pvzApiId = point.id;
 
   // Координаты ПВЗ из ответа Platform API
   const coords: [number, number] | undefined = (point.position)
