@@ -14,8 +14,8 @@
         <path d="M13.7394 11.4269C12.7254 11.5304 11.862 12.2292 11.5327 13.2149C11.3703 13.6996 11.375 14.3536 11.5444 14.85C11.8079 15.6217 12.4243 16.2286 13.2101 16.4921C13.6783 16.6498 14.3417 16.6498 14.8099 16.4921C15.7156 16.1886 16.365 15.4617 16.5626 14.5206C16.6167 14.2665 16.6167 13.7631 16.5626 13.509C16.365 12.5679 15.7156 11.841 14.8099 11.5375C14.5158 11.4387 14.0711 11.394 13.7394 11.4269Z" fill="#383838"/>
       </svg>
     </a>
-    <a href="https://max.ru/id4707052811_bot" class="footer__socials-item" target="_blank" rel="noopener noreferrer" aria-label="MAX">
-      <img src="/icons/chat/max.svg" alt="MAX" width="28" height="28">
+    <a href="https://max.ru/id4707052811_bot" class="footer__socials-item footer__socials-item--max" target="_blank" rel="noopener noreferrer" aria-label="MAX">
+      <span>MAX</span>
     </a>
     <a href="https://t.me/againdev_test_bot" class="footer__socials-item" target="_blank">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,5 +53,18 @@
   &:last-child {
     margin-right: 0;
   }
+}
+
+.footer__socials-item--max {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #383838;
+  font-size: .7rem;
+  font-weight: 700;
 }
 </style>
