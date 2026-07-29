@@ -43,6 +43,7 @@
                   v-model:delivery-method-name="form.delivery_method_name"
                   v-model:delivery-method-code="form.delivery_method_code"
                   v-model:yandex-offer="form.yandex_offer"
+                  v-model:yandex-delivery-data="form.yandex_delivery_data"
                   v-model:pvz-code="form.pvz_code"
                   v-model:pvz-address="form.pvz_address"
               />
@@ -168,6 +169,7 @@ const form = reactive<CheckoutForm>({
   delivery_method_code: '',
   payment_method: '',
   yandex_offer: null,
+  yandex_delivery_data: null,
   pvz_code: null,
   pvz_address: null,
 });

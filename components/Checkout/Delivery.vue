@@ -243,6 +243,7 @@ const yandexOffer = defineModel<{
   price: number;
   delivery_date?: string;
 } | null>('yandexOffer', { default: null });
+const yandexDeliveryData = defineModel<Record<string, unknown> | null>('yandexDeliveryData', { default: null });
 
 const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
@@ -361,10 +362,12 @@ const yandexOffers      = ref<YandexOffer[]>([]);
 const yandexOffersLoading = ref(false);
 const yandexError       = ref('');
 const selectedYandexOffer = ref<YandexOffer | null>(null);
+const courierDestination = ref<{ address: string; coordinates: [number, number] } | null>(null);
 
 // Сброс при смене метода
 watch(selectedDeliveryMethod, () => {
   yandexOffer.value       = null;
+  yandexDeliveryData.value = null;
   selectedYandexOffer.value = null;
   yandexOffers.value      = [];
   yandexError.value       = '';
@@ -453,6 +456,8 @@ watch([isYandexCourier, address, cityName], ([courier, addr, city]) => {
       return;
     }
 
+    courierDestination.value = { address: fullAddr, coordinates: coords };
+
     await fetchYandexOffers({
       deliveryType: 'courier',
       destination:  { address: fullAddr, coordinates: coords },
@@ -468,11 +473,24 @@ const selectYandexOffer = (offer: YandexOffer) => {
     price:         offer.price,
     delivery_date: offer.delivery_date,
   };
+  yandexDeliveryData.value = {
+    provider: 'yandex',
+    delivery_type: isYandexPickup.value ? 'pickup' : 'courier',
+    offer_id: offer.offer_id,
+    price: offer.price,
+    scheduled_time: offer.delivery_date,
+    pvz: isYandexPickup.value && selectedPvz.value ? {
+      id: selectedPvz.value.pvzApiId ?? selectedPvz.value.id,
+      address: selectedPvz.value.address,
+      coordinates: selectedPvz.value.coordinates,
+    } : null,
+    destination: isYandexCourier.value ? courierDestination.value : null,
+  };
 };
 
 // ─── ПВЗ модалка ──────────────────────────────────────────────────────────────
 const showPvzModal = ref(false);
-const selectedPvz  = ref<{ id: string; name: string; address: string; pvzApiId?: string } | null>(null);
+const selectedPvz  = ref<{ id: string; name: string; address: string; pvzApiId?: string; coordinates?: [number, number] } | null>(null);
 
 const onPickOnMap = async () => {
   if (isYandexPickup.value && pvzGeoIdLoading.value) {
@@ -496,7 +514,12 @@ const onPvzSelect = async (point: PvzPoint) => {
       ? `${point.operator_id}:${point.operator_station_id}`
       : point.id;
 
-  selectedPvz.value  = { id: point.id, name: point.name, address: addr, pvzApiId };
+  // Координаты ПВЗ из ответа Platform API
+  const coords: [number, number] | undefined = (point.position)
+      ? [point.position.longitude, point.position.latitude]
+      : undefined;
+
+  selectedPvz.value  = { id: point.id, name: point.name, address: addr, pvzApiId, coordinates: coords };
   address.value      = addr;
   pvzCode.value      = pvzApiId;
   pvzAddress.value   = addr;
@@ -504,11 +527,7 @@ const onPvzSelect = async (point: PvzPoint) => {
   // Сбрасываем прошлый тариф и считаем новые
   selectedYandexOffer.value = null;
   yandexOffer.value         = null;
-
-  // Координаты ПВЗ из ответа Platform API
-  const coords: [number, number] | undefined = (point.position)
-      ? [point.position.longitude, point.position.latitude]
-      : undefined;
+  yandexDeliveryData.value  = null;
 
   await fetchYandexOffers({
     deliveryType: 'pickup',

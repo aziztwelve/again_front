@@ -179,7 +179,8 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
 
         // Яндекс.Доставка: передаём выбранный тариф
         if (form.yandex_offer) {
-            payload.yandex_offer = form.yandex_offer;
+            payload.yandex_offer = form.yandex_offer.offer_id;
+            payload.delivery_data = form.yandex_delivery_data ?? undefined;
         }
 
         // Яндекс.Доставка (ПВЗ): передаём выбранный пункт выдачи.

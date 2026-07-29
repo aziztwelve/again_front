@@ -108,6 +108,7 @@ export interface CheckoutForm {
     pvz_code?: string | null;
     /** Адрес выбранного ПВЗ. */
     pvz_address?: string | null;
+    yandex_delivery_data?: Record<string, unknown> | null;
 }
 
 // Тело POST /public/orders.
@@ -127,6 +128,10 @@ export interface CheckoutPayload {
     delivery_address: Record<string, unknown>;
     delivery_method?: { name: string };
     payment_method?: string;
+    yandex_offer?: string;
+    pvz_code?: string;
+    pvz_address?: string;
+    delivery_data?: Record<string, unknown>;
     /**
      * Применённые акции (мультиакционная/стекируемая модель). По одному элементу
      * на каждую применённую акцию: выбранный подарок (+ вариант, если есть размеры)
