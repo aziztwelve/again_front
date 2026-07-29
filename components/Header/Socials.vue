@@ -45,6 +45,7 @@
   @media(any-hover: hover) {
     & a:hover {
       background: var(--fg-gray-2);
+      color: var(--fg-white);
 
       & path {
         fill: var(--fg-white);
