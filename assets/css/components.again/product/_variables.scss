@@ -91,6 +91,10 @@
     background: #F6F6F6;
   }
 
+  &--compact label {
+    font-size: 1.4rem;
+  }
+
   @media (max-width: $mobile) {
     margin-bottom: .9rem;
   }

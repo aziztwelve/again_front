@@ -48,7 +48,12 @@
           </button>
         </div>
         <div class="product-variables__values">
-          <div class="product-variables__size" v-for="(size, key) in sizes" :key="size.id">
+          <div
+              class="product-variables__size"
+              :class="{'product-variables__size--compact': size.size.length > 3}"
+              v-for="(size, key) in sizes"
+              :key="size.id"
+          >
             <input
                 type="radio"
                 name="size"
