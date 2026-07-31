@@ -110,7 +110,7 @@ const promotionStore = usePromotionStore();
 // по min_purchase_amount и reset() затрёт уже выставленный selectedGift.
 const runPromotionCheck = async () => {
   if (cartStore.cart.length > 0 && cartStore.total > 0) {
-    await promotionStore.checkApplicable(cartStore.cart, cartStore.total);
+    await promotionStore.checkApplicable(cartStore.cart, cartStore.total, !!cartStore.promoCode);
   } else if (cartStore.cart.length === 0) {
     promotionStore.reset();
   }

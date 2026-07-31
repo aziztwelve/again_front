@@ -40,7 +40,7 @@ export const useCartStore = defineStore('cartStore', () => {
         // Проверяем акции после пересчёта корзины
         if (cart.value.length > 0 && total.value > 0) {
             const promotionStore = usePromotionStore();
-            promotionStore.checkApplicable(cart.value, total.value);
+            promotionStore.checkApplicable(cart.value, total.value, !!promoCode.value);
         }
     }
 

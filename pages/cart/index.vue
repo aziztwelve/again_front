@@ -39,7 +39,7 @@ const promotionStore = usePromotionStore();
 
 const runCheck = async () => {
   if (cartStore.cart.length > 0 && cartStore.total > 0) {
-    await promotionStore.checkApplicable(cartStore.cart, cartStore.total);
+    await promotionStore.checkApplicable(cartStore.cart, cartStore.total, !!cartStore.promoCode);
   } else if (cartStore.cart.length === 0) {
     promotionStore.reset();
   }

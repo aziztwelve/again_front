@@ -164,6 +164,7 @@ export const usePromotionStore = defineStore('promotionStore', () => {
     const isGiftSelectionComplete = computed(() => {
         if (appliedPromotions.value.length === 0) return true;
         return appliedPromotions.value.every((p) => {
+            if (p.unavailable_by_promo) return true;
             const gift = selectedGiftFor(p);
             if (!gift) return false;
             if (!gift.has_variants) return true;
@@ -239,7 +240,7 @@ export const usePromotionStore = defineStore('promotionStore', () => {
     /**
      * Проверить применимые акции для текущей корзины.
      */
-    const checkApplicable = async (cartItems, cartTotal) => {
+    const checkApplicable = async (cartItems, cartTotal, hasPromoCode = false) => {
         if (!cartItems || cartItems.length === 0) {
             // Сбрасываем все «в полёте» запросы, чтобы их ответы не применились.
             requestId += 1;
@@ -272,9 +273,28 @@ export const usePromotionStore = defineStore('promotionStore', () => {
                 return;
             }
 
-            if (data.value?.success && data.value.data?.length > 0) {
-                appliedPromotions.value = data.value.data;
-                rebuildSelections(data.value.data);
+            if (data.value?.success) {
+                const applicable = data.value.data || [];
+                const applicableIds = new Set(applicable.map((promotion) => promotion.id));
+
+                // Промокод может снизить сумму ниже порога акции. В этом случае
+                // сохраняем уже показанный подарок, но делаем его недоступным,
+                // чтобы покупатель понимал причину, а не видел внезапное исчезновение.
+                const unavailable = hasPromoCode
+                    ? appliedPromotions.value
+                        .filter((promotion) => !promotion.unavailable_by_promo && !applicableIds.has(promotion.id))
+                        .map((promotion) => ({ ...promotion, unavailable_by_promo: true }))
+                    : [];
+                const nextPromotions = [...applicable, ...unavailable]
+                    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+                if (nextPromotions.length === 0) {
+                    reset();
+                    return;
+                }
+
+                appliedPromotions.value = nextPromotions;
+                rebuildSelections(nextPromotions);
                 message.value = '';
                 messageClass.value = '';
             } else {
@@ -406,7 +426,9 @@ export const usePromotionStore = defineStore('promotionStore', () => {
      * если у подарка есть размеры). Промокод, если разрешён, передаётся отдельно.
      */
     const getDataForOrder = () => {
-        const promotions = appliedPromotions.value.map((p) => {
+        const promotions = appliedPromotions.value
+            .filter((p) => !p.unavailable_by_promo)
+            .map((p) => {
             const entry = {
                 promotion_id: p.id,
                 use_discount_instead: false,

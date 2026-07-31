@@ -1,5 +1,5 @@
 <template>
-  <div class="cart__promotion-item">
+  <div class="cart__promotion-item" :class="{ '_unavailable': promotion.unavailable_by_promo }">
     <div class="cart__promotion-header">
       <div class="cart__promotion-icon">🎁</div>
       <div class="cart__promotion-info">
@@ -8,6 +8,10 @@
           {{ promotion.description }}
         </div>
       </div>
+    </div>
+
+    <div v-if="promotion.unavailable_by_promo" class="cart__promotion-unavailable-message">
+      Подарок недоступен: после применения промокода сумма заказа стала ниже условия этой акции.
     </div>
 
     <!-- Выбор подарка -->
@@ -22,7 +26,7 @@
           <div
               class="cart__promotion-gift"
               :class="{ '_selected': selectedGiftId === gift.id }"
-              @click="promotionStore.selectGift(promotion.id, gift)"
+              @click="!promotion.unavailable_by_promo && promotionStore.selectGift(promotion.id, gift)"
           >
             <div v-if="gift.image" class="cart__promotion-gift-img">
               <img :src="gift.image" :alt="gift.name" />
@@ -130,6 +134,7 @@ interface Promotion {
   name: string;
   description?: string | null;
   allow_promo_codes: boolean;
+  unavailable_by_promo?: boolean;
   gift_products?: GiftProduct[];
 }
 
@@ -154,6 +159,24 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
   & + & {
     margin-top: 1.6rem;
   }
+}
+
+.cart__promotion-item._unavailable {
+  opacity: 0.58;
+
+  .cart__promotion-gifts {
+    pointer-events: none;
+  }
+}
+
+.cart__promotion-unavailable-message {
+  margin-top: 1.2rem;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid #f57c00;
+  background: rgba(245, 124, 0, 0.1);
+  color: #a45300;
+  font-size: 1.2rem;
+  line-height: 1.4;
 }
 
 .cart__promotion-header {
