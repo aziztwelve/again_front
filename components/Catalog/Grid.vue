@@ -1,15 +1,23 @@
 <template>
   <div class="catalog__grid">
-    <CatalogCard v-for="(item, index) in list" :key="item.id" :product="item" />
+    <CatalogCard
+        v-for="item in list"
+        :key="item.id"
+        :product="item"
+        :is-coming-soon="isComingSoon"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type {Product} from "~/types/catalog";
 
-defineProps<{
+withDefaults(defineProps<{
   list: Product[]
-}>();
+  isComingSoon?: boolean
+}>(), {
+  isComingSoon: false,
+});
 </script>
 
 <style scoped lang="scss">

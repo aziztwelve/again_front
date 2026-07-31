@@ -101,10 +101,10 @@
           </svg>
         </div>
 
-        <div class="catalog-item__colors colors" v-if="product.colors && product.colors.length > 0">
+        <div class="catalog-item__colors colors" v-if="displayedColors.length > 0">
           <div class="colors__list">
             <div
-                v-for="(color, key) in product.colors"
+                v-for="(color, key) in displayedColors"
                 :key="color.id"
                 class="colors__item"
                 :class="{
@@ -117,7 +117,7 @@
                   type="radio"
                   class="colors__input"
                   :value="color.id"
-                  :checked="product.colors[key] === color"
+                :checked="displayedColors[key] === color"
               >
               <label for="color" class="colors__label">
                 <span v-if="!isPrintColor(color.code)"></span>
@@ -174,7 +174,8 @@ import MarketplaceLinksButtons from "~/components/Catalog/MarketplaceLinksButton
 import {CatalogRestockNotify} from "#components";
 
 const props = defineProps<{
-  product: Product
+  product: Product,
+  isComingSoon?: boolean,
 }>();
 
 
@@ -246,7 +247,23 @@ const isFavourite = computed(() => {
 });
 
 const shouldNotifyRestock = computed(() => {
-  return props.product.cta === 'notify_restock' || Number(props.product.stock_quantity || 0) <= 0;
+  return props.isComingSoon || props.product.cta === 'notify_restock' || Number(props.product.stock_quantity || 0) <= 0;
+});
+
+const displayedColors = computed(() => {
+  const colors = props.product.colors ?? [];
+
+  if (!props.isComingSoon) {
+    return colors;
+  }
+
+  const inStockColorIds = new Set(
+      (props.product.available_variants ?? [])
+          .filter(variant => variant.in_stock !== false && Number(variant.quantity ?? 0) > 0)
+          .map(variant => Number(variant.color_id))
+  );
+
+  return colors.filter(color => !inStockColorIds.has(Number(color.id)));
 });
 
 const openRestockNotify = () => {

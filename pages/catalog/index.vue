@@ -27,6 +27,7 @@
           <CatalogGrid
               class="catalog-page__grid"
               :list="nProducts?.data"
+              :is-coming-soon="route.query.category === 'skoro-v-prodaze'"
           />
 
           <Loadmore
