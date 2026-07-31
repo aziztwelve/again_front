@@ -134,6 +134,12 @@ const menuItems = computed(() => {
       title: 'Информация для клиентов',
       sublist: [
         {
+          // Страница профиля сама перенаправит неавторизованного клиента на
+          // /login, а авторизованному откроет личный кабинет.
+          link: '/profile/settings',
+          title: 'Личный кабинет',
+        },
+        {
           link: '/delivery',
           title: 'Доставка и оплата',
         },
@@ -146,12 +152,12 @@ const menuItems = computed(() => {
           title: 'Уход и использование',
         },
         {
-          link: '/sertificates',
-          title: 'Сертификаты',
-        },
-        {
           link: '/selection',
           title: 'Подбор по впитываемости и по размеру',
+        },
+        {
+          link: '/sertificates',
+          title: 'Сертификаты',
         },
       ]
     },
