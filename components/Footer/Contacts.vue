@@ -1,12 +1,6 @@
 <template>
   <div class="footer__contacts">
     <div class="footer__contacts-item">
-      <a href="tel:79255523577" class="footer__contacts-link">
-        <span class="footer__contacts-title">Номер телефона</span>
-        <span class="footer__contacts-value">+7 925 552 35 77</span>
-      </a>
-    </div>
-    <div class="footer__contacts-item">
       <a href="mailto:info@again8.ru" class="footer__contacts-link">
         <span class="footer__contacts-title">Почта</span>
         <span class="footer__contacts-value">info@again8.ru</span>
