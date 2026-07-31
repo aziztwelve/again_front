@@ -79,25 +79,8 @@ const blockingPromotionsText = computed(() => {
 });
 
 const blockingMessage = computed(() => {
-  const hasGiftOnlyPromotion = promotionStore.promoBlockingPromotions
-      .some((promotion) => !promotion.allow_promo_codes);
-
-  if (hasGiftOnlyPromotion) {
-    return `Промокоды и скидки недоступны — ${blockingPromotionsText.value}`;
-  }
-
-  return 'Выбран подарок. Чтобы использовать промокод или скидку, выберите «Промокод / скидка» в акции.';
+  return `Промокоды и скидки недоступны — ${blockingPromotionsText.value}`;
 });
-
-// Если пользователь переключился с промокода на подарок, убираем уже
-// применённый промокод и пересчитываем итог — иначе визуально и в payload
-// оставалась бы скидка, несовместимая с выбранным подарком.
-watch(() => promotionStore.allowPromoCodes, (isAllowed) => {
-  if (!isAllowed && cart.promoCode) {
-    cart.removePromoFromCart();
-    promoCodeInput.value = '';
-  }
-}, { immediate: true });
 
 const checkAndApplyPromoCode = async () => {
 

@@ -147,29 +147,23 @@ export const usePromotionStore = defineStore('promotionStore', () => {
     // Есть ли применённые акции
     const hasPromotion = computed(() => appliedPromotions.value.length > 0);
 
-    // Промокод можно использовать, только когда по КАЖДОЙ применённой акции
-    // выбран вариант «Промокод / скидка». Сам флаг allow_promo_codes лишь даёт
-    // пользователю право такого выбора; выбранный подарок и промокод не
-    // суммируются.
+    // Подарки всегда остаются в заказе. Поле промокода показываем, если хотя бы
+    // одна применённая акция его разрешает. После применения промокода cart.total
+    // меняется, а watch на странице заново пересчитывает набор подарков.
     const allowPromoCodes = computed(() => {
         if (appliedPromotions.value.length === 0) return true;
-        return appliedPromotions.value.every((p) =>
-            !!p.allow_promo_codes && useDiscountInsteadFor(p.id)
-        );
+        return appliedPromotions.value.some((p) => !!p.allow_promo_codes);
     });
 
-    // Акции, которые сейчас блокируют промокод: флаг выключен либо выбран подарок.
+    // Все применённые акции — для пояснения, когда ни одна не разрешает промокод.
     const promoBlockingPromotions = computed(() =>
-        appliedPromotions.value.filter((p) =>
-            !p.allow_promo_codes || !useDiscountInsteadFor(p.id)
-        )
+        appliedPromotions.value
     );
 
     // Полностью ли заполнен выбор по ВСЕМ применённым акциям (готово к отправке)
     const isGiftSelectionComplete = computed(() => {
         if (appliedPromotions.value.length === 0) return true;
         return appliedPromotions.value.every((p) => {
-            if (useDiscountInsteadFor(p.id)) return true;
             const gift = selectedGiftFor(p);
             if (!gift) return false;
             if (!gift.has_variants) return true;
@@ -201,15 +195,8 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         for (const p of promotions) {
             const gifts = giftProductsFor(p);
 
-            // Режим: сохраняем прошлый выбор; если акция запрещает промокоды —
-            // принудительно «подарок» (скидку вместо подарка взять нельзя).
-            let choice = userChoiceByPromotionId.value[p.id] || 'gift';
-            if (!p.allow_promo_codes) choice = 'gift';
-            nextChoice[p.id] = choice;
-
-            if (choice === 'discount') {
-                continue; // при скидке подарок не выбирается
-            }
+            // Подарок обязателен независимо от allow_promo_codes.
+            nextChoice[p.id] = 'gift';
 
             // Подарок: сохраняем прошлый, если он всё ещё в наборе, иначе первый.
             const prevGiftId = selectedGiftByPromotionId.value[p.id];
@@ -415,26 +402,23 @@ export const usePromotionStore = defineStore('promotionStore', () => {
 
     /**
      * Данные для отправки в заказ — массив акций promotions[].
-     * По каждой применённой акции: либо «скидка вместо подарка», либо выбранный
-     * подарок (+ вариант, если у подарка есть размеры).
+     * По каждой применённой акции передаётся выбранный подарок (+ вариант,
+     * если у подарка есть размеры). Промокод, если разрешён, передаётся отдельно.
      */
     const getDataForOrder = () => {
         const promotions = appliedPromotions.value.map((p) => {
-            const useDiscount = useDiscountInsteadFor(p.id);
             const entry = {
                 promotion_id: p.id,
-                use_discount_instead: useDiscount,
+                use_discount_instead: false,
             };
 
-            if (!useDiscount) {
-                const gift = selectedGiftFor(p);
-                if (gift) {
-                    entry.gift_product_id = gift.id;
-                    if (gift.has_variants) {
-                        const variant = selectedVariantFor(p);
-                        if (variant) {
-                            entry.gift_product_variant_id = variant.id;
-                        }
+            const gift = selectedGiftFor(p);
+            if (gift) {
+                entry.gift_product_id = gift.id;
+                if (gift.has_variants) {
+                    const variant = selectedVariantFor(p);
+                    if (variant) {
+                        entry.gift_product_variant_id = variant.id;
                     }
                 }
             }

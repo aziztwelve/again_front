@@ -10,38 +10,8 @@
       </div>
     </div>
 
-    <!-- Выбор: подарок или промокод/скидка (только если акция разрешает промокоды) -->
-    <div v-if="promotion.allow_promo_codes" class="cart__promotion-choice">
-      <div class="cart__promotion-choice-label">Выберите бонус:</div>
-      <div class="cart__promotion-choice-options">
-        <button
-            type="button"
-            class="cart__promotion-option"
-            :class="{ '_active': choice === 'gift' }"
-            @click="chooseGiftMode"
-        >
-          <span class="cart__promotion-option-icon">🎁</span>
-          <span>Подарок</span>
-        </button>
-        <button
-            type="button"
-            class="cart__promotion-option"
-            :class="{ '_active': choice === 'discount' }"
-            @click="promotionStore.selectDiscount(promotion.id)"
-        >
-          <span class="cart__promotion-option-icon">🏷</span>
-          <span>Промокод / скидка</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Если промокоды не разрешены — сообщение -->
-    <div v-else class="cart__promotion-no-promo">
-      Промокоды и скидки не действуют с этой акцией. Вам доступен подарок!
-    </div>
-
     <!-- Выбор подарка -->
-    <div v-if="choice === 'gift' && gifts.length > 0" class="cart__promotion-gifts">
+    <div v-if="gifts.length > 0" class="cart__promotion-gifts">
       <div class="cart__promotion-gifts-label">Выберите подарок:</div>
       <div class="cart__promotion-gifts-list">
         <div
@@ -168,18 +138,10 @@ const props = defineProps<{ promotion: Promotion }>();
 const promotionStore = usePromotionStore();
 
 const gifts = computed<GiftProduct[]>(() => promotionStore.giftProductsFor(props.promotion));
-const choice = computed<string>(() => promotionStore.userChoiceFor(props.promotion.id));
 const selectedGiftId = computed<number | null>(() => promotionStore.selectedGiftIdFor(props.promotion.id));
 
 const uniqueColors = (gift: GiftProduct) => promotionStore.uniqueColorsForGift(gift);
 const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByColor(props.promotion.id, gift);
-
-// Переключение на режим «Подарок»: гарантируем, что подарок выбран
-// (сохраняем текущий выбор, иначе берём первый из списка).
-const chooseGiftMode = () => {
-  const current = promotionStore.selectedGiftFor(props.promotion);
-  promotionStore.selectGift(props.promotion.id, current || gifts.value[0] || null);
-};
 </script>
 
 <style scoped lang="scss">
