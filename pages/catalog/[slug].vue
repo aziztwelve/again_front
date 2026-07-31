@@ -66,11 +66,11 @@
             <div>
               <Quantity
                   class="product__quantity"
-                  v-if="product.price && product.stock_quantity > 0 || product.name == GIFT_CERTIFICATE"
+                  v-if="(product.price && canPurchaseSelectedOption) || product.name == GIFT_CERTIFICATE"
                   @get-quantity="getQuantity"
               />
 
-              <div class="product__actions" v-if="product.stock_quantity > 0">
+              <div class="product__actions" v-if="canPurchaseSelectedOption">
                 <div class="product__actions-buttons">
                   <ProductActionsAddToCart
                       v-if="product.price || product.name == GIFT_CERTIFICATE"
@@ -152,6 +152,20 @@
 
   const selectedColor: Ref = ref(null);
   const selectedSize: Ref = ref(null);
+
+  // Товар может быть в наличии в целом, но не в выбранном цвете. В этом
+  // случае нельзя добавить вариант в корзину — предлагаем подписку на остатки.
+  const canPurchaseSelectedOption = computed(() => {
+    if (product.value?.name === GIFT_CERTIFICATE) return true;
+    if (!product.value?.has_variants) return Number(product.value?.stock_quantity ?? 0) > 0;
+    if (!selectedColor.value) return false;
+
+    return (product.value?.available_variants ?? []).some((variant) =>
+      Number(variant.color_id) === Number(selectedColor.value.id)
+      && variant.in_stock !== false
+      && Number(variant.quantity ?? 0) > 0
+    );
+  });
 
   const getColor = (value: object) => {
     selectedColor.value = value;

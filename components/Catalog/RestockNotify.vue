@@ -87,6 +87,7 @@ const {show: showToast} = useToast();
 
 const product = computed<Product | undefined>(() => asideMenuStore.props?.product);
 const variation = computed<any>(() => asideMenuStore.props?.variation);
+const color = computed<Color | null>(() => asideMenuStore.props?.color ?? null);
 
 const productImage = computed(() => {
   const img = product.value?.main_image as any;
@@ -112,13 +113,13 @@ const colorError = ref('');
 
 const availableColors = computed<Color[]>(() => product.value?.colors ?? []);
 
-watch([availableColors, variation], ([colors, currentVariation]) => {
+watch([availableColors, variation, color], ([colors, currentVariation, currentColor]) => {
   if (!colors.length) {
     selectedColorIds.value = [];
     return;
   }
 
-  const selectedId = Number(currentVariation?.color_id);
+  const selectedId = Number(currentVariation?.color_id ?? currentColor?.id);
   selectedColorIds.value = selectedId && colors.some(color => color.id === selectedId)
       ? [selectedId]
       : colors.map(color => color.id);

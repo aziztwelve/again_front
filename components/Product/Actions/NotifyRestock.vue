@@ -30,6 +30,7 @@ const openRestockNotify = () => {
     title: 'Узнать о поступлении',
     product: props.product,
     variation: props.variation,
+    color: props.color,
   });
 };
 </script>
