@@ -82,6 +82,12 @@ const hasLinks = computed(() => {
   margin-top: auto;
 }
 
+/* На странице товара кнопки маркетплейсов совпадают по ширине с «В корзину». */
+.marketplace-buttons.product__marketplace-buttons {
+  width: 38.8rem;
+  max-width: 100%;
+}
+
 .marketplace-btn {
   display: flex;
   align-items: center;
@@ -173,6 +179,10 @@ const hasLinks = computed(() => {
   .marketplace-btn {
     padding: 1.2rem 1rem;
     font-size: 13px;
+  }
+
+  .marketplace-buttons.product__marketplace-buttons {
+    width: 25.2rem;
   }
 
   .wb-icon,

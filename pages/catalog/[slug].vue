@@ -96,7 +96,7 @@
 
 
               <MarketplaceLinksButtons
-                  class="pt-2"
+                  class="product__marketplace-buttons pt-2"
                   v-if="checkLinkMarketplace(product.marketplace_links)"
                   :marketplace-links="product.marketplace_links"
               />
