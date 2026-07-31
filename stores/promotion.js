@@ -147,16 +147,22 @@ export const usePromotionStore = defineStore('promotionStore', () => {
     // Есть ли применённые акции
     const hasPromotion = computed(() => appliedPromotions.value.length > 0);
 
-    // Разрешены ли промокоды — только если ВСЕ применённые акции их разрешают
-    // (агрегированный вердикт, зеркалит серверную валидацию).
+    // Промокод можно использовать, только когда по КАЖДОЙ применённой акции
+    // выбран вариант «Промокод / скидка». Сам флаг allow_promo_codes лишь даёт
+    // пользователю право такого выбора; выбранный подарок и промокод не
+    // суммируются.
     const allowPromoCodes = computed(() => {
         if (appliedPromotions.value.length === 0) return true;
-        return appliedPromotions.value.every((p) => !!p.allow_promo_codes);
+        return appliedPromotions.value.every((p) =>
+            !!p.allow_promo_codes && useDiscountInsteadFor(p.id)
+        );
     });
 
-    // Акции, которые запрещают промокоды (для пояснения в UI промокода)
+    // Акции, которые сейчас блокируют промокод: флаг выключен либо выбран подарок.
     const promoBlockingPromotions = computed(() =>
-        appliedPromotions.value.filter((p) => !p.allow_promo_codes)
+        appliedPromotions.value.filter((p) =>
+            !p.allow_promo_codes || !useDiscountInsteadFor(p.id)
+        )
     );
 
     // Полностью ли заполнен выбор по ВСЕМ применённым акциям (готово к отправке)

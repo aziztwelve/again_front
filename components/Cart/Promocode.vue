@@ -1,10 +1,8 @@
 <template>
-  <!-- Блокировка промокода: хотя бы одна применённая акция запрещает промокоды.
-       Промокод разрешён только если ВСЕ применённые акции его допускают
-       (агрегированный вердикт, зеркалит серверную валидацию). -->
+  <!-- Промокод доступен только при выборе «Промокод / скидка» по всем акциям. -->
   <div v-if="promotionStore.hasPromotion && !promotionStore.allowPromoCodes" class="cart__promo">
     <div class="cart__promo-blocked">
-      Промокоды и скидки недоступны — {{ blockingPromotionsText }}
+      {{ blockingMessage }}
     </div>
   </div>
 
@@ -79,6 +77,27 @@ const blockingPromotionsText = computed(() => {
   if (names.length === 1) return `действует акция ${names[0]}`;
   return `действуют акции ${names.join(', ')}`;
 });
+
+const blockingMessage = computed(() => {
+  const hasGiftOnlyPromotion = promotionStore.promoBlockingPromotions
+      .some((promotion) => !promotion.allow_promo_codes);
+
+  if (hasGiftOnlyPromotion) {
+    return `Промокоды и скидки недоступны — ${blockingPromotionsText.value}`;
+  }
+
+  return 'Выбран подарок. Чтобы использовать промокод или скидку, выберите «Промокод / скидка» в акции.';
+});
+
+// Если пользователь переключился с промокода на подарок, убираем уже
+// применённый промокод и пересчитываем итог — иначе визуально и в payload
+// оставалась бы скидка, несовместимая с выбранным подарком.
+watch(() => promotionStore.allowPromoCodes, (isAllowed) => {
+  if (!isAllowed && cart.promoCode) {
+    cart.removePromoFromCart();
+    promoCodeInput.value = '';
+  }
+}, { immediate: true });
 
 const checkAndApplyPromoCode = async () => {
 
