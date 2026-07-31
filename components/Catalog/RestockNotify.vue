@@ -111,7 +111,24 @@ const isLoading = ref(false);
 const selectedColorIds = ref<number[]>([]);
 const colorError = ref('');
 
-const availableColors = computed<Color[]>(() => product.value?.colors ?? []);
+// В подписке показываем только цвета, по которым сейчас нет доступных
+// вариантов. Цвета с остатками не должны попадать в заявку на уведомление.
+const availableColors = computed<Color[]>(() => {
+  const colors = product.value?.colors ?? [];
+  const variants = product.value?.available_variants ?? [];
+
+  // У простого товара или полностью распроданного товара вариантов может не
+  // быть в публичном ответе — тогда подписка остаётся доступна по всем цветам.
+  if (!variants.length) return colors;
+
+  const inStockColorIds = new Set(
+      variants
+          .filter(variant => variant.in_stock !== false && Number(variant.quantity ?? 0) > 0)
+          .map(variant => Number(variant.color_id))
+  );
+
+  return colors.filter(color => !inStockColorIds.has(Number(color.id)));
+});
 
 watch([availableColors, variation, color], ([colors, currentVariation, currentColor]) => {
   if (!colors.length) {
