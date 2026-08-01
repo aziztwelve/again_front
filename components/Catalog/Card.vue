@@ -135,12 +135,6 @@
       </div>
     </div>
     <div class="cart_btns">
-      <MarketplaceLinksButtons
-          class="mb-2"
-          v-if="checkLinkMarketplace(product.marketplace_links)"
-          :marketplace-links="product.marketplace_links"
-      />
-
       <button
           v-if="shouldNotifyRestock"
           type="button"
@@ -164,6 +158,12 @@
               fill="#3F3F3F"/>
         </svg>
       </NuxtLink>
+
+      <MarketplaceLinksButtons
+          v-if="checkLinkMarketplace(product.marketplace_links)"
+          class="mt-2"
+          :marketplace-links="product.marketplace_links"
+      />
     </div>
   </article>
 </template>
