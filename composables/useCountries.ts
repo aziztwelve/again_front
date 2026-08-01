@@ -1,45 +1,16 @@
 import type { Countries } from "~/types/countries";
 
-// Простое глобальное хранилище
-let countriesCache: Countries | null = null;
-let loadingPromise: Promise<Countries> | null = null;
+/**
+ * Список стран нужен и на SSR, и при гидратации форм. useAsyncData сохраняет
+ * ответ в payload Nuxt, поэтому браузер не создаёт второй асинхронный setup
+ * формы при обновлении страницы.
+ */
+export const useCountries = () => useAsyncData<Countries>('countries', async () => {
+    const { data, error } = await useApi<Countries>('/countries');
 
-export const useCountries = async () => {
-    // Если данные уже есть в кэше, возвращаем их
-    if (countriesCache) {
-        return {
-            data: ref(countriesCache),
-            isLoading: ref(false)
-        };
+    if (error.value || !data.value) {
+        throw error.value ?? new Error('Failed to load countries');
     }
 
-    // Если уже идёт загрузка, ждём её завершения
-    if (loadingPromise) {
-        const result = await loadingPromise;
-        return {
-            data: ref(result),
-            isLoading: ref(false)
-        };
-    }
-
-    // Первая загрузка - создаём промис
-    loadingPromise = (async () => {
-        const { data } = await useApi<Countries>('/countries');
-
-        if (data.value) {
-            countriesCache = data.value;
-            loadingPromise = null; // Сбрасываем промис после загрузки
-            return data.value;
-        }
-
-        loadingPromise = null;
-        throw new Error('Failed to load countries');
-    })();
-
-    const result = await loadingPromise;
-
-    return {
-        data: ref(result),
-        isLoading: ref(false)
-    };
-};
+    return data.value;
+});
