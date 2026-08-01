@@ -161,7 +161,7 @@
 
       <MarketplaceLinksButtons
           v-if="checkLinkMarketplace(product.marketplace_links)"
-          class="mt-2"
+          class="catalog-item__marketplace-links"
           :marketplace-links="product.marketplace_links"
       />
     </div>
@@ -404,6 +404,10 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .cart_btns {
+  margin-top: 10px;
+}
+
+.catalog-item__marketplace-links {
   margin-top: 10px;
 }
 
