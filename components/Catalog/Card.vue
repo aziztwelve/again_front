@@ -234,16 +234,13 @@ const displayedImagesWithMain = computed(() => {
 });
 
 const to = computed(() => {
-  return {
-    name: 'catalog-slug',
-    params: {
-      slug: props.product.slug || props.product.id
-    },
-    // Один и тот же товар открывается в особом режиме только при переходе
-    // из «Скоро в продаже». Прямая ссылка и обычный каталог остаются
-    // режимом покупки доступных цветов.
-    query: props.isComingSoon ? {availability: 'coming-soon'} : undefined,
-  }
+  const slug = props.product.slug || props.product.id;
+
+  // Nuxt не сериализует query из объекта именованного маршрута в SSR-карточке.
+  // Явная строка гарантирует контекстный режим как при SSR, так и в браузере.
+  return props.isComingSoon
+      ? `/catalog/${slug}?availability=coming-soon`
+      : `/catalog/${slug}`;
 });
 
 const isFavourite = computed(() => {
