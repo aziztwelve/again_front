@@ -155,8 +155,20 @@
   const selectedSize: Ref = ref(null);
   const isComingSoonView = computed(() => route.query.availability === 'coming-soon');
 
-  // В режиме «Скоро в продаже» показываем только те цвета, у которых нет
-  // ни одного доступного размера. В обычной карточке набор цветов полный.
+  // Разделяем один товар на два режима: в обычной карточке доступны только
+  // цвета с остатком, а из «Скоро в продаже» — только полностью отсутствующие
+  // цвета, для которых можно оставить заявку.
+  const inStockColorIds = computed(() => {
+    const variants = product.value?.available_variants ?? [];
+
+    return new Set(
+        variants
+            .filter(variant => variant.in_stock !== false && Number(variant.quantity ?? 0) > 0)
+            .map(variant => Number(variant.color_id))
+            .filter(colorId => Number.isFinite(colorId) && colorId > 0)
+    );
+  });
+
   const unavailableColorIds = computed(() => {
     const variants = product.value?.available_variants ?? [];
     const colorIds = new Set(
@@ -178,14 +190,14 @@
     const colors = product.value?.colors ?? [];
     return isComingSoonView.value
         ? colors.filter(color => unavailableColorIds.value.has(Number(color.id)))
-        : colors;
+        : colors.filter(color => inStockColorIds.value.has(Number(color.id)));
   });
 
   const displayedVariations = computed(() => {
     const variants = product.value?.available_variants ?? [];
     return isComingSoonView.value
         ? variants.filter(variant => unavailableColorIds.value.has(Number(variant.color_id)))
-        : variants;
+        : variants.filter(variant => inStockColorIds.value.has(Number(variant.color_id)));
   });
 
   // Товар может быть в наличии в целом, но не в выбранном цвете. В этом
