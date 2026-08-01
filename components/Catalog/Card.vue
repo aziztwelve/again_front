@@ -238,7 +238,11 @@ const to = computed(() => {
     name: 'catalog-slug',
     params: {
       slug: props.product.slug || props.product.id
-    }
+    },
+    // Один и тот же товар открывается в особом режиме только при переходе
+    // из «Скоро в продаже». Прямая ссылка и обычный каталог остаются
+    // режимом покупки доступных цветов.
+    query: props.isComingSoon ? {availability: 'coming-soon'} : undefined,
   }
 });
 

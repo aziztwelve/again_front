@@ -24,6 +24,7 @@
                 :rating="product.avg_rating"
             />
             <h1 class="product__title">{{ product.name }}</h1>
+            <div v-if="isComingSoonView" class="product__stock-status">Нет в наличии</div>
 
 
             <ProductPrice
@@ -57,8 +58,8 @@
             <ProductVariations
                 v-if="product.available_variants?.length || product.colors?.length"
                 :product="product"
-                :variations="product.available_variants"
-                :colors="product.colors"
+                :variations="displayedVariations"
+                :colors="displayedColors"
                 @get-color="getColor"
                 @get-size="getSize"
             />
@@ -97,7 +98,7 @@
 
               <MarketplaceLinksButtons
                   class="product__marketplace-buttons pt-2"
-                  v-if="checkLinkMarketplace(product.marketplace_links)"
+                  v-if="!isComingSoonView && checkLinkMarketplace(product.marketplace_links)"
                   :marketplace-links="product.marketplace_links"
               />
 
@@ -152,10 +153,45 @@
 
   const selectedColor: Ref = ref(null);
   const selectedSize: Ref = ref(null);
+  const isComingSoonView = computed(() => route.query.availability === 'coming-soon');
+
+  // В режиме «Скоро в продаже» показываем только те цвета, у которых нет
+  // ни одного доступного размера. В обычной карточке набор цветов полный.
+  const unavailableColorIds = computed(() => {
+    const variants = product.value?.available_variants ?? [];
+    const colorIds = new Set(
+        variants
+            .map(variant => Number(variant.color_id))
+            .filter(colorId => Number.isFinite(colorId) && colorId > 0)
+    );
+
+    return new Set(
+        [...colorIds].filter(colorId => !variants.some(variant =>
+            Number(variant.color_id) === colorId
+            && variant.in_stock !== false
+            && Number(variant.quantity ?? 0) > 0
+        ))
+    );
+  });
+
+  const displayedColors = computed(() => {
+    const colors = product.value?.colors ?? [];
+    return isComingSoonView.value
+        ? colors.filter(color => unavailableColorIds.value.has(Number(color.id)))
+        : colors;
+  });
+
+  const displayedVariations = computed(() => {
+    const variants = product.value?.available_variants ?? [];
+    return isComingSoonView.value
+        ? variants.filter(variant => unavailableColorIds.value.has(Number(variant.color_id)))
+        : variants;
+  });
 
   // Товар может быть в наличии в целом, но не в выбранном цвете. В этом
   // случае нельзя добавить вариант в корзину — предлагаем подписку на остатки.
   const canPurchaseSelectedOption = computed(() => {
+    if (isComingSoonView.value) return false;
     if (product.value?.name === GIFT_CERTIFICATE) return true;
     if (!product.value?.has_variants) return Number(product.value?.stock_quantity ?? 0) > 0;
     if (!selectedColor.value) return false;
@@ -209,6 +245,12 @@
   <style scoped lang="scss">
   .product__stock--not {
     margin-top: 1.5rem;
+  }
+
+  .product__stock-status {
+    margin-top: .8rem;
+    color: var(--fg-red);
+    font-size: 1.4rem;
   }
 
   .cart_marketplace_links__btn {
