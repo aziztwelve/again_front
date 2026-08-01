@@ -11,16 +11,9 @@
            :key="item.href"
            :href="item.href"
            class="certificates__item item--cover"
-           :target="item.type === 'pdf' ? '_blank' : undefined"
-           :rel="item.type === 'pdf' ? 'noopener' : undefined"
-           :data-fancybox="item.type === 'image' ? 'gallery' : undefined"
+           data-fancybox="gallery"
         >
-          <img v-if="item.type === 'image'" :src="item.href" :alt="item.title">
-          <div v-else class="certificates__pdf">
-            <span class="certificates__pdf-type">PDF</span>
-            <span class="certificates__pdf-title">{{ item.title }}</span>
-            <span class="certificates__pdf-action">Открыть сертификат</span>
-          </div>
+          <img :src="item.href" :alt="item.title">
         </a>
       </div>
     </div>
@@ -38,18 +31,19 @@ definePageMeta( {
 const certificates = [
   {
     title: 'Сертификат соответствия № 05916',
-    href: '/documents/certificates/scan-ss-05916.pdf',
-    type: 'pdf',
+    href: '/img/certificates.again/scan-ss-05916-1.jpg',
+  },
+  {
+    title: 'Сертификат соответствия № 05916 — оборотная сторона',
+    href: '/img/certificates.again/scan-ss-05916-2.jpg',
   },
   {
     title: 'Сертификат BY.70.06.01.001.R.002680.11.24',
-    href: '/documents/certificates/by-70-06-01-001-r-002680-11-24.pdf',
-    type: 'pdf',
+    href: '/img/certificates.again/by-70-06-01-001-r-002680-11-24.jpg',
   },
   {
     title: 'Декларация соответствия ТР ЕАЭС № 423006',
-    href: '/documents/certificates/423006-maket-ds-tr-eaes.pdf',
-    type: 'pdf',
+    href: '/img/certificates.again/423006-maket-ds-tr-eaes.jpg',
   },
   {
     title: 'Сертификат AGAIN',
@@ -89,46 +83,6 @@ onMounted( () => {
   @media (max-width: $mobile) {
     min-height: 15rem;
   }
-}
-
-.certificates__pdf {
-  display: flex;
-  min-height: 20rem;
-  padding: 2rem;
-  flex-direction: column;
-  justify-content: space-between;
-  background: #f4f2ef;
-  color: #292725;
-  transition: background-color .2s ease;
-
-  &:hover {
-    background: #e8e5e1;
-  }
-
-  @media (max-width: $mobile) {
-    min-height: 15rem;
-  }
-}
-
-.certificates__pdf-type {
-  align-self: flex-start;
-  padding: .35rem .6rem;
-  background: #292725;
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-}
-
-.certificates__pdf-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.certificates__pdf-action {
-  font-size: 1.4rem;
-  text-decoration: underline;
 }
 
 :global(.fancybox__container.is-ready) {
