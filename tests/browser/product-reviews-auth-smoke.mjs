@@ -4,8 +4,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import WebSocket from 'ws';
 
 const baseUrl = process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000';
-const apiBaseUrl = process.env.SMOKE_API_BASE_URL || 'https://sub.againdev.ru';
-const adminUrl = process.env.SMOKE_ADMIN_URL || 'https://sub.againdev.ru/admin/products/reviews';
+const apiBaseUrl = process.env.SMOKE_API_BASE_URL || 'https://againdev3.ru';
+const adminUrl = process.env.SMOKE_ADMIN_URL || 'https://againdev3.ru/admin/products/reviews';
 const productPath = '/catalog/menstrualnye-trusy-sexy-again-1';
 const tokens = JSON.parse(await readFile(process.env.REVIEW_AUTH_TOKENS || '/tmp/product-reviews-auth.json', 'utf8'));
 const browser = spawn(process.env.CHROMIUM_PATH || 'chromium', [
@@ -91,7 +91,7 @@ try {
   assert(secondHeaders.headers.get('cache-control')?.includes('private'), 'Client 2 SSR is not private');
   assert(secondHeaders.headers.get('vary')?.includes('Cookie'), 'Client 2 SSR does not vary by Cookie');
 
-  await setToken(client, 'access_token', tokens.admin, 'https://sub.againdev.ru');
+  await setToken(client, 'access_token', tokens.admin, 'https://againdev3.ru');
   await client.send('Page.navigate', { url: adminUrl });
   await waitFor(client, `document.body?.innerText.includes('Отзывы')`);
   await waitFor(client, `document.querySelector('table') || document.body.innerText.includes('Все отзывы')`);
