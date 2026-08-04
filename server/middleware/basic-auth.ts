@@ -1,7 +1,7 @@
 export default defineEventHandler((event) => {
     const host = getRequestHeader(event, "host") || "";
     const hostname = host.split(":")[0];
-    const isDevDomain = hostname === "sub.againdev.ru";
+    const isDevDomain = hostname === "againdev3.ru";
     if (!isDevDomain) return;
 
     const auth = getRequestHeader(event, "authorization") || "";
