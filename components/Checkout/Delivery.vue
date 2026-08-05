@@ -555,6 +555,29 @@ watch(selectedPvz, (point) => {
   }
 });
 
+// Если способ доставки был выбран раньше телефона, повторяем расчёт сразу после
+// ввода номера. До этого fetchYandexOffers намеренно не делает запрос, чтобы не
+// отправлять в Яндекс неполные данные получателя.
+watch(() => props.recipient?.phone, (phone, previousPhone) => {
+  if (!phone || phone === previousPhone || !isYandexDelivery.value) return;
+
+  if (isYandexPickup.value && selectedPvz.value) {
+    void fetchYandexOffers({
+      deliveryType: 'pickup',
+      pvzId: selectedPvz.value.pvzApiId ?? selectedPvz.value.id,
+      pvzCoords: selectedPvz.value.coordinates,
+    });
+    return;
+  }
+
+  if (isYandexCourier.value && courierDestination.value) {
+    void fetchYandexOffers({
+      deliveryType: 'courier',
+      destination: courierDestination.value,
+    });
+  }
+});
+
 // ─── Утилиты форматирования ───────────────────────────────────────────────────
 const formatDeliveryDate = (date: string): string => {
   if (!date) return '';
