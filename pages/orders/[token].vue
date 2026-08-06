@@ -335,6 +335,10 @@ const startCloudPayments = async () => {
 
     await loadCloudPaymentsWidget();
     const widget = new (window as any).cp.CloudPayments() as CloudPaymentsWidget;
+    // useFetch возвращает реактивный Proxy. Виджет сохраняет параметры в
+    // history.pushState(), который умеет клонировать только обычные данные.
+    // Превращаем ответ API в plain JSON, иначе браузер выбрасывает DataCloneError.
+    const paymentParams = JSON.parse(JSON.stringify(intent.value.payment)) as Record<string, unknown>;
     widget.oncomplete = async (result) => {
       if (result?.status === 'success') {
         showToast('Платёж принят. Обновляем статус заказа…');
@@ -342,7 +346,7 @@ const startCloudPayments = async () => {
         await navigateTo(`/orders/${token}`, { replace: true });
       }
     };
-    await widget.start(intent.value.payment);
+    await widget.start(paymentParams);
   } catch (error: any) {
     showToast(error?.message || 'Не удалось открыть форму оплаты. Попробуйте ещё раз.');
   } finally {
