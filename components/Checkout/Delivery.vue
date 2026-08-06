@@ -438,7 +438,7 @@ const fetchYandexOffers = async (params: {
     if (params.pvzCoords)    body.pvz_coords  = params.pvzCoords;
     if (params.destination)  body.destination = params.destination;
 
-    const { data, error } = await useApi<{ success: boolean; offers: YandexOffer[] }>(
+    const { data, error } = await useApi<{ success: boolean; offers: YandexOffer[]; message?: string }>(
         '/public/delivery/yandex/calculate',
         { method: 'POST', body },
     );
@@ -449,7 +449,9 @@ const fetchYandexOffers = async (params: {
         yandexError.value = 'Для указанного адреса нет доступных тарифов.';
       }
     } else {
-      yandexError.value = 'Не удалось рассчитать стоимость доставки.';
+      yandexError.value = (error.value as any)?.data?.message
+        ?? data.value?.message
+        ?? 'Не удалось рассчитать стоимость доставки.';
     }
   } catch (e) {
     console.error('Yandex calculate error:', e);
