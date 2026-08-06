@@ -42,6 +42,7 @@ export interface PublicOrder {
     status: PublicOrderStatusInfo;
     payment_status: PublicOrderStatusInfo;
     payment_method: string | null;
+    cloudpayments_available: boolean;
     total_amount: number;
     /** items_discount + promo_discount (на бэке = order.discount_amount). */
     discount_amount: number;

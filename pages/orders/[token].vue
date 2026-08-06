@@ -34,12 +34,13 @@
                     class="order-view__state order-view__state--minor"
                 >{{ paymentStatusLabel }}</span>
                 <button
-                    v-if="canBePaid"
+                    v-if="canBePaid && isCloudPaymentsOrder"
                     type="button"
                     class="order-view__pay-button"
-                    @click="showPaymentStub"
+                    :disabled="isPaymentStarting"
+                    @click="startCloudPayments"
                 >
-                  Перейти к оплате
+                  {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить картой' }}
                 </button>
                 <button
                     type="button"
@@ -223,6 +224,7 @@ const order = computed<PublicOrder | null>(() => data.value?.order ?? null);
 const cartStore = useCartStore();
 const { show: showToast } = useToast();
 const isReordering = ref(false);
+const isPaymentStarting = ref(false);
 const messengerLinks = ref<MessengerLinks['links']>({});
 
 // Обновляем токен текущей сессии сразу после оформления заказа. Поэтому
@@ -245,6 +247,7 @@ useHead(() => ({
 const orderStatusLabel = computed(() => order.value?.status?.label || null);
 const paymentStatusLabel = computed(() => order.value?.payment_status?.label || null);
 const canBePaid = computed(() => ['pending', 'failed'].includes(order.value?.payment_status?.value ?? ''));
+const isCloudPaymentsOrder = computed(() => order.value?.cloudpayments_available === true);
 
 const paymentMethodLabel = computed(() => getPaymentMethodLabel(order.value?.payment_method));
 
@@ -290,8 +293,61 @@ const yandexStatusLabel = (status: string) => ({
 const mapUrl = (addr: string) =>
     `https://yandex.ru/maps/?text=${encodeURIComponent(addr)}`;
 
-const showPaymentStub = () => {
-  showToast('Онлайн-оплата скоро будет доступна.');
+type CloudPaymentsWidget = {
+  start: (params: Record<string, unknown>) => Promise<unknown>;
+  oncomplete?: (result: { status?: string }) => void;
+};
+
+const loadCloudPaymentsWidget = (): Promise<void> => new Promise((resolve, reject) => {
+  if ((window as any).cp?.CloudPayments) {
+    resolve();
+    return;
+  }
+
+  const existing = document.querySelector<HTMLScriptElement>('script[data-cloudpayments-widget]');
+  if (existing) {
+    existing.addEventListener('load', () => resolve(), { once: true });
+    existing.addEventListener('error', () => reject(new Error('Не удалось загрузить форму оплаты.')), { once: true });
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://widget.cloudpayments.ru/bundles/cloudpayments.js';
+  script.async = true;
+  script.dataset.cloudpaymentsWidget = 'true';
+  script.onload = () => resolve();
+  script.onerror = () => reject(new Error('Не удалось загрузить форму оплаты.'));
+  document.head.appendChild(script);
+});
+
+const startCloudPayments = async () => {
+  if (!order.value || isPaymentStarting.value) return;
+  isPaymentStarting.value = true;
+
+  try {
+    const { data: intent, error } = await useApi<{ success: boolean; message?: string; payment?: Record<string, unknown> }>(
+        `/public/orders/${token}/cloudpayments/intent`,
+        { method: 'POST', body: {} },
+    );
+    if (error.value || !intent.value?.success || !intent.value.payment) {
+      throw new Error(intent.value?.message || 'Не удалось подготовить оплату.');
+    }
+
+    await loadCloudPaymentsWidget();
+    const widget = new (window as any).cp.CloudPayments() as CloudPaymentsWidget;
+    widget.oncomplete = async (result) => {
+      if (result?.status === 'success') {
+        showToast('Платёж принят. Обновляем статус заказа…');
+        await refreshNuxtData();
+        await navigateTo(`/orders/${token}`, { replace: true });
+      }
+    };
+    await widget.start(intent.value.payment);
+  } catch (error: any) {
+    showToast(error?.message || 'Не удалось открыть форму оплаты. Попробуйте ещё раз.');
+  } finally {
+    isPaymentStarting.value = false;
+  }
 };
 
 const repeatOrder = async () => {
