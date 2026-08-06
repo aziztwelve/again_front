@@ -9,20 +9,21 @@
       </button>
       <div class="select__list">
         <div class="select__search">
-          <input type="text" placeholder="Поиск..." @input="search" v-model="searchInput">
+          <input type="text" placeholder="Поиск..." v-model="searchInput">
         </div>
 
         <button
             class="select__item"
-            v-for="( item, key ) in items"
-            :key="key"
+            v-for="item in displayedItems"
+            :key="item.id"
             ref="selectItems"
             @click="selected( item.id, item[optionLabel], item.code )"
         >
           {{ item.name }}
         </button>
 
-        <div class="select__nfound" v-if="notFound">Ничего не найдено</div>
+        <div class="select__nfound" v-if="searchHint">Введите минимум {{ minSearchLength }} символа для поиска</div>
+        <div class="select__nfound" v-else-if="notFound">Ничего не найдено</div>
       </div>
 
       <input type="hidden" v-model="model">
@@ -48,8 +49,6 @@ const props = withDefaults(defineProps<{
   optionLabel: 'name'
 });
 
-const items = ref(props.list);
-
 const select = ref<HTMLElement | null>(null);
 
 const selectItems = ref(false);
@@ -57,7 +56,29 @@ const placeholder = ref(props.placeholder);
 const isActive = ref(false);
 const searchInput = ref('');
 const model = defineModel<string | number>();
-const notFound = ref(false);
+const MAX_VISIBLE_ITEMS = 50;
+const LARGE_LIST_THRESHOLD = 300;
+
+const minSearchLength = computed(() =>
+  props.list.length > LARGE_LIST_THRESHOLD ? 2 : 0,
+);
+const normalizedSearch = computed(() => searchInput.value.trim().toLowerCase());
+const searchHint = computed(() =>
+  minSearchLength.value > 0 && normalizedSearch.value.length < minSearchLength.value,
+);
+const displayedItems = computed(() => {
+  if (searchHint.value) return [];
+
+  const query = normalizedSearch.value;
+  const filtered = query
+    ? props.list.filter(item => String(item.name ?? '').toLowerCase().includes(query))
+    : props.list;
+
+  return filtered.slice(0, MAX_VISIBLE_ITEMS);
+});
+const notFound = computed(() =>
+  !searchHint.value && normalizedSearch.value.length > 0 && displayedItems.value.length === 0,
+);
 
 const toggle = () => {
   isActive.value = !isActive.value;
@@ -120,11 +141,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('touchstart', onClickOutside, true);
 });
 
-const search = () => {
-  items.value = props.list.filter(item =>
-      item.name.toLowerCase().includes(searchInput.value.toLowerCase())
-  );
-}
 </script>
 
 <style scoped lang="scss">
@@ -218,6 +234,11 @@ const search = () => {
       border-radius: 2rem;
       padding: 0 1.5rem;
     }
+  }
+
+  &__nfound {
+    padding: 1.5rem 0;
+    color: var(--fg-input-border);
   }
 }
 </style>
