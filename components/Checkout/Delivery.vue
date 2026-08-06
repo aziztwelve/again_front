@@ -368,6 +368,13 @@ const yandexError       = ref('');
 const selectedYandexOffer = ref<YandexOffer | null>(null);
 const courierDestination = ref<{ address: string; coordinates: [number, number] } | null>(null);
 
+// Platform API принимает для доставки по России только полный российский номер.
+// Не отправляем промежуточное значение маски (например, "+7 (") при наборе.
+const hasValidYandexRecipientPhone = (phone?: string): boolean => {
+  const digits = (phone ?? '').replace(/\D/g, '');
+  return /^7\d{10}$/.test(digits);
+};
+
 // Сброс при смене метода
 watch(selectedDeliveryMethod, () => {
   yandexOffer.value       = null;
@@ -392,6 +399,11 @@ const fetchYandexOffers = async (params: {
   if (!props.recipient?.phone) {
     yandexOffers.value = [];
     yandexError.value = 'Укажите телефон получателя, чтобы рассчитать Яндекс.Доставку.';
+    return;
+  }
+  if (!hasValidYandexRecipientPhone(props.recipient.phone)) {
+    yandexOffers.value = [];
+    yandexError.value = 'Введите полный российский номер получателя в формате +7 (999) 123-45-67.';
     return;
   }
   yandexOffersLoading.value = true;
