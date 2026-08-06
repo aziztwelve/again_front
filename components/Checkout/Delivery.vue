@@ -159,7 +159,7 @@
               <div v-if="offer.delivery_date" class="checkout__yandex-offer-date">
                 {{ formatDeliveryDate(offer.delivery_date) }}
                 <span v-if="offer.delivery_interval">
-                  {{ offer.delivery_interval.from }}–{{ offer.delivery_interval.to }}
+                  {{ formatDeliveryInterval(offer.delivery_interval) }}
                 </span>
               </div>
             </div>
@@ -596,6 +596,17 @@ const formatDeliveryDate = (date: string): string => {
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return date;
   return parsed.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+};
+
+const formatDeliveryInterval = (interval: { from: string; to: string }): string => {
+  const formatTime = (date: string): string => {
+    const parsed = new Date(date);
+    return Number.isNaN(parsed.getTime())
+      ? date
+      : parsed.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  return `${formatTime(interval.from)}–${formatTime(interval.to)}`;
 };
 
 const formatPrice = (price: number): string => {
