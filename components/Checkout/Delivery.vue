@@ -507,6 +507,7 @@ const selectYandexOffer = (offer: YandexOffer) => {
     offer_id: offer.offer_id,
     price: offer.price,
     scheduled_time: offer.delivery_date,
+    delivery_interval: offer.delivery_interval,
     pvz: isYandexPickup.value && selectedPvz.value ? {
       id: selectedPvz.value.pvzApiId ?? selectedPvz.value.id,
       address: selectedPvz.value.address,
