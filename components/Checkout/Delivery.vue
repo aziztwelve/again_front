@@ -302,8 +302,13 @@ const { data: deliveryMethods } = await useApi<{
   meta: { total_methods: number };
 }>('/public/delivery/methods', { query: { active: 1 } });
 
-const deliveryMethodsList = computed<DeliveryMethod[]>(
-    () => deliveryMethods.value?.data ?? [],
+// В checkout доступны только два варианта Яндекс.Доставки. Остальные методы
+// остаются в справочнике и у старых заказов, но не предлагаются новым покупкам.
+const YANDEX_DELIVERY_CODES = ['yandex_courier', 'yandex_pickup'];
+const deliveryMethodsList = computed<DeliveryMethod[]>(() =>
+    (deliveryMethods.value?.data ?? []).filter((method) =>
+      YANDEX_DELIVERY_CODES.includes(method.delivery_type_code ?? method.code ?? ''),
+    ),
 );
 
 const selectedDeliveryMethod = computed<DeliveryMethod | null>(
@@ -343,10 +348,7 @@ const canCalculateYandex = computed(() =>
 );
 
 // Кнопка «Выбрать на карте / ПВЗ»
-const MAP_PICK_DELIVERY_CODES = ['cdek_pickup', 'russian_post_office', 'russian_post_on_demand'];
-const canPickOnMap = computed(() =>
-    MAP_PICK_DELIVERY_CODES.includes(currentCode.value) || isYandexPickup.value,
-);
+const canPickOnMap = computed(() => isYandexPickup.value);
 
 // ─── geo_id для фильтрации ПВЗ ────────────────────────────────────────────────
 const yandexGeoId       = ref<number | null>(null);
