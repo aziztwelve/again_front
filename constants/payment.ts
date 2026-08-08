@@ -13,8 +13,11 @@ export interface PaymentOption {
 }
 
 export const PAYMENT_OPTIONS: PaymentOption[] = [
-    { code: 'card_ru', title: 'Оплата картой РФ' },
-    { code: 'sberpay', title: 'SberPay, рассрочка, иностранная карта' },
+    { code: 'card_ru', title: 'Банковская карта' },
+    { code: 'cloudpayments_tpay', title: 'T-Pay' },
+    { code: 'cloudpayments_sbp', title: 'СБП' },
+    { code: 'cloudpayments_sberpay', title: 'SberPay' },
+    { code: 'cloudpayments_mirpay', title: 'Mir Pay' },
     { code: 'yandex_pay_split', title: 'Яндекс Пэй и Сплит' },
     { code: 'cash_on_delivery', title: 'Наличными или картой при получении' },
     { code: 'pickup_payment', title: 'Оплата в точке самовывоза' },
