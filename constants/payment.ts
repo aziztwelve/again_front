@@ -18,12 +18,6 @@ export const PAYMENT_OPTIONS: PaymentOption[] = [
     { code: 'cloudpayments_sbp', title: 'СБП' },
     { code: 'cloudpayments_sberpay', title: 'SberPay' },
     { code: 'cloudpayments_mirpay', title: 'Mir Pay' },
-    { code: 'yandex_pay_split', title: 'Яндекс Пэй и Сплит' },
-    { code: 'cash_on_delivery', title: 'Наличными или картой при получении' },
-    { code: 'pickup_payment', title: 'Оплата в точке самовывоза' },
-    { code: 'podeli', title: 'Подели' },
-    { code: 'robokassa_mokka', title: 'Robokassa X Мокка' },
-    { code: 'robokassa_yandex_split', title: 'Robokassa X Яндекс Сплит' },
 ];
 
 /**
