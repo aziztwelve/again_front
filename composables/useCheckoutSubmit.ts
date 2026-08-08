@@ -46,6 +46,17 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
 
     const isLoading = ref(false);
     const submitError = ref('');
+    // Сохраняем ключ до ухода со страницы. Если ответ сервера потеряется и
+    // покупатель попробует оформить заказ ещё раз, бэкенд вернёт тот же заказ.
+    const checkoutIdempotencyKey = ref<string | null>(null);
+
+    const getCheckoutIdempotencyKey = (): string => {
+        if (!checkoutIdempotencyKey.value) {
+            checkoutIdempotencyKey.value = crypto.randomUUID();
+        }
+
+        return checkoutIdempotencyKey.value;
+    };
 
     const scrollTo = async (selector: string) => {
         await nextTick();
@@ -309,7 +320,10 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         const body = buildPayload();
         const { data, error } = await useApi<{ success: boolean; order: { id: number; view_token: string } }>(
             '/public/orders',
-            { body },
+            {
+                body,
+                headers: { 'Idempotency-Key': getCheckoutIdempotencyKey() },
+            },
             '',
             'POST',
         );
