@@ -18,7 +18,7 @@
           class="checkout__btn btn _loader"
           @click="emit('clickToButton')"
           :class="{ '_loading': isLoading }"
-          :disabled="isDisabled"
+          :disabled="isDisabled || isLoading"
       >
         Подтвердить заказ
       </button>

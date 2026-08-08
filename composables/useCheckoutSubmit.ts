@@ -261,6 +261,14 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
      * куда вести юзера (как правило — это `/orders/{view_token}`).
      */
     const submit = async (): Promise<CheckoutResult> => {
+        // Блокируем повторный клик сразу, ещё до асинхронной валидации и
+        // refreshPrices(). Иначе два быстрых клика успевают параллельно
+        // отправить POST /public/orders и создать два одинаковых заказа.
+        if (isLoading.value) return { success: false };
+
+        isLoading.value = true;
+
+        try {
         submitError.value = '';
 
         // 1. Данные сертификата (если он в корзине)
@@ -298,7 +306,6 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         await cartStore.refreshPrices();
 
         // 7. POST на единый публичный endpoint /public/orders.
-        isLoading.value = true;
         const body = buildPayload();
         const { data, error } = await useApi<{ success: boolean; order: { id: number; view_token: string } }>(
             '/public/orders',
@@ -306,8 +313,6 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             '',
             'POST',
         );
-        isLoading.value = false;
-
         if (data.value?.success === true) {
             // setEmptyCart внутри уже чистит promotion + giftCardPayment + giftCardPurchase.
             cartStore.setEmptyCart();
@@ -335,6 +340,9 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         await showError(message);
         if (process.dev) console.error('Order error:', error.value ?? data.value);
         return { success: false, error: message };
+        } finally {
+            isLoading.value = false;
+        }
     };
 
     return {
