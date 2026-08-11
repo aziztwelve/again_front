@@ -39,8 +39,9 @@ const mapItem = (raw: any) => ({
     name: raw.name,
     slug: raw.slug,
     images: raw.images ?? [],
-    selected_variant: null,
-    selected_color: null,
+    main_image: raw.main_image ?? raw.images?.find((image: any) => image?.is_main) ?? raw.images?.[0] ?? null,
+    selected_variant: raw.selected_variant ?? null,
+    selected_color: raw.selected_color ?? null,
     item_key: uuidv4(),
 });
 
