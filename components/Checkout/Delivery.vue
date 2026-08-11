@@ -660,6 +660,11 @@ const formatPrice = (price: number): string => {
   flex: 0 1 36rem;
   min-width: 0;
   max-width: 100%;
+
+  @media (max-width: $mobile) {
+    flex: 0 0 auto;
+    width: 100%;
+  }
 }
 
 .checkout__delivery-map-btn {
