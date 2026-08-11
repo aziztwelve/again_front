@@ -68,6 +68,7 @@
 
       <FormDatepicker
           v-if="!isYandexDelivery"
+          class="checkout__delivery-date"
           name="delivery_date"
           placeholder="Желаемая дата доставки"
           v-model="deliveryDate"
@@ -631,6 +632,12 @@ const formatPrice = (price: number): string => {
 
   @media (max-width: $mobile) {
     grid-template-columns: 1fr;
+  }
+}
+
+.checkout__delivery-date {
+  @media (max-width: $mobile) {
+    margin-top: 1.5rem;
   }
 }
 
