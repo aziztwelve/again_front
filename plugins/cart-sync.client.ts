@@ -11,7 +11,7 @@
  */
 export default defineNuxtPlugin(() => {
     const cartStore = useCartStore();
-    const { mirrorCart } = useServerCart();
+    const { mirrorCart, clearServerCart } = useServerCart();
 
     // Первичная синхронизация после гидрации.
     onNuxtReady(() => {
@@ -26,7 +26,10 @@ export default defineNuxtPlugin(() => {
         () => {
             if (cartStore.cart.length) {
                 mirrorCart();
+                return;
             }
+
+            clearServerCart();
         },
         { deep: true, debounce: 800, maxWait: 4000 },
     );

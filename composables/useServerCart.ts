@@ -38,6 +38,14 @@ export function useServerCart() {
         }
     };
 
+    const clearServerCart = async (): Promise<void> => {
+        try {
+            await useApi('/cart', {}, '', 'DELETE');
+        } catch (e) {
+            if (process.dev) console.warn('[serverCart] clear failed', e);
+        }
+    };
+
     /**
      * Сохранить контакты и согласие гостя на рассылку (opt-in).
      * PATCH /cart/contact — делает гостевую корзину eligible для напоминаний.
@@ -84,7 +92,7 @@ export function useServerCart() {
         }
     };
 
-    return { mirrorCart, saveContact, fetchRecovery };
+    return { mirrorCart, clearServerCart, saveContact, fetchRecovery };
 }
 
 export default useServerCart;
