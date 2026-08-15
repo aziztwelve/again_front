@@ -124,7 +124,7 @@
             :class="{ '_selected': cdekCityCode === city.code }"
             @click="selectCdekCity(city)"
           >
-            {{ city.city }}, {{ city.region }}
+            {{ city.full_name }}
           </button>
         </div>
         <div v-if="isCdekPickup && cdekCityCode" class="checkout__cdek-pvz">
@@ -270,7 +270,7 @@ interface PvzPoint {
   operator_station_id?: string;
 }
 
-interface CdekCity { code: number; city: string; region?: string; country_code?: string }
+interface CdekCity { code: number; full_name: string; country_code?: string }
 interface CdekPvz { code: string; name?: string; type?: string; location?: { address?: string; address_full?: string; longitude?: number; latitude?: number } }
 interface CdekTariff { tariff_code: number; tariff_name: string; delivery_mode: number; price: number; currency: string; period: { min: number; max: number } }
 
