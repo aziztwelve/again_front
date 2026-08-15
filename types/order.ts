@@ -115,6 +115,7 @@ export interface CheckoutForm {
     /** Адрес выбранного ПВЗ. */
     pvz_address?: string | null;
     yandex_delivery_data?: Record<string, unknown> | null;
+    cdek_delivery_data?: Record<string, unknown> | null;
 }
 
 // Тело POST /public/orders.

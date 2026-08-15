@@ -194,6 +194,10 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             payload.delivery_data = form.yandex_delivery_data ?? undefined;
         }
 
+        if (form.cdek_delivery_data) {
+            payload.delivery_data = form.cdek_delivery_data;
+        }
+
         // Яндекс.Доставка (ПВЗ): передаём выбранный пункт выдачи.
         if (form.pvz_code) {
             payload.pvz_code = form.pvz_code;

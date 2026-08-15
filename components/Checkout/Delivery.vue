@@ -43,12 +43,12 @@
       <!-- Адрес: для ПВЗ подставляется автоматически, для курьера — обязателен -->
       <FormInput
           name="address"
-          :placeholder="isYandexPickup ? 'Адрес (заполняется при выборе ПВЗ)' : 'Адрес*'"
-          :readonly="isYandexPickup"
+          :placeholder="isPickupDelivery ? 'Адрес (заполняется при выборе ПВЗ)' : 'Адрес*'"
+          :readonly="isPickupDelivery"
           v-model="address"
       />
 
-      <div v-if="!isYandexPickup" class="checkout__delivery-extras">
+      <div v-if="!isPickupDelivery" class="checkout__delivery-extras">
         <FormInput
             name="entrance"
             placeholder="Подъезд"
@@ -88,7 +88,7 @@
                 @get-selected-value="onDeliveryMethodSelected"
             />
           </div>
-          <!-- Кнопка «Выбрать ПВЗ» — для СДЭК/ПочтаРФ и Яндекс.ПВЗ -->
+          <!-- Кнопка выбора ПВЗ Яндекс.Доставки -->
           <button
               v-if="canPickOnMap"
               type="button"
@@ -104,6 +104,57 @@
       </div>
 
       <!-- ======= ЯНДЕКС.ДОСТАВКА ======= -->
+
+      <!-- ======= СДЭК ======= -->
+      <div v-if="isCdekDelivery" class="checkout__cdek">
+        <div v-if="cdekCityLoading" class="checkout__yandex-loading">
+          <span class="checkout__yandex-loading-spinner"></span>
+          Ищем город в СДЭК...
+        </div>
+        <div v-else-if="cityName && !cdekCityCode" class="checkout__yandex-hint">
+          Выберите город из списка СДЭК, чтобы рассчитать доставку.
+        </div>
+        <div v-if="cdekCities.length" class="checkout__cdek-cities">
+          <div class="checkout__yandex-offers-title">Город СДЭК</div>
+          <button
+            v-for="city in cdekCities"
+            :key="city.code"
+            type="button"
+            class="checkout__cdek-city"
+            :class="{ '_selected': cdekCityCode === city.code }"
+            @click="selectCdekCity(city)"
+          >
+            {{ city.city }}, {{ city.region }}
+          </button>
+        </div>
+        <div v-if="isCdekPickup && cdekCityCode" class="checkout__cdek-pvz">
+          <label class="checkout__yandex-offers-title" for="cdek-pvz">Пункт выдачи СДЭК</label>
+          <select id="cdek-pvz" v-model="selectedCdekPvzCode" class="checkout__cdek-select" :disabled="cdekPvzLoading">
+            <option :value="null">{{ cdekPvzLoading ? 'Загружаем пункты...' : 'Выберите ПВЗ или постамат' }}</option>
+            <option v-for="point in cdekPvzPoints" :key="point.code" :value="point.code">
+              {{ point.name || point.code }}: {{ point.location?.address || point.location?.address_full }}
+            </option>
+          </select>
+        </div>
+        <div v-if="cdekLoading" class="checkout__yandex-loading">
+          <span class="checkout__yandex-loading-spinner"></span>
+          Рассчитываем тарифы СДЭК...
+        </div>
+        <div v-if="cdekError" class="checkout__yandex-error">{{ cdekError }}</div>
+        <div v-if="cdekTariffs.length" class="checkout__yandex-offers">
+          <div class="checkout__yandex-offers-title">Выберите тариф СДЭК</div>
+          <div class="checkout__yandex-offers-list">
+            <div v-for="tariff in cdekTariffs" :key="tariff.tariff_code" class="checkout__yandex-offer" :class="{ '_selected': selectedCdekTariff?.tariff_code === tariff.tariff_code }" @click="selectCdekTariff(tariff)">
+              <div class="checkout__yandex-offer-check"><span v-if="selectedCdekTariff?.tariff_code === tariff.tariff_code">✓</span></div>
+              <div class="checkout__yandex-offer-info">
+                <div class="checkout__yandex-offer-name">{{ tariff.tariff_name }}</div>
+                <div class="checkout__yandex-offer-date">{{ tariff.period.min }}-{{ tariff.period.max }} дн.</div>
+              </div>
+              <div class="checkout__yandex-offer-price">{{ formatPrice(tariff.price) }} ₽</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Подсказка для ПВЗ: нужно выбрать пункт -->
       <div v-if="isYandexPickup && !selectedPvz" class="checkout__yandex-hint">
@@ -219,6 +270,10 @@ interface PvzPoint {
   operator_station_id?: string;
 }
 
+interface CdekCity { code: number; city: string; region?: string; country_code?: string }
+interface CdekPvz { code: string; name?: string; type?: string; location?: { address?: string; address_full?: string; longitude?: number; latitude?: number } }
+interface CdekTariff { tariff_code: number; tariff_name: string; delivery_mode: number; price: number; currency: string; period: { min: number; max: number } }
+
 const props = defineProps<{
   recipient?: { first_name?: string; last_name?: string; phone?: string; email?: string };
 }>();
@@ -249,6 +304,7 @@ const yandexOffer = defineModel<{
   delivery_date?: string;
 } | null>('yandexOffer', { default: null });
 const yandexDeliveryData = defineModel<Record<string, unknown> | null>('yandexDeliveryData', { default: null });
+const cdekDeliveryData = defineModel<Record<string, unknown> | null>('cdekDeliveryData', { default: null });
 
 const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
@@ -303,12 +359,10 @@ const { data: deliveryMethods } = await useApi<{
   meta: { total_methods: number };
 }>('/public/delivery/methods', { query: { active: 1 } });
 
-// В checkout доступны только два варианта Яндекс.Доставки. Остальные методы
-// остаются в справочнике и у старых заказов, но не предлагаются новым покупкам.
-const YANDEX_DELIVERY_CODES = ['yandex_courier', 'yandex_pickup'];
+const CHECKOUT_DELIVERY_CODES = ['yandex_courier', 'yandex_pickup', 'cdek_courier', 'cdek_pickup', 'cdek_postamat'];
 const deliveryMethodsList = computed<DeliveryMethod[]>(() =>
     (deliveryMethods.value?.data ?? []).filter((method) =>
-      YANDEX_DELIVERY_CODES.includes(method.delivery_type_code ?? method.code ?? ''),
+      CHECKOUT_DELIVERY_CODES.includes(method.delivery_type_code ?? method.code ?? ''),
     ),
 );
 
@@ -342,6 +396,10 @@ watch(deliveryMethodsList, (list) => {
 const isYandexPickup  = computed(() => currentCode.value === 'yandex_pickup');
 const isYandexCourier = computed(() => currentCode.value === 'yandex_courier');
 const isYandexDelivery = computed(() => isYandexPickup.value || isYandexCourier.value);
+const isCdekPickup = computed(() => ['cdek_pickup', 'cdek_postamat'].includes(currentCode.value));
+const isCdekCourier = computed(() => currentCode.value === 'cdek_courier');
+const isCdekDelivery = computed(() => isCdekPickup.value || isCdekCourier.value);
+const isPickupDelivery = computed(() => isYandexPickup.value || isCdekPickup.value);
 
 // Для курьера нужен город + адрес
 const canCalculateYandex = computed(() =>
@@ -385,12 +443,111 @@ watch(selectedDeliveryMethod, () => {
   selectedYandexOffer.value = null;
   yandexOffers.value      = [];
   yandexError.value       = '';
+  cdekDeliveryData.value = null;
+  selectedCdekTariff.value = null;
+  cdekTariffs.value = [];
+  cdekError.value = '';
+  if (!isCdekPickup.value) selectedCdekPvzCode.value = null;
   if (!isYandexPickup.value) {
     selectedPvz.value = null;
     pvzCode.value     = null;
     pvzAddress.value  = null;
   }
 });
+
+// ─── СДЭК ─────────────────────────────────────────────────────────────────────
+const cdekCities = ref<CdekCity[]>([]);
+const cdekCityCode = ref<number | null>(null);
+const cdekCityLoading = ref(false);
+const cdekPvzPoints = ref<CdekPvz[]>([]);
+const cdekPvzLoading = ref(false);
+const selectedCdekPvzCode = ref<string | null>(null);
+const cdekTariffs = ref<CdekTariff[]>([]);
+const selectedCdekTariff = ref<CdekTariff | null>(null);
+const cdekLoading = ref(false);
+const cdekError = ref('');
+
+let cdekCityTimer: ReturnType<typeof setTimeout> | null = null;
+watch([isCdekDelivery, currentCode, cityName], ([enabled, _code, city]) => {
+  cdekCityCode.value = null;
+  cdekCities.value = [];
+  cdekPvzPoints.value = [];
+  selectedCdekPvzCode.value = null;
+  if (!enabled || !city) return;
+  if (cdekCityTimer) clearTimeout(cdekCityTimer);
+  cdekCityTimer = setTimeout(async () => {
+    cdekCityLoading.value = true;
+    try {
+      const { data, error } = await useApi<{ cities: CdekCity[] }>('/public/delivery/cdek/cities', { query: { query: city, country_code: countryCode.value || 'RU' } });
+      cdekCities.value = error.value ? [] : (data.value?.cities ?? []);
+      if (cdekCities.value.length === 1) selectCdekCity(cdekCities.value[0]);
+    } finally {
+      cdekCityLoading.value = false;
+    }
+  }, 350);
+});
+
+const selectCdekCity = async (city: CdekCity) => {
+  cdekCityCode.value = city.code;
+  cdekTariffs.value = [];
+  selectedCdekTariff.value = null;
+  cdekDeliveryData.value = null;
+  if (!isCdekPickup.value) return;
+  cdekPvzLoading.value = true;
+  try {
+    const pointType = currentCode.value === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ';
+    const { data, error } = await useApi<{ points: CdekPvz[] }>('/public/delivery/cdek/pvz', { query: { city_code: city.code, type: pointType } });
+    cdekPvzPoints.value = error.value ? [] : (data.value?.points ?? []);
+  } finally {
+    cdekPvzLoading.value = false;
+  }
+};
+
+const cdekItems = () => useCartStore().cart.map((item: any) => ({
+  name: item.name ?? 'Товар', weight: item.weight ?? 500, price: item.price ?? 0, quantity: item.quantity ?? 1,
+}));
+const fetchCdekTariffs = async () => {
+  if (!cdekCityCode.value || (isCdekPickup.value && !selectedCdekPvzCode.value) || (isCdekCourier.value && !address.value)) return;
+  cdekLoading.value = true;
+  cdekError.value = '';
+  cdekTariffs.value = [];
+  selectedCdekTariff.value = null;
+  cdekDeliveryData.value = null;
+  try {
+    const { data, error } = await useApi<{ success: boolean; tariffs: CdekTariff[]; message?: string }>('/public/delivery/cdek/calculate', {
+      method: 'POST', body: { delivery_type: isCdekPickup.value ? 'pickup' : 'courier', destination: { city_code: cdekCityCode.value, address: address.value }, pvz_code: selectedCdekPvzCode.value, items: cdekItems() },
+    });
+    if (!error.value && data.value?.success) cdekTariffs.value = data.value.tariffs ?? [];
+    else cdekError.value = (error.value as any)?.data?.message ?? data.value?.message ?? 'Не удалось рассчитать доставку СДЭК.';
+    if (!cdekTariffs.value.length && !cdekError.value) cdekError.value = 'Для указанного адреса нет доступных тарифов СДЭК.';
+  } finally {
+    cdekLoading.value = false;
+  }
+};
+
+watch(selectedCdekPvzCode, async (code) => {
+  if (!code) return;
+  const point = cdekPvzPoints.value.find((item) => item.code === code);
+  address.value = point?.location?.address ?? point?.location?.address_full ?? '';
+  pvzCode.value = code;
+  pvzAddress.value = address.value;
+  await fetchCdekTariffs();
+});
+let cdekCourierTimer: ReturnType<typeof setTimeout> | null = null;
+watch([isCdekCourier, cdekCityCode, address], () => {
+  if (!isCdekCourier.value || !cdekCityCode.value || !address.value) return;
+  if (cdekCourierTimer) clearTimeout(cdekCourierTimer);
+  cdekCourierTimer = setTimeout(fetchCdekTariffs, 700);
+});
+const selectCdekTariff = (tariff: CdekTariff) => {
+  selectedCdekTariff.value = tariff;
+  const point = cdekPvzPoints.value.find((item) => item.code === selectedCdekPvzCode.value);
+  cdekDeliveryData.value = {
+    provider: 'cdek', delivery_type: isCdekPickup.value ? 'pickup' : 'courier', ...tariff,
+    destination: { city_code: cdekCityCode.value, address: address.value },
+    pvz: point ? { code: point.code, type: point.type, address: point.location?.address ?? point.location?.address_full, coordinates: [point.location?.longitude, point.location?.latitude] } : null,
+  };
+};
 
 /** Запрашивает тарифы у бэка. */
 const fetchYandexOffers = async (params: {
@@ -707,6 +864,51 @@ const formatPrice = (price: number): string => {
 
 .checkout__delivery-comment {
   margin-top: 3.3rem;
+}
+
+.checkout__cdek {
+  margin-top: 1.5rem;
+}
+
+.checkout__cdek-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.checkout__cdek-cities .checkout__yandex-offers-title {
+  flex-basis: 100%;
+  margin-bottom: 0;
+}
+
+.checkout__cdek-city {
+  border: 1px solid #d5d5d5;
+  border-radius: 0.6rem;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  cursor: pointer;
+  font-size: var(--fz-small);
+
+  &._selected {
+    border-color: var(--color-primary, #000);
+    background: #f7f7f7;
+  }
+}
+
+.checkout__cdek-pvz {
+  margin-top: 1.5rem;
+}
+
+.checkout__cdek-select {
+  display: block;
+  width: 100%;
+  min-height: 4.8rem;
+  padding: 0 1.2rem;
+  border: 1px solid #d5d5d5;
+  border-radius: 0.6rem;
+  background: #fff;
+  font: inherit;
 }
 
 // ─── Яндекс: подсказки ───────────────────────────────────────────────────────
