@@ -128,13 +128,8 @@
           </button>
         </div>
         <div v-if="isCdekPickup && cdekCityCode" class="checkout__cdek-pvz">
-          <label class="checkout__yandex-offers-title" for="cdek-pvz">Пункт выдачи СДЭК</label>
-          <select id="cdek-pvz" v-model="selectedCdekPvzCode" class="checkout__cdek-select" :disabled="cdekPvzLoading">
-            <option :value="null">{{ cdekPvzLoading ? 'Загружаем пункты...' : 'Выберите ПВЗ или постамат' }}</option>
-            <option v-for="point in cdekPvzPoints" :key="point.code" :value="point.code">
-              {{ point.name || point.code }}: {{ point.location?.address || point.location?.address_full }}
-            </option>
-          </select>
+          <div class="checkout__yandex-offers-title">Пункт выдачи СДЭК</div>
+          <button type="button" class="checkout__cdek-select" :disabled="cdekPvzLoading" @click="showCdekPvzModal = true">{{ selectedCdekPvzCode ? 'Изменить пункт выдачи' : (cdekPvzLoading ? 'Загружаем пункты...' : 'Выбрать пункт выдачи') }}</button>
         </div>
         <div v-if="cdekLoading" class="checkout__yandex-loading">
           <span class="checkout__yandex-loading-spinner"></span>
@@ -237,6 +232,7 @@
         @close="showPvzModal = false"
         @select="onPvzSelect"
     />
+    <CheckoutCdekPvzModal :is-open="showCdekPvzModal" :points="cdekPvzPoints" :point-type="currentCode === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ'" :selected-code="selectedCdekPvzCode" @close="showCdekPvzModal = false" @select="selectedCdekPvzCode = $event.code" />
   </div>
 </template>
 
@@ -462,6 +458,7 @@ const cdekCityLoading = ref(false);
 const cdekPvzPoints = ref<CdekPvz[]>([]);
 const cdekPvzLoading = ref(false);
 const selectedCdekPvzCode = ref<string | null>(null);
+const showCdekPvzModal = ref(false);
 const cdekTariffs = ref<CdekTariff[]>([]);
 const selectedCdekTariff = ref<CdekTariff | null>(null);
 const cdekLoading = ref(false);
