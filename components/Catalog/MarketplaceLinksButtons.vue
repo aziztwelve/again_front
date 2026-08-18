@@ -29,6 +29,15 @@
     >
       Заказать в Золотом Яблоке
     </a>
+    <a
+        v-if="showForeignCard && links.foreign_card"
+        :href="links.foreign_card"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="marketplace-btn foreign-card-btn"
+    >
+      Оплатить иностранной картой
+    </a>
   </div>
 </template>
 
@@ -39,19 +48,22 @@ interface MarketplaceLinks {
   wb?: string | null
   ozon?: string | null
   zy?: string | null
+  foreign_card?: string | null
 }
 
 interface Props {
   marketplaceLinks?: MarketplaceLinks | string | null
+  showForeignCard?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  marketplaceLinks: null
+  marketplaceLinks: null,
+  showForeignCard: false
 })
 
 const links = computed<MarketplaceLinks>(() => {
   if (!props.marketplaceLinks) {
-    return {wb: null, ozon: null, zy: null}
+    return {wb: null, ozon: null, zy: null, foreign_card: null}
   }
 
   // Если это строка (JSON), распарси её
@@ -59,7 +71,7 @@ const links = computed<MarketplaceLinks>(() => {
     try {
       return JSON.parse(props.marketplaceLinks)
     } catch {
-      return {wb: null, ozon: null, zy: null}
+      return {wb: null, ozon: null, zy: null, foreign_card: null}
     }
   }
 
@@ -68,7 +80,7 @@ const links = computed<MarketplaceLinks>(() => {
 })
 
 const hasLinks = computed(() => {
-  return !!(links.value.wb || links.value.ozon || links.value.zy)
+  return !!(links.value.wb || links.value.ozon || links.value.zy || (props.showForeignCard && links.value.foreign_card))
 })
 </script>
 
@@ -168,6 +180,17 @@ const hasLinks = computed(() => {
   width: 20px;
   height: 20px;
   color: #1a1a1a;
+}
+
+/* Оплата иностранной картой (нейтральный тёмный) */
+.foreign-card-btn {
+  background: linear-gradient(135deg, #3F3F3F 0%, #2A2A2A 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.foreign-card-btn:hover {
+  background: linear-gradient(135deg, #2A2A2A 0%, #1A1A1A 100%);
+  box-shadow: 0 8px 24px rgba(63, 63, 63, 0.35);
 }
 
 /* Адаптив для планшетов */

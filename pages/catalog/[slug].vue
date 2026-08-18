@@ -100,6 +100,7 @@
                   class="product__marketplace-buttons pt-2"
                   v-if="!isComingSoonView && checkLinkMarketplace(product.marketplace_links)"
                   :marketplace-links="product.marketplace_links"
+                  :show-foreign-card="true"
               />
 
 

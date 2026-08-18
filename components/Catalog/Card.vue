@@ -181,7 +181,10 @@ const props = defineProps<{
 
 function checkLinkMarketplace(links: Record<string, any>): boolean {
   if (!links || typeof links !== 'object') return false;
-  return Object.values(links).some(link => link !== null && link !== '');
+  // В каталоге кнопка "Оплатить иностранной картой" не показывается,
+  // поэтому foreign_card не должен учитываться в проверке наличия ссылок.
+  const {foreign_card, ...marketplaceOnlyLinks} = links;
+  return Object.values(marketplaceOnlyLinks).some(link => link !== null && link !== '');
 }
 
 
