@@ -182,14 +182,24 @@ const hasLinks = computed(() => {
   color: #1a1a1a;
 }
 
-/* Оплата иностранной картой (нейтральный тёмный) */
+/* Оплата иностранной картой: та же геометрия, что у кнопки "В корзину"
+   (.btn), но собственный тёмно-графитовый цвет, чтобы визуально отличаться
+   и от корзины (красная), и от кнопок маркетплейсов. */
 .foreign-card-btn {
-  background: linear-gradient(135deg, #3F3F3F 0%, #2A2A2A 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem 1.2rem;
+  min-height: 7rem;
+  border-radius: 6.5rem;
+  text-transform: uppercase;
+  font-family: var(--ff-mulish);
+  font-size: var(--fz-regular);
+  line-height: 2.38rem;
+  background: #3F3F3F;
+  border: .1rem solid #3F3F3F;
 }
 
 .foreign-card-btn:hover {
-  background: linear-gradient(135deg, #2A2A2A 0%, #1A1A1A 100%);
+  background: #2A2A2A;
+  border-color: #2A2A2A;
   box-shadow: 0 8px 24px rgba(63, 63, 63, 0.35);
 }
 
@@ -206,6 +216,12 @@ const hasLinks = computed(() => {
 
   .marketplace-buttons.product__marketplace-buttons {
     width: 25.2rem;
+  }
+
+  .foreign-card-btn {
+    padding: 1.6rem 1.2rem;
+    min-height: 5.5rem;
+    font-size: 1.3rem;
   }
 
   .wb-icon,
@@ -229,6 +245,13 @@ const hasLinks = computed(() => {
     gap: 6px;
   }
 
+  .foreign-card-btn {
+    padding: 1.2rem 1rem;
+    min-height: 5rem;
+    font-size: 1.1rem;
+    border-radius: 6.5rem;
+  }
+
   .wb-icon,
   .ozon-icon,
   .zy-icon {
@@ -248,6 +271,12 @@ const hasLinks = computed(() => {
     padding: 0.8rem 0.6rem;
     font-size: 11px;
     gap: 4px;
+  }
+
+  .foreign-card-btn {
+    padding: 1rem 0.8rem;
+    min-height: 4.5rem;
+    font-size: 1rem;
   }
 
   .wb-icon,
