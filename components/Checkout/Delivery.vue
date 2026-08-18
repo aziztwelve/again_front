@@ -93,12 +93,12 @@
               v-if="canPickOnMap"
               type="button"
               class="checkout__delivery-map-btn btn _border _thin"
-              :disabled="isYandexPickup && (!cityName || pvzGeoIdLoading)"
-              :title="isYandexPickup && !cityName ? 'Укажите город для выбора ПВЗ' : undefined"
+              :disabled="(isYandexPickup && (!cityName || pvzGeoIdLoading)) || (isCdekPickup && (!cdekCityCode || cdekPvzLoading))"
+              :title="!cityName ? 'Укажите город для выбора ПВЗ' : undefined"
               @click="onPickOnMap"
           >
             <span v-if="isYandexPickup && pvzGeoIdLoading" class="checkout__pvz-btn-spinner"></span>
-            {{ isYandexPickup ? 'Выбрать ПВЗ' : 'Выбрать на карте' }}
+            Выбрать ПВЗ
           </button>
         </div>
       </div>
@@ -112,24 +112,11 @@
           Ищем город в СДЭК...
         </div>
         <div v-else-if="cityName && !cdekCityCode" class="checkout__yandex-hint">
-          Выберите город из списка СДЭК, чтобы рассчитать доставку.
+          Не удалось сопоставить город с СДЭК. Уточните название города.
         </div>
-        <div v-if="cdekCities.length" class="checkout__cdek-cities">
-          <div class="checkout__yandex-offers-title">Город СДЭК</div>
-          <button
-            v-for="city in cdekCities"
-            :key="city.code"
-            type="button"
-            class="checkout__cdek-city"
-            :class="{ '_selected': cdekCityCode === city.code }"
-            @click="selectCdekCity(city)"
-          >
-            {{ city.full_name }}
-          </button>
-        </div>
-        <div v-if="isCdekPickup && cdekCityCode" class="checkout__cdek-pvz">
-          <div class="checkout__yandex-offers-title">Пункт выдачи СДЭК</div>
-          <button type="button" class="checkout__cdek-select" :disabled="cdekPvzLoading" @click="showCdekPvzModal = true">{{ selectedCdekPvzCode ? 'Изменить пункт выдачи' : (cdekPvzLoading ? 'Загружаем пункты...' : 'Выбрать пункт выдачи') }}</button>
+        <div v-if="isCdekPickup && selectedCdekPvzCode" class="checkout__selected-pvz">
+          <div class="checkout__selected-pvz-header"><span class="checkout__selected-pvz-icon">✓</span><span class="checkout__selected-pvz-title">Пункт выдачи СДЭК</span><button type="button" class="checkout__selected-pvz-change" @click="showCdekPvzModal = true">Изменить</button></div>
+          <div class="checkout__selected-pvz-address">{{ pvzAddress }}</div>
         </div>
         <div v-if="cdekLoading" class="checkout__yandex-loading">
           <span class="checkout__yandex-loading-spinner"></span>
@@ -403,7 +390,7 @@ const canCalculateYandex = computed(() =>
 );
 
 // Кнопка «Выбрать на карте / ПВЗ»
-const canPickOnMap = computed(() => isYandexPickup.value);
+const canPickOnMap = computed(() => isYandexPickup.value || isCdekPickup.value);
 
 // ─── geo_id для фильтрации ПВЗ ────────────────────────────────────────────────
 const yandexGeoId       = ref<number | null>(null);
@@ -477,7 +464,7 @@ watch([isCdekDelivery, currentCode, cityName], ([enabled, _code, city]) => {
     try {
       const { data, error } = await useApi<{ cities: CdekCity[] }>('/public/delivery/cdek/cities', { query: { query: city, country_code: countryCode.value || 'RU' } });
       cdekCities.value = error.value ? [] : (data.value?.cities ?? []);
-      if (cdekCities.value.length === 1) selectCdekCity(cdekCities.value[0]);
+      if (cdekCities.value.length) selectCdekCity(cdekCities.value[0]);
     } finally {
       cdekCityLoading.value = false;
     }
@@ -679,6 +666,10 @@ const showPvzModal = ref(false);
 const selectedPvz  = ref<{ id: string; name: string; address: string; pvzApiId?: string; coordinates?: [number, number] } | null>(null);
 
 const onPickOnMap = async () => {
+  if (isCdekPickup.value) {
+    showCdekPvzModal.value = true;
+    return;
+  }
   if (isYandexPickup.value && pvzGeoIdLoading.value) {
     // Ждём завершения определения geo_id
     await until(pvzGeoIdLoading).toBe(false);
