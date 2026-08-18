@@ -8,7 +8,7 @@
         </NuxtLink>
       </div>
 
-      <CatalogGrid v-if="products" :list="products.data.slice(4)"/>
+      <CatalogGrid v-if="products" :list="products.data"/>
     </div>
   </section>
 </template>
@@ -20,11 +20,10 @@ const {data: products} = await useApi<{
   data: Product[]
 }>('/public/catalog/products', {
   query: {
-    per_page: 12,
+    per_page: 8,
     page: 1,
     in_stock: 1,
-    sort_by: 'display_order',
-    sort_order: 'asc',
+    category_slug: 'novinki-8',
   }
 })
 </script>
