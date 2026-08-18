@@ -93,12 +93,12 @@
               v-if="canPickOnMap"
               type="button"
               class="checkout__delivery-map-btn btn _border _thin"
-              :disabled="(isYandexPickup && (!cityName || pvzGeoIdLoading)) || (isCdekPickup && (!cityName || cdekPvzLoading))"
+              :disabled="(isYandexPickup && (!cityName || pvzGeoIdLoading)) || (isCdekPickup && (!cityName || cdekCityLoading || cdekPvzLoading))"
               :title="!cityName ? 'Укажите город для выбора ПВЗ' : undefined"
               @click="onPickOnMap"
           >
-            <span v-if="isYandexPickup && pvzGeoIdLoading" class="checkout__pvz-btn-spinner"></span>
-            Выбрать ПВЗ
+            <span v-if="(isYandexPickup && pvzGeoIdLoading) || (isCdekPickup && (cdekCityLoading || cdekPvzLoading))" class="checkout__pvz-btn-spinner"></span>
+            {{ isCdekPickup && (cdekCityLoading || cdekPvzLoading) ? 'Загружаем ПВЗ...' : 'Выбрать ПВЗ' }}
           </button>
         </div>
       </div>
