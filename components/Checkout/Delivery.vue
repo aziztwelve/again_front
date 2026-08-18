@@ -93,7 +93,7 @@
               v-if="canPickOnMap"
               type="button"
               class="checkout__delivery-map-btn btn _border _thin"
-              :disabled="(isYandexPickup && (!cityName || pvzGeoIdLoading)) || (isCdekPickup && (!cdekCityCode || cdekPvzLoading))"
+              :disabled="(isYandexPickup && (!cityName || pvzGeoIdLoading)) || (isCdekPickup && (!cityName || cdekPvzLoading))"
               :title="!cityName ? 'Укажите город для выбора ПВЗ' : undefined"
               @click="onPickOnMap"
           >
@@ -469,7 +469,7 @@ watch([isCdekDelivery, currentCode, cityName], ([enabled, _code, city]) => {
       cdekCityLoading.value = false;
     }
   }, 350);
-});
+}, { immediate: true });
 
 const selectCdekCity = async (city: CdekCity) => {
   cdekCityCode.value = city.code;
