@@ -92,6 +92,13 @@ export interface CheckoutForm {
     country_code: string;
     country_name: string;
     city_name: string;
+    /**
+     * id справочников гео (`country`/`city`) из селектов чекаута. Уходят в
+     * `delivery_address.country_id` / `city_id` и используются бэкендом для
+     * матчинга правил бесплатной доставки (docs/tasks/free-shipping.md).
+     */
+    country_id?: number | null;
+    city_id?: number | null;
     delivery_address: string;
     region: string;
     postal_code: string;

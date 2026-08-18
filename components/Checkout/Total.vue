@@ -3,6 +3,7 @@
       :is-promocode="true"
       :is-border="true"
       :with-button="withButton"
+      :with-delivery="true"
   />
 </template>
 
@@ -14,6 +15,6 @@ withDefaults(defineProps<{
 });
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 
 </style>

@@ -1,17 +1,60 @@
 <template>
-  <div class="cart__progress cart-progress">
+  <!--
+    Прогресс до бесплатной доставки. Порог и условия задаются в админке
+    (Настройки → Бесплатная доставка), считает бэкенд — см.
+    lara_admin/docs/tasks/free-shipping.md
+    Если подходящих правил нет (или порог уже взят по всем) — блок скрыт.
+  -->
+  <div v-if="progress" class="cart__progress cart-progress">
     <div class="cart-progress__title">
       <span class="cart-progress__text">До бесплатной доставки осталось</span>
-      <strong class="cart-progress__price"><span>1.212</span> ₽</strong>
+      <strong class="cart-progress__price"><span>{{ formattedRemaining }}</span> ₽</strong>
     </div>
     <div class="cart-progress__line">
-      <div style="--width: 70%;"></div>
+      <div :style="{ '--width': widthPercent }"></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useCartStore } from '~/stores/cart';
 
+const cartStore = useCartStore();
+const freeShipping = useFreeShippingStore();
+
+const progress = computed(() => freeShipping.progress);
+
+const formattedRemaining = computed(() =>
+    new Intl.NumberFormat('ru-RU').format(Math.ceil(progress.value?.remaining ?? 0)),
+);
+
+const widthPercent = computed(() => {
+  const item = progress.value;
+  if (!item || !item.min_order_amount) return '0%';
+
+  const ratio = Math.min(1, item.qualifying_amount / item.min_order_amount);
+
+  return `${Math.round(ratio * 100)}%`;
+});
+
+let timer: ReturnType<typeof setTimeout> | null = null;
+
+const refresh = () => {
+  if (timer) clearTimeout(timer);
+
+  timer = setTimeout(() => {
+    freeShipping.evaluate({
+      items: cartStore.getCartForCheckout(),
+      candidates: [],
+      promoCode: cartStore.promoCode || null,
+    });
+  }, 300);
+};
+
+onMounted(refresh);
+
+// Корзина пересчитывается асинхронно (cartInit в app.vue) — следим за суммой.
+watch(() => [cartStore.cart.length, cartStore.total], refresh);
 </script>
 
 <style scoped lang="scss">

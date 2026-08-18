@@ -158,6 +158,10 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         };
         if (form.region) addr.region = form.region;
         if (form.postal_code) addr.postal_code = form.postal_code;
+        // id гео из селектов — для правил бесплатной доставки на бэкенде.
+        // Проверяем на null/undefined, а не на truthy: id = 0 валиден (Россия).
+        if (form.country_id !== null && form.country_id !== undefined) addr.country_id = form.country_id;
+        if (form.city_id !== null && form.city_id !== undefined) addr.city_id = form.city_id;
         if (form.entrance) addr.entrance = form.entrance;
         if (form.floor) addr.floor = form.floor;
         if (form.intercom) addr.intercom = form.intercom;

@@ -25,11 +25,26 @@
           <span class="cart-summary__item-title gift-card">Подарочная карта</span>
           <span class="cart-summary__item-price discount gift-card">-{{ getFormatPrice().formattedPrice(giftCardStore.giftCardAmount) }} ₽</span>
         </div>
+
+        <!--
+          Доставка. Показываем только на чекауте (withDelivery) и только когда
+          покупатель выбрал тариф. «Бесплатно» приходит от правил бесплатной
+          доставки — см. lara_admin/docs/tasks/free-shipping.md
+        -->
+        <div class="cart-summary__item" v-if="withDelivery && freeShipping.deliveryCost !== null">
+          <span class="cart-summary__item-title">Доставка</span>
+          <span
+              class="cart-summary__item-price"
+              :class="{ 'discount': freeShipping.selectedIsFree }"
+          >
+            {{ freeShipping.selectedIsFree ? 'Бесплатно' : `${getFormatPrice().formattedPrice(freeShipping.deliveryCost)} ₽` }}
+          </span>
+        </div>
       </div>
     </div>
 
     <div class="cart__total-bottom">
-      <CartSubtotal/>
+      <CartSubtotal :with-delivery="withDelivery"/>
 
       <!-- 🆕 НОВОЕ: Уведомление если полностью оплачено картой -->
       <div v-if="giftCardStore.giftCardAmount > 0 && cart.getFinalTotal() === 0" class="cart__total-message success">
@@ -55,15 +70,19 @@ import { useGiftCardPaymentStore } from '~/stores/giftCardPayment';
 withDefaults(defineProps<{
   isBorder?: boolean,
   isPromocode?: boolean,
-  withButton?: boolean
+  withButton?: boolean,
+  /** Показывать строку «Доставка» (только на чекауте). */
+  withDelivery?: boolean
 }>(), {
   isBorder: false,
   isPromocode: true,
-  withButton: true
+  withButton: true,
+  withDelivery: false
 });
 
 const cart = useCartStore();
 const giftCardStore = useGiftCardPaymentStore();
+const freeShipping = useFreeShippingStore();
 </script>
 
 <style scoped lang="scss">

@@ -47,7 +47,11 @@
                   v-model:cdek-delivery-data="form.cdek_delivery_data"
                   v-model:pvz-code="form.pvz_code"
                   v-model:pvz-address="form.pvz_address"
+                  v-model:geo-country-id="form.country_id"
+                  v-model:geo-city-id="form.city_id"
                   :recipient="form.user"
+                  :payment-method="form.payment_method"
+                  :promo-code="form.promo_code"
               />
               <CheckoutRecipient
                   ref="recipientRef"
@@ -158,6 +162,10 @@ const form = reactive<CheckoutForm>({
   country_code: '',
   country_name: '',
   city_name: '',
+  // id справочников гео из селектов: нужны для точного матчинга правил
+  // бесплатной доставки на бэкенде (см. lara_admin/docs/tasks/free-shipping.md)
+  country_id: null,
+  city_id: null,
   delivery_address: '',
   region: '',
   postal_code: '',

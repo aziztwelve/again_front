@@ -132,9 +132,16 @@
                 <div class="checkout__yandex-offer-name">{{ tariff.tariff_name }}</div>
                 <div class="checkout__yandex-offer-date">{{ tariff.period.min }}-{{ tariff.period.max }} дн.</div>
               </div>
-              <div class="checkout__yandex-offer-price">{{ formatPrice(tariff.price) }} ₽</div>
+              <div class="checkout__yandex-offer-price">
+                <template v-if="freeShipping.isFree(cdekCandidateKey(tariff))">
+                  <span class="checkout__offer-price-old">{{ formatPrice(tariff.price) }} ₽</span>
+                  <span class="checkout__offer-price-free">Бесплатно</span>
+                </template>
+                <template v-else>{{ formatPrice(tariff.price) }} ₽</template>
+              </div>
             </div>
           </div>
+          <div v-if="freeShippingHint" class="checkout__free-shipping-hint">{{ freeShippingHint }}</div>
         </div>
       </div>
 
@@ -197,9 +204,16 @@
                 </span>
               </div>
             </div>
-            <div class="checkout__yandex-offer-price">{{ formatPrice(offer.price) }} ₽</div>
+            <div class="checkout__yandex-offer-price">
+              <template v-if="freeShipping.isFree(yandexCandidateKey(offer))">
+                <span class="checkout__offer-price-old">{{ formatPrice(offer.price) }} ₽</span>
+                <span class="checkout__offer-price-free">Бесплатно</span>
+              </template>
+              <template v-else>{{ formatPrice(offer.price) }} ₽</template>
+            </div>
           </div>
         </div>
+        <div v-if="freeShippingHint" class="checkout__free-shipping-hint">{{ freeShippingHint }}</div>
       </div>
     </div>
 
@@ -259,6 +273,13 @@ interface CdekTariff { tariff_code: number; tariff_name: string; delivery_mode: 
 
 const props = defineProps<{
   recipient?: { first_name?: string; last_name?: string; phone?: string; email?: string };
+  /**
+   * Выбранный способ оплаты — часть условий правил бесплатной доставки
+   * (см. lara_admin/docs/tasks/free-shipping.md).
+   */
+  paymentMethod?: string;
+  /** Введённый промокод: влияет на сумму выкупа. */
+  promoCode?: string;
 }>();
 
 // ─── v-model связки с родителем ───────────────────────────────────────────────
@@ -292,6 +313,12 @@ const cdekDeliveryData = defineModel<Record<string, unknown> | null>('cdekDelive
 const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
 
+// Идентификаторы справочников гео из селектов «Страна»/«Город».
+// Уходят в заказ (delivery_address.country_id / city_id) и в оценку правил
+// бесплатной доставки — по названиям матчинг менее надёжный.
+const geoCountryId = defineModel<number | null>('geoCountryId', { default: null });
+const geoCityId    = defineModel<number | null>('geoCityId',    { default: null });
+
 // ─── Адрес из профиля ─────────────────────────────────────────────────────────
 const useMyAddress = ref(false);
 const hasProfileAddress = computed(() => {
@@ -321,10 +348,14 @@ const setCountry = (object: any) => {
   countryCode.value = object.code;
   countryName.value = object.title ?? object.name ?? object.code;
   countryId.value   = object.id;
+  geoCountryId.value = typeof object.id === 'number' ? object.id : null;
+  // Город относится к другой стране — сбрасываем его id.
+  geoCityId.value = null;
 };
 
 const setCity = (object: any) => {
   cityName.value = object.title ?? object.name;
+  geoCityId.value = typeof object.id === 'number' ? object.id : null;
 };
 
 const { data: countries } = await useCountries();
@@ -531,7 +562,84 @@ const selectCdekTariff = (tariff: CdekTariff) => {
     destination: { city_code: cdekCityCode.value, address: address.value },
     pvz: point ? { code: point.code, type: point.type, address: point.location?.address ?? point.location?.address_full, coordinates: [point.location?.longitude, point.location?.latitude] } : null,
   };
+  freeShipping.setSelected(cdekCandidateKey(tariff), tariff.price);
 };
+
+// ─── Бесплатная доставка ──────────────────────────────────────────────────────
+// Правила настраиваются в админке (Настройки → Бесплатная доставка).
+// Бэкенд говорит, какие из показанных вариантов бесплатны, и сколько не хватает
+// до ближайшего порога. См. lara_admin/docs/tasks/free-shipping.md
+const freeShipping = useFreeShippingStore();
+
+const cdekCandidateKey = (tariff: CdekTariff) =>
+    `cdek:${isCdekPickup.value ? 'pickup' : 'courier'}:${tariff.tariff_code}`;
+
+const yandexCandidateKey = (offer: YandexOffer) =>
+    `yandex:${isYandexPickup.value ? 'pickup' : 'courier'}:${offer.offer_id}`;
+
+const freeShippingCandidates = computed(() => {
+  const list: Array<{ key: string; service: 'cdek' | 'yandex'; delivery_type: 'pickup' | 'courier'; price: number }> = [];
+
+  cdekTariffs.value.forEach((tariff) => list.push({
+    key: cdekCandidateKey(tariff),
+    service: 'cdek',
+    delivery_type: isCdekPickup.value ? 'pickup' : 'courier',
+    price: tariff.price,
+  }));
+
+  yandexOffers.value.forEach((offer) => list.push({
+    key: yandexCandidateKey(offer),
+    service: 'yandex',
+    delivery_type: isYandexPickup.value ? 'pickup' : 'courier',
+    price: offer.price,
+  }));
+
+  return list;
+});
+
+const freeShippingHint = computed(() => {
+  const progress = freeShipping.progress;
+  if (!progress) return '';
+
+  const format = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.ceil(value));
+
+  return `Бесплатная доставка от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`;
+});
+
+let freeShippingTimer: ReturnType<typeof setTimeout> | null = null;
+
+const evaluateFreeShipping = () => {
+  if (freeShippingTimer) clearTimeout(freeShippingTimer);
+
+  freeShippingTimer = setTimeout(() => {
+    const cartStore = useCartStore();
+
+    freeShipping.evaluate({
+      items: cartStore.getCartForCheckout(),
+      candidates: freeShippingCandidates.value,
+      paymentMethod: props.paymentMethod ?? null,
+      promoCode: props.promoCode ?? null,
+      countryId: geoCountryId.value,
+      cityId: geoCityId.value,
+      country: countryName.value || null,
+      region: region.value || null,
+      city: cityName.value || null,
+    });
+  }, 300);
+};
+
+watch(
+    [
+      freeShippingCandidates,
+      () => props.paymentMethod,
+      () => props.promoCode,
+      geoCountryId,
+      geoCityId,
+      () => useCartStore().total,
+    ],
+    evaluateFreeShipping,
+    { immediate: true },
+);
 
 /** Запрашивает тарифы у бэка. */
 const fetchYandexOffers = async (params: {
@@ -659,6 +767,7 @@ const selectYandexOffer = (offer: YandexOffer) => {
     } : null,
     destination: isYandexCourier.value ? courierDestination.value : null,
   };
+  freeShipping.setSelected(yandexCandidateKey(offer), offer.price);
 };
 
 // ─── ПВЗ модалка ──────────────────────────────────────────────────────────────
@@ -1087,5 +1196,24 @@ const formatPrice = (price: number): string => {
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* Бесплатная доставка: зачёркнутый тариф + «Бесплатно» */
+.checkout__offer-price-old {
+  margin-right: .6rem;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--color-gray, #888);
+  text-decoration: line-through;
+}
+
+.checkout__offer-price-free {
+  color: var(--fg-green, #2e9c4a);
+}
+
+.checkout__free-shipping-hint {
+  margin-top: 1rem;
+  font-size: var(--fz-small);
+  color: var(--color-gray, #888);
 }
 </style>
