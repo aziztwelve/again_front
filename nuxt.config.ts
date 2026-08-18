@@ -49,6 +49,8 @@ export default defineNuxtConfig({
             REVERB_HOST: process.env.REVERB_HOST || 'localhost',
             REVERB_PORT: process.env.REVERB_PORT || '443',
             REVERB_SCHEME: process.env.REVERB_SCHEME || 'wss',
+
+            YANDEX_MAPS_API_KEY: process.env.YANDEX_MAPS_API_KEY || '',
         }
     },
     build: {

@@ -20,45 +20,54 @@
           />
         </div>
 
-        <!-- Тело -->
-        <div class="pvz-modal__body">
-          <!-- Загрузка -->
-          <div v-if="loading" class="pvz-modal__state">
-            <span class="pvz-modal__spinner"></span>
-            Загружаем пункты выдачи...
+        <!-- Тело: карта + список -->
+        <div class="pvz-modal__body" :class="{ '_no-map': mapError }">
+          <!-- Карта -->
+          <div v-show="!mapError" class="pvz-modal__map-wrap">
+            <div ref="mapEl" class="pvz-modal__map"></div>
           </div>
 
-          <!-- Нет ПВЗ -->
-          <div v-else-if="!filteredPoints.length" class="pvz-modal__state">
-            <template v-if="!cityName && !geoId">
-              Укажите город в форме доставки для показа ближайших ПВЗ.
-            </template>
-            <template v-else>
-              Пункты выдачи не найдены.
-              <span v-if="searchQuery"> Попробуйте изменить поисковый запрос.</span>
-            </template>
-          </div>
+          <!-- Список -->
+          <div class="pvz-modal__aside">
+            <!-- Загрузка -->
+            <div v-if="loading" class="pvz-modal__state">
+              <span class="pvz-modal__spinner"></span>
+              Загружаем пункты выдачи...
+            </div>
 
-          <!-- Список ПВЗ -->
-          <div v-else class="pvz-modal__list">
-            <div
-                v-for="point in filteredPoints"
-                :key="point.id"
-                class="pvz-modal__item"
-                :class="{ '_selected': selectedPoint?.id === point.id }"
-                @click="selectPoint(point)"
-            >
-              <div class="pvz-modal__item-radio">
-                <span v-if="selectedPoint?.id === point.id" class="pvz-modal__item-radio-dot"></span>
-              </div>
-              <div class="pvz-modal__item-info">
-                <div class="pvz-modal__item-name">{{ point.name }}</div>
-                <div class="pvz-modal__item-address">{{ formatAddress(point) }}</div>
-                <div v-if="getSchedule(point)" class="pvz-modal__item-schedule">
-                  {{ getSchedule(point) }}
+            <!-- Нет ПВЗ -->
+            <div v-else-if="!filteredPoints.length" class="pvz-modal__state">
+              <template v-if="!cityName && !geoId">
+                Укажите город в форме доставки для показа ближайших ПВЗ.
+              </template>
+              <template v-else>
+                Пункты выдачи не найдены.
+                <span v-if="searchQuery"> Попробуйте изменить поисковый запрос.</span>
+              </template>
+            </div>
+
+            <!-- Список ПВЗ -->
+            <div v-else class="pvz-modal__list">
+              <div
+                  v-for="point in filteredPoints"
+                  :key="point.id"
+                  :ref="el => setItemRef(point.id, el)"
+                  class="pvz-modal__item"
+                  :class="{ '_selected': selectedPoint?.id === point.id }"
+                  @click="selectPoint(point, true)"
+              >
+                <div class="pvz-modal__item-radio">
+                  <span v-if="selectedPoint?.id === point.id" class="pvz-modal__item-radio-dot"></span>
                 </div>
-                <div v-if="point.is_yandex_branded" class="pvz-modal__item-badge">
-                  Яндекс
+                <div class="pvz-modal__item-info">
+                  <div class="pvz-modal__item-name">{{ point.name }}</div>
+                  <div class="pvz-modal__item-address">{{ formatAddress(point) }}</div>
+                  <div v-if="getSchedule(point)" class="pvz-modal__item-schedule">
+                    {{ getSchedule(point) }}
+                  </div>
+                  <div v-if="point.is_yandex_branded" class="pvz-modal__item-badge">
+                    Яндекс
+                  </div>
                 </div>
               </div>
             </div>
@@ -81,6 +90,8 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick } from 'vue';
+
 interface PvzPoint {
   id: string;
   name: string;
@@ -109,6 +120,23 @@ const pvzList       = ref<PvzPoint[]>([]);
 const selectedPoint = ref<PvzPoint | null>(null);
 const searchQuery   = ref('');
 
+// ─── Карта ───────────────────────────────────────────────────────────────────
+const { load: loadYandexMaps } = useYandexMaps();
+
+const mapEl    = ref<HTMLElement | null>(null);
+const mapError = ref(false);
+
+let ymaps: any = null;
+let map: any = null;
+let clusterer: any = null;
+const placemarks = new Map<string, any>();      // point.id -> placemark
+const itemRefs   = new Map<string, HTMLElement>(); // point.id -> список DOM-элемент
+
+const setItemRef = (id: string, el: any) => {
+  if (el) itemRefs.set(id, el as HTMLElement);
+  else itemRefs.delete(id);
+};
+
 // ─── Форматирование ────────────────────────────────────────────────────────────
 const formatAddress = (point: PvzPoint): string => {
   if (typeof point.address === 'string') return point.address;
@@ -124,6 +152,12 @@ const getSchedule = (point: PvzPoint): string => {
   if (!r?.time_from || !r?.time_to) return '';
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(r.time_from.hours)}:${pad(r.time_from.minutes)} – ${pad(r.time_to.hours)}:${pad(r.time_to.minutes)}`;
+};
+
+const getCoords = (point: PvzPoint): [number, number] | null => {
+  const p = point.position;
+  if (!p || typeof p.latitude !== 'number' || typeof p.longitude !== 'number') return null;
+  return [p.latitude, p.longitude];
 };
 
 // ─── Фильтрация ────────────────────────────────────────────────────────────────
@@ -160,18 +194,108 @@ const loadPvz = async () => {
   }
 };
 
-// Загружаем при открытии модалки или смене geo_id
-watch(() => props.isOpen, (open) => {
-  if (open) loadPvz();
-});
+// ─── Инициализация / отрисовка карты ────────────────────────────────────────────
+const ensureMap = async () => {
+  if (import.meta.server) return;
+  try {
+    ymaps = await loadYandexMaps();
+    await nextTick();
+    if (!mapEl.value) return;
 
-watch(() => props.geoId, (newId, oldId) => {
-  if (props.isOpen && newId !== oldId) loadPvz();
-});
+    if (!map) {
+      map = new ymaps.Map(mapEl.value, {
+        center: [55.751574, 37.573856], // Москва по умолчанию
+        zoom: 10,
+        controls: ['zoomControl', 'geolocationControl'],
+      }, {
+        suppressMapOpenBlock: true,
+      });
+
+      clusterer = new ymaps.Clusterer({
+        preset: 'islands#invertedBlueClusterIcons',
+        groupByCoordinates: false,
+        clusterDisableClickZoom: false,
+      });
+      map.geoObjects.add(clusterer);
+    }
+
+    renderPlacemarks();
+  } catch (e) {
+    console.error('Yandex Maps init failed:', e);
+    mapError.value = true;
+  }
+};
+
+const renderPlacemarks = () => {
+  if (!map || !ymaps || !clusterer) return;
+
+  clusterer.removeAll();
+  placemarks.clear();
+
+  const objects: any[] = [];
+
+  for (const point of filteredPoints.value) {
+    const coords = getCoords(point);
+    if (!coords) continue;
+
+    const placemark = new ymaps.Placemark(coords, {
+      balloonContentHeader: point.name,
+      balloonContentBody: formatAddress(point),
+      hintContent: point.name,
+    }, {
+      preset: 'islands#blueDotIcon',
+    });
+
+    placemark.events.add('click', () => selectPoint(point, false));
+    placemarks.set(point.id, placemark);
+    objects.push(placemark);
+  }
+
+  clusterer.add(objects);
+
+  if (objects.length) {
+    const bounds = clusterer.getBounds();
+    if (bounds) {
+      map.setBounds(bounds, { checkZoomRange: true, zoomMargin: 40 });
+    }
+  }
+
+  applySelectionToMap();
+};
+
+const setPlacemarkActive = (id: string, active: boolean) => {
+  const pm = placemarks.get(id);
+  if (pm) pm.options.set('preset', active ? 'islands#redDotIcon' : 'islands#blueDotIcon');
+};
+
+const applySelectionToMap = () => {
+  for (const [id] of placemarks) setPlacemarkActive(id, false);
+  if (selectedPoint.value) setPlacemarkActive(selectedPoint.value.id, true);
+};
 
 // ─── Действия ─────────────────────────────────────────────────────────────────
-const selectPoint = (point: PvzPoint) => {
+/**
+ * @param point       выбранный ПВЗ
+ * @param scrollToMap центрировать карту на точке (true — клик по списку)
+ */
+const selectPoint = (point: PvzPoint, scrollToMap: boolean) => {
   selectedPoint.value = point;
+  applySelectionToMap();
+
+  const coords = getCoords(point);
+  if (map && coords) {
+    if (scrollToMap) {
+      map.panTo(coords, { flying: true });
+      if (map.getZoom() < 14) map.setZoom(14, { duration: 300 });
+    }
+  }
+
+  // Клик по метке — подсветить и проскроллить элемент в списке
+  if (!scrollToMap) {
+    nextTick(() => {
+      itemRefs.get(point.id)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
 };
 
 const close = () => {
@@ -184,6 +308,24 @@ const confirm = () => {
     close();
   }
 };
+
+// ─── Реакции ──────────────────────────────────────────────────────────────────
+// Загружаем при открытии модалки или смене geo_id
+watch(() => props.isOpen, async (open) => {
+  if (open) {
+    await loadPvz();
+    await ensureMap();
+  }
+});
+
+watch(() => props.geoId, (newId, oldId) => {
+  if (props.isOpen && newId !== oldId) loadPvz();
+});
+
+// Перерисовываем метки при изменении списка / фильтра
+watch(filteredPoints, () => {
+  renderPlacemarks();
+});
 </script>
 
 <style scoped lang="scss">
@@ -206,8 +348,8 @@ const confirm = () => {
   position: relative;
   background: #fff;
   border-radius: 1.2rem;
-  width: min(90vw, 56rem);
-  max-height: 85vh;
+  width: min(94vw, 92rem);
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
@@ -266,8 +408,67 @@ const confirm = () => {
 // ─── Тело ──────────────────────────────────────────────────────────────────────
 .pvz-modal__body {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.pvz-modal__map-wrap {
+  position: relative;
+  flex: 1 1 60%;
+  min-height: 0;
+
+  @media (max-width: 768px) {
+    flex: none;
+    height: 32vh;
+  }
+}
+
+.pvz-modal__map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pvz-modal__map-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+  font-size: var(--fz-small);
+  background: #f5f5f5;
+}
+
+.pvz-modal__aside {
+  flex: 1 1 40%;
+  min-width: 30rem;
+  max-width: 38rem;
   overflow-y: auto;
-  padding: 1.2rem 2rem;
+  padding: 1.2rem 1.6rem;
+  border-left: 1px solid #eee;
+
+  @media (max-width: 768px) {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    border-left: none;
+    border-top: 1px solid #eee;
+  }
+
+  ._no-map & {
+    flex: 1;
+    max-width: none;
+    border-left: none;
+  }
 }
 
 .pvz-modal__state {
