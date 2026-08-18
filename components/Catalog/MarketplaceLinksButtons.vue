@@ -182,20 +182,12 @@ const hasLinks = computed(() => {
   color: #1a1a1a;
 }
 
-/* Оплата иностранной картой: та же геометрия, что у кнопки "В корзину"
-   (.btn), но собственный тёмно-графитовый цвет, чтобы визуально отличаться
-   и от корзины (красная), и от кнопок маркетплейсов. */
+/* Оплата иностранной картой: тот же размер, что у кнопок маркетплейсов
+   (.marketplace-btn), но собственный тёмно-графитовый цвет, чтобы визуально
+   отличаться и от корзины, и от WB/Ozon/ЗЯ. */
 .foreign-card-btn {
-  padding: 2rem 1.2rem;
-  min-height: 7rem;
-  border-radius: 6.5rem;
-  text-transform: uppercase;
-  font-family: var(--ff-mulish);
-  font-size: var(--fz-regular);
-  font-weight: 400;
-  line-height: 2.38rem;
   background: #3F3F3F;
-  border: .1rem solid #3F3F3F;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .foreign-card-btn:hover {
@@ -219,13 +211,6 @@ const hasLinks = computed(() => {
     width: 25.2rem;
   }
 
-  .foreign-card-btn {
-    padding: 1.6rem 1.2rem;
-    min-height: 5.5rem;
-    font-size: 1.3rem;
-    font-weight: 400;
-  }
-
   .wb-icon,
   .ozon-icon,
   .zy-icon {
@@ -247,14 +232,6 @@ const hasLinks = computed(() => {
     gap: 6px;
   }
 
-  .foreign-card-btn {
-    padding: 1.2rem 1rem;
-    min-height: 5rem;
-    font-size: 1.1rem;
-    font-weight: 400;
-    border-radius: 6.5rem;
-  }
-
   .wb-icon,
   .ozon-icon,
   .zy-icon {
@@ -274,13 +251,6 @@ const hasLinks = computed(() => {
     padding: 0.8rem 0.6rem;
     font-size: 11px;
     gap: 4px;
-  }
-
-  .foreign-card-btn {
-    padding: 1rem 0.8rem;
-    min-height: 4.5rem;
-    font-size: 1rem;
-    font-weight: 400;
   }
 
   .wb-icon,
