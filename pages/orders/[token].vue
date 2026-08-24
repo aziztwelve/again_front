@@ -43,6 +43,15 @@
                   {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить картой' }}
                 </button>
                 <button
+                    v-if="canBePaid && isYandexPayOrder"
+                    type="button"
+                    class="order-view__pay-button"
+                    :disabled="isPaymentStarting"
+                    @click="startYandexPay"
+                >
+                  {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить Яндекс Пэй или Сплитом' }}
+                </button>
+                <button
                     type="button"
                     class="order-view__repeat-button"
                     :disabled="isReordering"
@@ -248,6 +257,7 @@ const orderStatusLabel = computed(() => order.value?.status?.label || null);
 const paymentStatusLabel = computed(() => order.value?.payment_status?.label || null);
 const canBePaid = computed(() => ['pending', 'failed'].includes(order.value?.payment_status?.value ?? ''));
 const isCloudPaymentsOrder = computed(() => order.value?.cloudpayments_available === true);
+const isYandexPayOrder = computed(() => order.value?.yandex_pay_available === true);
 
 const paymentMethodLabel = computed(() => getPaymentMethodLabel(order.value?.payment_method));
 
@@ -350,6 +360,24 @@ const startCloudPayments = async () => {
   } catch (error: any) {
     showToast(error?.message || 'Не удалось открыть форму оплаты. Попробуйте ещё раз.');
   } finally {
+    isPaymentStarting.value = false;
+  }
+};
+
+const startYandexPay = async () => {
+  if (!order.value || isPaymentStarting.value) return;
+  isPaymentStarting.value = true;
+  try {
+    const { data: intent, error } = await useApi<{ success: boolean; message?: string; payment_url?: string }>(
+      `/public/orders/${token}/yandex-pay/intent`,
+      { method: 'POST', body: {} },
+    );
+    if (error.value || !intent.value?.success || !intent.value.payment_url) {
+      throw new Error(intent.value?.message || 'Не удалось подготовить оплату.');
+    }
+    window.location.assign(intent.value.payment_url);
+  } catch (error: any) {
+    showToast(error?.message || 'Не удалось открыть Яндекс Пэй. Попробуйте ещё раз.');
     isPaymentStarting.value = false;
   }
 };
