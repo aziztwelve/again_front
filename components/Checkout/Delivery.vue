@@ -134,7 +134,10 @@
             <div v-for="tariff in cdekTariffs" :key="tariff.tariff_code" class="checkout__yandex-offer" :class="{ '_selected': selectedCdekTariff?.tariff_code === tariff.tariff_code }" @click="selectCdekTariff(tariff)">
               <div class="checkout__yandex-offer-check"><span v-if="selectedCdekTariff?.tariff_code === tariff.tariff_code">✓</span></div>
               <div class="checkout__yandex-offer-info">
-                <div class="checkout__yandex-offer-name">{{ tariff.tariff_name }}</div>
+                <div class="checkout__yandex-offer-name">{{ cdekTariffTitle(tariff) }}</div>
+                <div v-if="cdekTariffTitle(tariff) !== tariff.tariff_name" class="checkout__cdek-tariff-original">
+                  {{ tariff.tariff_name }} · СДЭК
+                </div>
                 <div class="checkout__yandex-offer-date">{{ tariff.period.min }}-{{ tariff.period.max }} дн.</div>
               </div>
               <div class="checkout__yandex-offer-price">
@@ -275,6 +278,24 @@ interface PvzPoint {
 interface CdekCity { code: number; full_name: string; country_code?: string }
 interface CdekPvz { code: string; name?: string; type?: string; location?: { address?: string; address_full?: string; longitude?: number; latitude?: number } }
 interface CdekTariff { tariff_code: number; tariff_name: string; delivery_mode: number; price: number; currency: string; period: { min: number; max: number } }
+
+const cdekTariffTitles: Array<[RegExp, string]> = [
+  [/^Супер-экспресс до 10(?:\.00)?\b/i, 'Доставка до 10:00'],
+  [/^Супер-экспресс до 12(?:\.00)?\b/i, 'Доставка до 12:00'],
+  [/^Супер-экспресс до 14(?:\.00)?\b/i, 'Доставка до 14:00'],
+  [/^Супер-экспресс до 16(?:\.00)?\b/i, 'Доставка до 16:00'],
+  [/^Супер-экспресс до 18(?:\.00)?\b/i, 'Доставка до 18:00'],
+  [/^Экономичная посылка\b/i, 'Экономичная доставка в ПВЗ'],
+  [/^Экономичный экспресс\b/i, 'Экономичная экспресс-доставка'],
+  [/^Магистральный экспресс\b/i, 'Быстрая доставка в ПВЗ'],
+  [/^Экспресс тяжеловесы\b/i, 'Экспресс-доставка крупного заказа'],
+  [/^Сборный груз\b/i, 'Доставка крупногабаритного заказа'],
+  [/^Посылка\b/i, 'Стандартная доставка в ПВЗ'],
+  [/^Экспресс\b/i, 'Экспресс-доставка в ПВЗ'],
+]
+
+const cdekTariffTitle = (tariff: CdekTariff): string =>
+  cdekTariffTitles.find(([pattern]) => pattern.test(tariff.tariff_name))?.[1] ?? tariff.tariff_name
 
 const props = defineProps<{
   recipient?: { first_name?: string; last_name?: string; phone?: string; email?: string };
@@ -1191,6 +1212,12 @@ const formatPrice = (price: number): string => {
 .checkout__yandex-offer-name {
   font-weight: 600;
   font-size: var(--fz-regular);
+}
+
+.checkout__cdek-tariff-original {
+  font-size: var(--fz-small);
+  color: var(--color-gray, #888);
+  margin-top: 0.1rem;
 }
 
 .checkout__yandex-offer-date {
