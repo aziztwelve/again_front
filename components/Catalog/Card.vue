@@ -417,6 +417,7 @@ onMounted(() => {
 
 .catalog-item {
   position: relative;
+  align-self: start;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
