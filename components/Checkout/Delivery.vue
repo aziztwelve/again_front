@@ -107,6 +107,11 @@
 
       <!-- ======= СДЭК ======= -->
       <div v-if="isCdekDelivery" class="checkout__cdek">
+        <!-- Подсказка для курьера СДЭК: нужен город и адрес -->
+        <div v-if="isCdekCourier && !canCalculateCdek" class="checkout__yandex-hint">
+          <span class="checkout__yandex-hint-icon">🚚</span>
+          Заполните город и адрес доставки, чтобы рассчитать стоимость.
+        </div>
         <div v-if="cdekCityLoading" class="checkout__yandex-loading">
           <span class="checkout__yandex-loading-spinner"></span>
           Ищем город в СДЭК...
@@ -417,6 +422,9 @@ const isPickupDelivery = computed(() => isYandexPickup.value || isCdekPickup.val
 
 // Для курьера нужен город + адрес
 const canCalculateYandex = computed(() =>
+    !!(cityName.value && address.value),
+);
+const canCalculateCdek = computed(() =>
     !!(cityName.value && address.value),
 );
 
