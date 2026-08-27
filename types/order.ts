@@ -35,6 +35,17 @@ export interface PublicOrderPromoCode {
     code: string;
 }
 
+/** Public, non-secret parameters used to create a Yandex Pay Web SDK session. */
+export interface YandexPayConfig {
+    available: boolean;
+    env: 'SANDBOX' | 'PRODUCTION';
+    merchant_id: string;
+    currency_code: string;
+    total_amount: string;
+    available_payment_methods: string[];
+    preferred_payment_method: string | null;
+}
+
 export interface PublicOrder {
     view_token: string;
     order_number: string;
@@ -43,6 +54,7 @@ export interface PublicOrder {
     payment_status: PublicOrderStatusInfo;
     payment_method: string | null;
     cloudpayments_available: boolean;
+    yandex_pay: YandexPayConfig;
     total_amount: number;
     /** items_discount + promo_discount (на бэке = order.discount_amount). */
     discount_amount: number;

@@ -42,15 +42,11 @@
                 >
                   {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить картой' }}
                 </button>
-                <button
+                <div
                     v-if="canBePaid && isYandexPayOrder"
-                    type="button"
-                    class="order-view__pay-button"
-                    :disabled="isPaymentStarting"
-                    @click="startYandexPay"
-                >
-                  {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить Яндекс Пэй или Сплитом' }}
-                </button>
+                    ref="yandexPayButton"
+                    class="order-view__yandex-pay-button"
+                />
                 <button
                     type="button"
                     class="order-view__repeat-button"
@@ -212,7 +208,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PublicOrder, PublicOrderResponse } from '~/types/order';
+import type { PublicOrder, PublicOrderResponse, PublicOrderStatusInfo } from '~/types/order';
 import { getPaymentMethodLabel } from '~/constants/payment';
 import { getExternalIdClient } from '~/features/LiveChat/composables/useChatFunctions';
 import { useGetMessengerLinks } from '~/features/LiveChat/composables/useChatApi';
@@ -235,6 +231,7 @@ const { show: showToast } = useToast();
 const isReordering = ref(false);
 const isPaymentStarting = ref(false);
 const messengerLinks = ref<MessengerLinks['links']>({});
+const yandexPayButton = ref<HTMLElement | null>(null);
 
 // Обновляем токен текущей сессии сразу после оформления заказа. Поэтому
 // deeplink из виджета на этой странице несёт именно этот order_id, даже если
@@ -247,6 +244,12 @@ onMounted(async () => {
   } catch {
     // Виджет повторит запрос при открытии; страница заказа остаётся доступной.
   }
+
+  if (route.query.payment) {
+    await pollYandexPayStatus();
+  }
+
+  await mountYandexPayButton();
 });
 
 useHead(() => ({
@@ -257,7 +260,7 @@ const orderStatusLabel = computed(() => order.value?.status?.label || null);
 const paymentStatusLabel = computed(() => order.value?.payment_status?.label || null);
 const canBePaid = computed(() => ['pending', 'failed'].includes(order.value?.payment_status?.value ?? ''));
 const isCloudPaymentsOrder = computed(() => order.value?.cloudpayments_available === true);
-const isYandexPayOrder = computed(() => order.value?.yandex_pay_available === true);
+const isYandexPayOrder = computed(() => order.value?.yandex_pay?.available === true);
 
 const paymentMethodLabel = computed(() => getPaymentMethodLabel(order.value?.payment_method));
 
@@ -364,8 +367,48 @@ const startCloudPayments = async () => {
   }
 };
 
-const startYandexPay = async () => {
-  if (!order.value || isPaymentStarting.value) return;
+type YaPayGlobal = {
+  PaymentEnv: { Sandbox: unknown; Production: unknown };
+  CurrencyCode: { Rub: unknown };
+  ButtonType: { Pay: unknown };
+  ButtonTheme: { Black: unknown };
+  ButtonWidth: { Auto: unknown };
+  createSession: (paymentData: Record<string, unknown>, callbacks: {
+    onPayButtonClick: () => Promise<string>;
+    onFormOpenError: (reason: unknown) => void;
+  }) => Promise<{
+    mountButton: (container: HTMLElement, options: Record<string, unknown>) => void;
+  }>;
+};
+
+const loadYandexPaySdk = (): Promise<YaPayGlobal> => new Promise((resolve, reject) => {
+  if ((window as any).YaPay) {
+    resolve((window as any).YaPay as YaPayGlobal);
+    return;
+  }
+
+  const existing = document.querySelector<HTMLScriptElement>('script[data-yandex-pay-sdk]');
+  if (existing) {
+    existing.addEventListener('load', () => resolve((window as any).YaPay as YaPayGlobal), { once: true });
+    existing.addEventListener('error', () => reject(new Error('Не удалось загрузить Яндекс Пэй.')), { once: true });
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://pay.yandex.ru/sdk/v1/pay.js';
+  script.async = true;
+  script.dataset.yandexPaySdk = 'true';
+  script.onload = () => (window as any).YaPay
+    ? resolve((window as any).YaPay as YaPayGlobal)
+    : reject(new Error('Яндекс Пэй не инициализирован.'));
+  script.onerror = () => reject(new Error('Не удалось загрузить Яндекс Пэй.'));
+  document.head.appendChild(script);
+});
+
+const startYandexPay = async (): Promise<string> => {
+  if (!order.value || isPaymentStarting.value) {
+    throw new Error('Оплата уже подготавливается.');
+  }
   isPaymentStarting.value = true;
   try {
     const { data: intent, error } = await useApi<{ success: boolean; message?: string; payment_url?: string }>(
@@ -375,10 +418,63 @@ const startYandexPay = async () => {
     if (error.value || !intent.value?.success || !intent.value.payment_url) {
       throw new Error(intent.value?.message || 'Не удалось подготовить оплату.');
     }
-    window.location.assign(intent.value.payment_url);
+    return intent.value.payment_url;
   } catch (error: any) {
     showToast(error?.message || 'Не удалось открыть Яндекс Пэй. Попробуйте ещё раз.');
+    throw error;
+  } finally {
     isPaymentStarting.value = false;
+  }
+};
+
+const syncYandexPayStatus = async () => {
+  try {
+    const { data: status } = await useApi<{ success: boolean; payment_status?: PublicOrderStatusInfo }>(
+      `/public/orders/${token}/yandex-pay/status`,
+      { method: 'POST', body: {} },
+    );
+    if (status.value?.success) {
+      await refreshNuxtData();
+    }
+  } catch {
+    // Webhook остаётся источником истины; повторная загрузка страницы покажет его результат.
+  }
+};
+
+const pollYandexPayStatus = async () => {
+  // Redirect не подтверждает оплату. Несколько коротких сверок уменьшают
+  // ожидание покупателя, если webhook ещё находится в доставке.
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await syncYandexPayStatus();
+    if (order.value?.payment_status.value === 'paid') break;
+    if (attempt < 3) await new Promise((resolve) => window.setTimeout(resolve, 3000));
+  }
+};
+
+const mountYandexPayButton = async () => {
+  const config = order.value?.yandex_pay;
+  if (!config?.available || !yandexPayButton.value) return;
+
+  try {
+    const YaPay = await loadYandexPaySdk();
+    const paymentSession = await YaPay.createSession({
+      env: config.env === 'PRODUCTION' ? YaPay.PaymentEnv.Production : YaPay.PaymentEnv.Sandbox,
+      version: 4,
+      currencyCode: YaPay.CurrencyCode.Rub,
+      merchantId: config.merchant_id,
+      totalAmount: config.total_amount,
+      availablePaymentMethods: config.available_payment_methods,
+    }, {
+      onPayButtonClick: startYandexPay,
+      onFormOpenError: () => showToast('Не удалось открыть Яндекс Пэй. Попробуйте ещё раз.'),
+    });
+    paymentSession.mountButton(yandexPayButton.value, {
+      type: YaPay.ButtonType.Pay,
+      theme: YaPay.ButtonTheme.Black,
+      width: YaPay.ButtonWidth.Auto,
+    });
+  } catch (error: any) {
+    showToast(error?.message || 'Яндекс Пэй временно недоступен.');
   }
 };
 
