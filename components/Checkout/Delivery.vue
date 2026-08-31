@@ -135,8 +135,8 @@
               <div class="checkout__yandex-offer-check"><span v-if="selectedCdekTariff?.tariff_code === tariff.tariff_code">✓</span></div>
               <div class="checkout__yandex-offer-info">
                 <div class="checkout__yandex-offer-name">{{ cdekTariffTitle(tariff) }}</div>
-                <div v-if="cdekTariffTitle(tariff) !== tariff.tariff_name" class="checkout__cdek-tariff-original">
-                  {{ tariff.tariff_name }} · СДЭК
+                <div v-if="cdekTariffDescription(tariff)" class="checkout__cdek-tariff-original">
+                  {{ cdekTariffDescription(tariff) }}
                 </div>
                 <div class="checkout__yandex-offer-date">{{ tariff.period.min }}-{{ tariff.period.max }} дн.</div>
               </div>
@@ -277,7 +277,7 @@ interface PvzPoint {
 
 interface CdekCity { code: number; full_name: string; country_code?: string }
 interface CdekPvz { code: string; name?: string; type?: string; location?: { address?: string; address_full?: string; longitude?: number; latitude?: number } }
-interface CdekTariff { tariff_code: number; tariff_name: string; delivery_mode: number; price: number; currency: string; period: { min: number; max: number } }
+interface CdekTariff { tariff_code: number; tariff_name: string; display_name?: string; display_description?: string; show_tariff_label?: boolean; delivery_mode: number; price: number; currency: string; period: { min: number; max: number } }
 
 const cdekTariffTitles: Array<[RegExp, string]> = [
   [/^Супер-экспресс до 10(?:\.00)?\b/i, 'Доставка до 10:00'],
@@ -295,7 +295,11 @@ const cdekTariffTitles: Array<[RegExp, string]> = [
 ]
 
 const cdekTariffTitle = (tariff: CdekTariff): string =>
-  cdekTariffTitles.find(([pattern]) => pattern.test(tariff.tariff_name))?.[1] ?? tariff.tariff_name
+  tariff.display_name || (cdekTariffTitles.find(([pattern]) => pattern.test(tariff.tariff_name))?.[1] ?? tariff.tariff_name)
+const cdekTariffDescription = (tariff: CdekTariff): string | null => {
+  const description = tariff.display_description || null
+  return description && description !== cdekTariffTitle(tariff) ? `${tariff.show_tariff_label === false ? '' : 'Тариф «'}${description}${tariff.show_tariff_label === false ? '' : '»'}` : null
+}
 
 const props = defineProps<{
   recipient?: { first_name?: string; last_name?: string; phone?: string; email?: string };
@@ -559,7 +563,7 @@ const fetchCdekTariffs = async () => {
   cdekDeliveryData.value = null;
   try {
     const { data, error } = await useApi<{ success: boolean; tariffs: CdekTariff[]; message?: string }>('/public/delivery/cdek/calculate', {
-      method: 'POST', body: { delivery_type: isCdekPickup.value ? 'pickup' : 'courier', destination: { city_code: cdekCityCode.value, address: address.value }, pvz_code: selectedCdekPvzCode.value, items: cdekItems() },
+      method: 'POST', body: { delivery_type: currentCode.value === 'cdek_postamat' ? 'postamat' : (isCdekPickup.value ? 'pickup' : 'courier'), destination: { city_code: cdekCityCode.value, address: address.value }, pvz_code: selectedCdekPvzCode.value, items: cdekItems() },
     });
     if (!error.value && data.value?.success) cdekTariffs.value = data.value.tariffs ?? [];
     else cdekError.value = (error.value as any)?.data?.message ?? data.value?.message ?? 'Не удалось рассчитать доставку СДЭК.';
@@ -587,7 +591,7 @@ const selectCdekTariff = (tariff: CdekTariff) => {
   selectedCdekTariff.value = tariff;
   const point = cdekPvzPoints.value.find((item) => item.code === selectedCdekPvzCode.value);
   cdekDeliveryData.value = {
-    provider: 'cdek', delivery_type: isCdekPickup.value ? 'pickup' : 'courier', ...tariff,
+    provider: 'cdek', delivery_type: currentCode.value === 'cdek_postamat' ? 'postamat' : (isCdekPickup.value ? 'pickup' : 'courier'), ...tariff,
     destination: { city_code: cdekCityCode.value, address: address.value },
     pvz: point ? { code: point.code, type: point.type, address: point.location?.address ?? point.location?.address_full, coordinates: [point.location?.longitude, point.location?.latitude] } : null,
   };
