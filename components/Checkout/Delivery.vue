@@ -131,7 +131,7 @@
         <div v-if="cdekTariffs.length" class="checkout__yandex-offers">
           <div class="checkout__yandex-offers-title">Выберите тариф СДЭК</div>
           <div class="checkout__yandex-offers-list">
-            <div v-for="tariff in cdekTariffs" :key="tariff.tariff_code" class="checkout__yandex-offer" :class="{ '_selected': selectedCdekTariff?.tariff_code === tariff.tariff_code }" @click="selectCdekTariff(tariff)">
+            <div v-for="tariff in sortedCdekTariffs" :key="tariff.tariff_code" class="checkout__yandex-offer" :class="{ '_selected': selectedCdekTariff?.tariff_code === tariff.tariff_code }" @click="selectCdekTariff(tariff)">
               <div class="checkout__yandex-offer-check"><span v-if="selectedCdekTariff?.tariff_code === tariff.tariff_code">✓</span></div>
               <div class="checkout__yandex-offer-info">
                 <div class="checkout__yandex-offer-name">{{ cdekTariffTitle(tariff) }}</div>
@@ -607,11 +607,20 @@ const freeShipping = useFreeShippingStore();
 const cdekCandidateKey = (tariff: CdekTariff) =>
     `cdek:${isCdekPickup.value ? 'pickup' : 'courier'}:${tariff.tariff_code}`;
 
+// When a CDEK tariff qualifies for free delivery, make it immediately visible
+// instead of leaving it among the paid tariff options further down the list.
+const sortedCdekTariffs = computed(() => [...cdekTariffs.value].sort((left, right) => {
+  const leftFree = freeShipping.isFree(cdekCandidateKey(left));
+  const rightFree = freeShipping.isFree(cdekCandidateKey(right));
+  if (leftFree !== rightFree) return leftFree ? -1 : 1;
+  return left.price - right.price;
+}));
+
 const yandexCandidateKey = (offer: YandexOffer) =>
     `yandex:${isYandexPickup.value ? 'pickup' : 'courier'}:${offer.offer_id}`;
 
 const freeShippingCandidates = computed(() => {
-  const list: Array<{ key: string; service: 'cdek' | 'yandex'; delivery_type: 'pickup' | 'courier'; price: number }> = [];
+  const list: Array<{ key: string; service: 'cdek' | 'yandex'; delivery_type: 'pickup' | 'courier'; tariff_code?: number; price: number }> = [];
 
   cdekTariffs.value.forEach((tariff) => list.push({
     key: cdekCandidateKey(tariff),
