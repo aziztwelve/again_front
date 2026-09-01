@@ -21,6 +21,7 @@ export interface FreeShippingCandidateInput {
     key: string;
     service: 'cdek' | 'yandex';
     delivery_type: 'pickup' | 'courier';
+    tariff_code?: number;
     price: number;
 }
 

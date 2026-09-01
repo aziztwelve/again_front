@@ -617,6 +617,7 @@ const freeShippingCandidates = computed(() => {
     key: cdekCandidateKey(tariff),
     service: 'cdek',
     delivery_type: isCdekPickup.value ? 'pickup' : 'courier',
+    tariff_code: tariff.tariff_code,
     price: tariff.price,
   }));
 
