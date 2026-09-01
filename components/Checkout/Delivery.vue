@@ -565,7 +565,10 @@ const fetchCdekTariffs = async () => {
     const { data, error } = await useApi<{ success: boolean; tariffs: CdekTariff[]; message?: string }>('/public/delivery/cdek/calculate', {
       method: 'POST', body: { delivery_type: currentCode.value === 'cdek_postamat' ? 'postamat' : (isCdekPickup.value ? 'pickup' : 'courier'), destination: { city_code: cdekCityCode.value, address: address.value }, pvz_code: selectedCdekPvzCode.value, items: cdekItems() },
     });
-    if (!error.value && data.value?.success) cdekTariffs.value = data.value.tariffs ?? [];
+    if (!error.value && data.value?.success) {
+      cdekTariffs.value = data.value.tariffs ?? [];
+      if (cdekTariffs.value.length === 1) selectCdekTariff(cdekTariffs.value[0]);
+    }
     else cdekError.value = (error.value as any)?.data?.message ?? data.value?.message ?? 'Не удалось рассчитать доставку СДЭК.';
     if (!cdekTariffs.value.length && !cdekError.value) cdekError.value = 'Для указанного адреса нет доступных тарифов СДЭК.';
   } finally {
