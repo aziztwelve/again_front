@@ -18,7 +18,8 @@ export const PAYMENT_OPTIONS: PaymentOption[] = [
     { code: 'cloudpayments_sbp', title: 'СБП' },
     { code: 'cloudpayments_sberpay', title: 'SberPay' },
     { code: 'cloudpayments_mirpay', title: 'Mir Pay' },
-    { code: 'yandex_pay', title: 'Яндекс Пэй и Сплит' },
+    { code: 'yandex_pay', title: 'Яндекс Пэй' },
+    { code: 'yandex_pay_split', title: 'Яндекс Сплит' },
 ];
 
 /**
@@ -32,8 +33,8 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
     card: 'Оплата картой РФ',
     yookassa: 'Оплата картой РФ',
     online: 'Оплата картой РФ',
-    yandex_pay: 'Яндекс Пэй и Сплит',
-    yandex_pay_split: 'Яндекс Пэй и Сплит',
+    yandex_pay: 'Яндекс Пэй',
+    yandex_pay_split: 'Яндекс Сплит',
     split: 'Яндекс Пэй и Сплит',
     cash: 'Наличными или картой при получении',
     cod: 'Наличными или картой при получении',
