@@ -484,8 +484,7 @@ const hasValidYandexRecipientPhone = (phone?: string): boolean => {
 };
 
 // Сброс при смене метода
-watch(selectedDeliveryMethod, (method, old) => {
-  console.log('[DBG] method-watch', method?.id, 'old:', old?.id);
+watch(selectedDeliveryMethod, () => {
   yandexOffer.value       = null;
   yandexDeliveryData.value = null;
   selectedYandexOffer.value = null;
@@ -578,13 +577,16 @@ const fetchCdekTariffs = async () => {
 };
 
 watch(selectedCdekPvzCode, async (code) => {
-  console.log('[DBG] cdek-pvz-watch', code);
   if (!code) return;
   const point = cdekPvzPoints.value.find((item) => item.code === code);
-  address.value = point?.location?.address ?? point?.location?.address_full ?? '';
+  // ВАЖНО: с привязанным родительским v-model запись в defineModel не меняет
+  // локальное значение синхронно (только эмит, значение вернётся после
+  // раунд-трипа через родителя). Поэтому адрес передаём локальной переменной,
+  // а не читаем address.value сразу после записи.
+  const pointAddress = point?.location?.address ?? point?.location?.address_full ?? '';
+  address.value = pointAddress;
   pvzCode.value = code;
-  pvzAddress.value = address.value;
-  console.log('[DBG] pvzAddress set to', JSON.stringify(pvzAddress.value));
+  pvzAddress.value = pointAddress;
   await fetchCdekTariffs();
 });
 let cdekCourierTimer: ReturnType<typeof setTimeout> | null = null;
@@ -870,7 +872,6 @@ const onPvzSelect = async (point: PvzPoint) => {
 
 // Sync pvzCode при изменении selectedPvz
 watch(selectedPvz, (point) => {
-  console.log('[DBG] yandex-pvz-watch', point);
   if (!point) {
     pvzCode.value    = null;
     pvzAddress.value = null;
