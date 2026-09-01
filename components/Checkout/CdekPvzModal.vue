@@ -28,9 +28,11 @@ const coords = (point: Point): [number, number] | null => { const lat = Number(p
 const renderMap = () => { if (!map || !ymaps || !clusterer) return; clusterer.removeAll(); placemarks.clear(); const objects: any[] = []; filtered.value.forEach((point) => { const pointCoords = coords(point); if (!pointCoords) return; const mark = new ymaps.Placemark(pointCoords, { balloonContentHeader: point.name || point.code, balloonContentBody: address(point), hintContent: point.name || point.code }, { preset: point.code === selected.value?.code ? 'islands#redDotIcon' : 'islands#blueDotIcon' }); mark.events.add('click', () => select(point, false)); placemarks.set(point.code, mark); objects.push(mark) }); clusterer.add(objects); const bounds = clusterer.getBounds(); if (bounds) map.setBounds(bounds, { checkZoomRange: true, zoomMargin: 38 }) }
 const ensureMap = async () => { if (import.meta.server || mapError.value) return; try { ymaps = await loadYandexMaps(); await nextTick(); if (!mapEl.value) return; if (!map) { map = new ymaps.Map(mapEl.value, { center: [55.751574, 37.573856], zoom: 10, controls: ['zoomControl', 'geolocationControl'] }, { suppressMapOpenBlock: true }); clusterer = new ymaps.Clusterer({ preset: 'islands#invertedBlueClusterIcons', groupByCoordinates: false }); map.geoObjects.add(clusterer) }; renderMap() } catch { mapError.value = true } }
 const openMap = async () => { view.value = 'map'; await ensureMap() }
+const destroyMap = () => { if (map) { try { map.destroy() } catch {} map = null } clusterer = null; placemarks.clear(); mapError.value = false }
 const select = (point: Point, moveMap: boolean) => { selected.value = point; renderMap(); const pointCoords = coords(point); if (moveMap && map && pointCoords) map.panTo(pointCoords, { flying: true }) }
 const confirm = () => { if (selected.value) { emit('select', selected.value); emit('close') } }
-watch(() => props.isOpen, (open) => { if (open) { query.value = ''; view.value = 'list'; selected.value = props.points.find((point) => point.code === props.selectedCode) ?? null } })
+watch(() => props.isOpen, (open) => { if (open) { query.value = ''; view.value = 'list'; selected.value = props.points.find((point) => point.code === props.selectedCode) ?? null } else destroyMap() })
+onBeforeUnmount(destroyMap)
 watch(filtered, () => renderMap())
 </script>
 

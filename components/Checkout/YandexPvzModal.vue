@@ -310,13 +310,29 @@ const confirm = () => {
 };
 
 // ─── Реакции ──────────────────────────────────────────────────────────────────
+// DOM модалки живёт под v-if="isOpen": при закрытии контейнер карты уничтожается,
+// поэтому инстанс ymaps.Map нужно уничтожать и пересоздавать на каждом открытии.
+const destroyMap = () => {
+  if (map) {
+    try { map.destroy(); } catch {}
+    map = null;
+  }
+  clusterer = null;
+  placemarks.clear();
+  mapError.value = false;
+};
+
 // Загружаем при открытии модалки или смене geo_id
 watch(() => props.isOpen, async (open) => {
   if (open) {
     await loadPvz();
     await ensureMap();
+  } else {
+    destroyMap();
   }
 });
+
+onBeforeUnmount(destroyMap);
 
 watch(() => props.geoId, (newId, oldId) => {
   if (props.isOpen && newId !== oldId) loadPvz();
