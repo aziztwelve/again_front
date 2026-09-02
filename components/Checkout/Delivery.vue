@@ -403,11 +403,11 @@ const { data: deliveryMethods } = await useApi<{
   meta: { total_methods: number };
 }>('/public/delivery/methods', { query: { active: 1 } });
 
-const CHECKOUT_DELIVERY_CODES = ['yandex_courier', 'yandex_pickup', 'cdek_courier', 'cdek_pickup', 'cdek_postamat'];
+const CHECKOUT_DELIVERY_CODES = ['cdek_pickup', 'cdek_courier', 'cdek_postamat', 'yandex_pickup', 'yandex_courier'];
 const deliveryMethodsList = computed<DeliveryMethod[]>(() =>
     (deliveryMethods.value?.data ?? []).filter((method) =>
       CHECKOUT_DELIVERY_CODES.includes(method.delivery_type_code ?? method.code ?? ''),
-    ),
+    ).sort((left, right) => CHECKOUT_DELIVERY_CODES.indexOf(left.delivery_type_code ?? left.code ?? '') - CHECKOUT_DELIVERY_CODES.indexOf(right.delivery_type_code ?? right.code ?? '')),
 );
 
 const selectedDeliveryMethod = computed<DeliveryMethod | null>(
