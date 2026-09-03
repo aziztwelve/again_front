@@ -152,8 +152,17 @@
     quantity.value = value;
   }
 
-  const selectedColor: Ref = ref(null);
-  const selectedSize: Ref = ref(null);
+  // Значения нужны уже при SSR: иначе кнопка покупки появляется только после
+  // гидратации, а у товаров с размерами без цвета не появляется вовсе.
+  const firstInStockVariation = (product.value?.available_variants ?? []).find((variant) =>
+    variant.in_stock !== false && Number(variant.quantity ?? 0) > 0
+  ) ?? null;
+  const selectedColor: Ref = ref(
+    product.value?.colors?.find((color) => Number(color.id) === Number(firstInStockVariation?.color_id))
+    ?? product.value?.colors?.[0]
+    ?? null
+  );
+  const selectedSize: Ref = ref(firstInStockVariation);
   const isComingSoonView = computed(() => route.query.availability === 'coming-soon');
 
   // В режиме «Скоро в продаже» показываем только те цвета, у которых нет
@@ -195,6 +204,17 @@
     if (isComingSoonView.value) return false;
     if (product.value?.name === GIFT_CERTIFICATE) return true;
     if (!product.value?.has_variants) return Number(product.value?.stock_quantity ?? 0) > 0;
+
+    // У наборов без цветовых вариантов (например, BOX белья) доступность
+    // определяется выбранным размером, а не отсутствующим цветом.
+    if (!(product.value?.colors?.length ?? 0)) {
+      return (product.value?.available_variants ?? []).some((variant) =>
+        Number(variant.id) === Number(selectedSize.value?.id)
+        && variant.in_stock !== false
+        && Number(variant.quantity ?? 0) > 0
+      );
+    }
+
     if (!selectedColor.value) return false;
 
     return (product.value?.available_variants ?? []).some((variant) =>
