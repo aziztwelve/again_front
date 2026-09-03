@@ -408,11 +408,22 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .cart_btns {
+  display: flex;
+  flex-direction: column;
   margin-top: 10px;
+  min-height: 21rem;
+
+  @media (max-width: $tablet) {
+    min-height: 18.5rem;
+  }
+
+  @media (max-width: $mobile) {
+    min-height: 15.5rem;
+  }
 }
 
 .catalog-item__marketplace-links {
-  margin-top: 10px;
+  margin-top: auto;
 }
 
 .catalog-item {
