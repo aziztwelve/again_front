@@ -455,12 +455,34 @@ const canPickOnMap = computed(() => isYandexPickup.value || isCdekPickup.value);
 const yandexGeoId       = ref<number | null>(null);
 const pvzGeoIdLoading   = ref(false);
 
+const resolveYandexGeoId = (location: any, settlement: string): number | null => {
+  if (Number.isFinite(Number(location?.geo_id))) return Number(location.geo_id);
+
+  const queryParts = settlement.toLocaleLowerCase('ru-RU')
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 3);
+  const variants = Array.isArray(location?.variants) ? location.variants : [];
+
+  // Яндекс может вернуть несколько одноимённых деревень. Ищем вариант с
+  // наибольшим совпадением района/области, а не берём первый из выдачи.
+  const bestMatch = variants.reduce((best: any, variant: any) => {
+    const address = String(variant?.address ?? '').toLocaleLowerCase('ru-RU');
+    const score = queryParts.reduce((total, part) => total + (address.includes(part) ? 1 : 0), 0);
+    return score > best.score ? {variant, score} : best;
+  }, {variant: null, score: -1});
+
+  return Number.isFinite(Number(bestMatch.variant?.geo_id))
+    ? Number(bestMatch.variant.geo_id)
+    : null;
+};
+
 watch([isYandexDelivery, cityName], async ([isYandex, city]) => {
   if (!isYandex || !city) { yandexGeoId.value = null; return; }
   pvzGeoIdLoading.value = true;
   const { detectLocation } = useYandexDelivery();
   const loc = await detectLocation(String(city));
-  yandexGeoId.value = loc?.geo_id ?? loc?.variants?.[0]?.geo_id ?? null;
+  yandexGeoId.value = resolveYandexGeoId(loc, String(city));
   pvzGeoIdLoading.value = false;
 }, { immediate: false });
 
