@@ -38,7 +38,7 @@
             <!-- Нет ПВЗ -->
             <div v-else-if="!filteredPoints.length" class="pvz-modal__state">
               <template v-if="!cityName && !geoId">
-                Укажите город в форме доставки для показа ближайших ПВЗ.
+                Укажите населённый пункт в форме доставки для показа ближайших ПВЗ.
               </template>
               <template v-else>
                 Пункты выдачи не найдены.

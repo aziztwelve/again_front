@@ -20,14 +20,11 @@
           :selected-id="useMyAddress ? userStore.user?.profile?.delivery_country_id : defaultCountryId"
           @get-selected-value="setCountry"
       />
-      <FormSelect
-          v-if="cities"
-          :key="`city-${useMyAddress}-${countryId}`"
-          name="city"
-          :list="cities.cities"
-          placeholder="Город"
-          :selected-id="useMyAddress ? userStore.user?.profile?.delivery_city_id : undefined"
-          @get-selected-value="setCity"
+      <FormSettlementSelect
+          :key="`settlement-${useMyAddress}-${countryCode}`"
+          :country-code="countryCode || 'RU'"
+          placeholder="Населённый пункт"
+          @select="setCity"
       />
       <FormInput
           name="region"
@@ -94,7 +91,7 @@
               type="button"
               class="checkout__delivery-map-btn btn _border _thin"
               :disabled="(isYandexPickup && (!cityName || pvzGeoIdLoading)) || (isCdekPickup && (!cityName || cdekCityLoading || cdekPvzLoading))"
-              :title="!cityName ? 'Укажите город для выбора ПВЗ' : undefined"
+              :title="!cityName ? 'Укажите населённый пункт для выбора ПВЗ' : undefined"
               @click="onPickOnMap"
           >
             <span v-if="(isYandexPickup && pvzGeoIdLoading) || (isCdekPickup && (cdekCityLoading || cdekPvzLoading))" class="checkout__pvz-btn-spinner"></span>
@@ -107,17 +104,17 @@
 
       <!-- ======= СДЭК ======= -->
       <div v-if="isCdekDelivery" class="checkout__cdek">
-        <!-- Подсказка для курьера СДЭК: нужен город и адрес -->
+        <!-- Подсказка для курьера СДЭК: нужны населённый пункт и адрес -->
         <div v-if="isCdekCourier && !canCalculateCdek" class="checkout__yandex-hint">
           <span class="checkout__yandex-hint-icon">🚚</span>
-          Заполните город и адрес доставки, чтобы рассчитать стоимость.
+          Заполните населённый пункт и адрес доставки, чтобы рассчитать стоимость.
         </div>
         <div v-if="cdekCityLoading" class="checkout__yandex-loading">
           <span class="checkout__yandex-loading-spinner"></span>
-          Ищем город в СДЭК...
+          Ищем населённый пункт в СДЭК...
         </div>
         <div v-else-if="cityName && !cdekCityCode" class="checkout__yandex-hint">
-          Не удалось сопоставить город с СДЭК. Уточните название города.
+          Не удалось сопоставить населённый пункт с СДЭК. Уточните название.
         </div>
         <div v-if="isCdekPickup && selectedCdekPvzCode" class="checkout__selected-pvz">
           <div class="checkout__selected-pvz-header"><span class="checkout__selected-pvz-icon">✓</span><span class="checkout__selected-pvz-title">Пункт выдачи СДЭК</span><button type="button" class="checkout__selected-pvz-change" @click="showCdekPvzModal = true">Изменить</button></div>
@@ -175,7 +172,7 @@
       <!-- Подсказка для курьера: нужен адрес -->
       <div v-if="isYandexCourier && !canCalculateYandex" class="checkout__yandex-hint">
         <span class="checkout__yandex-hint-icon">🚚</span>
-        Заполните город и адрес доставки, чтобы рассчитать стоимость.
+        Заполните населённый пункт и адрес доставки, чтобы рассчитать стоимость.
       </div>
 
       <!-- Загрузка тарифов -->
@@ -247,7 +244,7 @@
 
 <script setup lang="ts">
 import { until } from '@vueuse/core';
-import type { Cities, Countries } from '~/types/countries';
+import type { Countries } from '~/types/countries';
 
 interface DeliveryMethod {
   id: number;
@@ -343,7 +340,8 @@ const cdekDeliveryData = defineModel<Record<string, unknown> | null>('cdekDelive
 const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
 
-// Идентификаторы справочников гео из селектов «Страна»/«Город».
+// Идентификаторы локальных справочников гео. Населённый пункт выбирается по
+// справочнику СДЭК, поэтому его код не подменяет локальный city_id.
 // Уходят в заказ (delivery_address.country_id / city_id) и в оценку правил
 // бесплатной доставки — по названиям матчинг менее надёжный.
 const geoCountryId = defineModel<number | null>('geoCountryId', { default: null });
@@ -373,29 +371,26 @@ watch(useMyAddress, (checked) => {
   }
 });
 
-// ─── Страна / город ───────────────────────────────────────────────────────────
+// ─── Страна / населённый пункт ────────────────────────────────────────────────
 const setCountry = (object: any) => {
   countryCode.value = object.code;
   countryName.value = object.title ?? object.name ?? object.code;
   countryId.value   = object.id;
   geoCountryId.value = typeof object.id === 'number' ? object.id : null;
-  // Город относится к другой стране — сбрасываем его id.
+  // Населённый пункт относится к другой стране — сбрасываем его локальный id.
   geoCityId.value = null;
 };
 
-const setCity = (object: any) => {
-  cityName.value = object.title ?? object.name;
-  geoCityId.value = typeof object.id === 'number' ? object.id : null;
+const setCity = (object: { full_name?: string; name?: string }) => {
+  cityName.value = object.full_name ?? object.name ?? '';
+  // Код населённого пункта СДЭК не является id локального справочника city.
+  geoCityId.value = null;
 };
 
 const { data: countries } = await useCountries();
 const defaultCountryId = computed(() =>
   countries.value?.countries?.find((c: any) => c.code === 'RU')?.id ?? undefined
 );
-const { data: cities }    = await useApi<Cities>('/countries/cities', {
-  query: { country_id: countryId },
-  watch: [countryId],
-});
 
 // ─── Методы доставки ──────────────────────────────────────────────────────────
 const { data: deliveryMethods } = await useApi<{
@@ -445,7 +440,7 @@ const isCdekCourier = computed(() => currentCode.value === 'cdek_courier');
 const isCdekDelivery = computed(() => isCdekPickup.value || isCdekCourier.value);
 const isPickupDelivery = computed(() => isYandexPickup.value || isCdekPickup.value);
 
-// Для курьера нужен город + адрес
+// Для курьера нужны населённый пункт и адрес.
 const canCalculateYandex = computed(() =>
     !!(cityName.value && address.value),
 );
