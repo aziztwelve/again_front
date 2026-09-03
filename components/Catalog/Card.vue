@@ -417,10 +417,16 @@ onMounted(() => {
 
 .catalog-item {
   position: relative;
-  align-self: start;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  height: 100%;
+
+  &__card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
 
   @media (max-width: $mobile) {
     padding-bottom: 5rem;
@@ -675,10 +681,18 @@ onMounted(() => {
   }
 
   &__title {
+    display: block;
+    overflow: hidden;
+    min-height: 4.32rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     font-size: 1.8rem;
     font-weight: 300;
     color: #000;
     @media (max-width: $mobile) {
+      min-height: 3.84rem;
       font-size: 1.6rem; // Оставляем только размер шрифта
     }
   }
