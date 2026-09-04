@@ -424,6 +424,22 @@ onMounted(() => {
 
 .catalog-item__marketplace-links {
   margin-top: auto;
+
+  :deep(.marketplace-btn) {
+    min-height: 6.4rem;
+    padding: 1.4rem 1.7rem 1.4rem 2.1rem;
+    font-size: 1.8rem;
+    font-weight: 300;
+    line-height: 1.2;
+  }
+
+  @media (max-width: $mobile) {
+    :deep(.marketplace-btn) {
+      min-height: 4.2rem;
+      padding: .9rem 1rem .7rem 1.5rem;
+      font-size: 1rem;
+    }
+  }
 }
 
 .catalog-item {
