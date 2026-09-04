@@ -8,29 +8,13 @@
         </NuxtLink>
       </div>
 
-      <CatalogGrid v-if="homeProductsFour" :list="homeProductsFour.data"/>
-      <CatalogGrid
-          v-if="homeProductsEight"
-          class="catalog__second-selection"
-          :list="homeProductsEight.data"
-      />
+      <CatalogGrid v-if="homeProductsEight" :list="homeProductsEight.data"/>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import type {Product} from "~/types/catalog";
-
-const {data: homeProductsFour} = await useApi<{
-  data: Product[]
-}>('/public/catalog/products', {
-  query: {
-    per_page: 4,
-    page: 1,
-    in_stock: 1,
-    category_slug: 'tovary-na-glavnoi-4',
-  }
-})
 
 const {data: homeProductsEight} = await useApi<{
   data: Product[]
@@ -49,10 +33,6 @@ const {data: homeProductsEight} = await useApi<{
   display: flex;
   justify-content: flex-end;
   margin-bottom: 2rem;
-}
-
-.catalog__second-selection {
-  margin-top: 3rem;
 }
 
 .catalog__all-btn {

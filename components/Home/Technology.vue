@@ -73,7 +73,7 @@ const {data: products} = await useApi<{
   query: {
     per_page: 4,
     in_stock: 1,
-    category_slug: 'novinki',
+    category_slug: 'tovary-na-glavnoi-4',
   }
 })
 </script>
