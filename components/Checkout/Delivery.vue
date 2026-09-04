@@ -116,6 +116,9 @@
         <div v-else-if="cityName && !cdekCityCode" class="checkout__yandex-hint">
           Не удалось сопоставить населённый пункт с СДЭК. Уточните название.
         </div>
+        <div v-else-if="isCdekPickup && cityName && cdekCityCode && !cdekPvzLoading && !cdekPvzPoints.length" class="checkout__yandex-hint">
+          В этом населённом пункте нет ПВЗ СДЭК. Выберите курьерскую доставку или другой населённый пункт.
+        </div>
         <div v-if="isCdekPickup && selectedCdekPvzCode" class="checkout__selected-pvz">
           <div class="checkout__selected-pvz-header"><span class="checkout__selected-pvz-icon">✓</span><span class="checkout__selected-pvz-title">Пункт выдачи СДЭК</span><button type="button" class="checkout__selected-pvz-change" @click="showCdekPvzModal = true">Изменить</button></div>
           <div class="checkout__selected-pvz-address">{{ pvzAddress }}</div>
@@ -346,6 +349,7 @@ const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
 // бесплатной доставки — по названиям матчинг менее надёжный.
 const geoCountryId = defineModel<number | null>('geoCountryId', { default: null });
 const geoCityId    = defineModel<number | null>('geoCityId',    { default: null });
+const selectedCdekSettlement = ref<CdekCity | null>(null);
 
 // ─── Адрес из профиля ─────────────────────────────────────────────────────────
 const useMyAddress = ref(false);
@@ -379,12 +383,14 @@ const setCountry = (object: any) => {
   geoCountryId.value = typeof object.id === 'number' ? object.id : null;
   // Населённый пункт относится к другой стране — сбрасываем его локальный id.
   geoCityId.value = null;
+  selectedCdekSettlement.value = null;
 };
 
-const setCity = (object: { full_name?: string; name?: string }) => {
-  cityName.value = object.full_name ?? object.name ?? '';
+const setCity = (object: CdekCity) => {
+  cityName.value = object.full_name;
   // Код населённого пункта СДЭК не является id локального справочника city.
   geoCityId.value = null;
+  selectedCdekSettlement.value = object;
 };
 
 const { data: countries } = await useCountries();
@@ -521,6 +527,13 @@ watch([isCdekDelivery, currentCode, cityName], ([enabled, _code, city]) => {
   cdekCityTimer = setTimeout(async () => {
     cdekCityLoading.value = true;
     try {
+      // Полное название из подсказки СДЭК повторно не ищем: suggest/cities
+      // принимает короткий запрос, а выбранный код уже однозначен.
+      if (selectedCdekSettlement.value?.code) {
+        cdekCities.value = [selectedCdekSettlement.value];
+        await selectCdekCity(selectedCdekSettlement.value);
+        return;
+      }
       const { data, error } = await useApi<{ cities: CdekCity[] }>('/public/delivery/cdek/cities', { query: { query: city, country_code: countryCode.value || 'RU' } });
       cdekCities.value = error.value ? [] : (data.value?.cities ?? []);
       if (cdekCities.value.length) selectCdekCity(cdekCities.value[0]);
