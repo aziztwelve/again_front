@@ -411,19 +411,10 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   margin-top: 10px;
-  min-height: 21rem;
-
-  @media (max-width: $tablet) {
-    min-height: 18.5rem;
-  }
-
-  @media (max-width: $mobile) {
-    min-height: 15.5rem;
-  }
 }
 
 .catalog-item__marketplace-links {
-  margin-top: auto;
+  margin-top: 10px;
 }
 
 .catalog-item {

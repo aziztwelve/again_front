@@ -91,7 +91,6 @@ const hasLinks = computed(() => {
   gap: 10px;
   width: 100%;
   box-sizing: border-box;
-  margin-top: auto;
 }
 
 /* На странице товара кнопки маркетплейсов совпадают по ширине с «В корзину». */
