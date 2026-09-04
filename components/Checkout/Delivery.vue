@@ -149,7 +149,9 @@
               </div>
             </div>
           </div>
-          <div v-if="freeShippingHint" class="checkout__free-shipping-hint">{{ freeShippingHint }}</div>
+          <div v-if="freeShippingHints.length" class="checkout__free-shipping-hint">
+            <div v-for="hint in freeShippingHints" :key="hint">{{ hint }}</div>
+          </div>
         </div>
       </div>
 
@@ -221,7 +223,9 @@
             </div>
           </div>
         </div>
-        <div v-if="freeShippingHint" class="checkout__free-shipping-hint">{{ freeShippingHint }}</div>
+        <div v-if="freeShippingHints.length" class="checkout__free-shipping-hint">
+          <div v-for="hint in freeShippingHints" :key="hint">{{ hint }}</div>
+        </div>
       </div>
     </div>
 
@@ -656,13 +660,17 @@ const freeShippingCandidates = computed(() => {
   return list;
 });
 
-const freeShippingHint = computed(() => {
-  const progress = freeShipping.progress;
-  if (!progress) return '';
-
+const freeShippingHints = computed(() => {
+  const labels: Record<string, string> = {
+    pickup: 'Бесплатная доставка до ПВЗ',
+    courier: 'Бесплатная доставка курьером',
+    postamat: 'Бесплатная доставка до постамата',
+  };
   const format = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.ceil(value));
 
-  return `Бесплатная доставка от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`;
+  return freeShipping.progresses
+      .filter((progress) => labels[progress.delivery_type])
+      .map((progress) => `${labels[progress.delivery_type]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`);
 });
 
 let freeShippingTimer: ReturnType<typeof setTimeout> | null = null;

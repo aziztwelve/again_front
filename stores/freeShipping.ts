@@ -38,6 +38,7 @@ export interface FreeShippingCandidateResult {
 export interface FreeShippingProgress {
     rule_id: number;
     rule_name: string;
+    delivery_type?: 'pickup' | 'courier' | 'postamat';
     min_order_amount: number;
     qualifying_amount: number;
     remaining: number;
@@ -58,6 +59,7 @@ interface EvaluateParams {
 export const useFreeShippingStore = defineStore('freeShipping', () => {
     const results = ref<Record<string, FreeShippingCandidateResult>>({});
     const progress = ref<FreeShippingProgress | null>(null);
+    const progresses = ref<FreeShippingProgress[]>([]);
     const qualifyingAmount = ref(0);
     const loading = ref(false);
 
@@ -88,6 +90,7 @@ export const useFreeShippingStore = defineStore('freeShipping', () => {
     const reset = () => {
         results.value = {};
         progress.value = null;
+        progresses.value = [];
         qualifyingAmount.value = 0;
         setSelected(null, null);
     };
@@ -109,6 +112,7 @@ export const useFreeShippingStore = defineStore('freeShipping', () => {
                 qualifying_amount: number;
                 candidates: FreeShippingCandidateResult[];
                 progress: FreeShippingProgress | null;
+                progresses: FreeShippingProgress[];
             }>('/public/delivery/free-shipping/evaluate', {
                 method: 'POST',
                 body: {
@@ -135,12 +139,14 @@ export const useFreeShippingStore = defineStore('freeShipping', () => {
 
             results.value = next;
             progress.value = response.progress ?? null;
+            progresses.value = response.progresses ?? [];
             qualifyingAmount.value = response.qualifying_amount ?? 0;
         } catch (e) {
             // Оценка — не критичный запрос: при ошибке просто не показываем
             // «Бесплатно» и подсказку, чекаут продолжает работать.
             results.value = {};
             progress.value = null;
+            progresses.value = [];
         } finally {
             loading.value = false;
         }
@@ -149,6 +155,7 @@ export const useFreeShippingStore = defineStore('freeShipping', () => {
     return {
         results,
         progress,
+        progresses,
         qualifyingAmount,
         loading,
         selectedKey,
