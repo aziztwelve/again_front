@@ -27,6 +27,20 @@ withDefaults(defineProps<{
   column-gap: 1.5rem;
   row-gap: 3rem;
 
+  @supports (grid-template-rows: subgrid) {
+    row-gap: 0;
+
+    :deep(.catalog-item) {
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+    }
+
+    :deep(.cart_btns) {
+      margin-bottom: 3rem;
+    }
+  }
+
   @media (max-width: $tablet) {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -35,6 +49,14 @@ withDefaults(defineProps<{
     grid-template-columns: repeat(2, 1fr);
     column-gap: 1rem;
     row-gap: 2rem;
+
+    @supports (grid-template-rows: subgrid) {
+      row-gap: 0;
+
+      :deep(.cart_btns) {
+        margin-bottom: 2rem;
+      }
+    }
   }
 }
 </style>
