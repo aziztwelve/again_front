@@ -547,8 +547,17 @@ const selectCdekCity = async (city: CdekCity) => {
   }
 };
 
+// Габариты/вес берутся из карточки товара (предпочитается выбранная вариантная
+// позиция), отсутствующие поля бэкенд заменит значениями из настроек СДЭК
+// («Вес по умолчанию», «Длина/Ширина/Высота»).
 const cdekItems = () => useCartStore().cart.map((item: any) => ({
-  name: item.name ?? 'Товар', weight: item.weight ?? 500, price: item.price ?? 0, quantity: item.quantity ?? 1,
+  name: item.name ?? 'Товар',
+  weight: item.selected_variant?.weight ?? item.weight ?? null,
+  length: item.selected_variant?.length ?? item.length ?? null,
+  width: item.selected_variant?.width ?? item.width ?? null,
+  height: item.selected_variant?.height ?? item.height ?? null,
+  price: item.price ?? 0,
+  quantity: item.quantity ?? 1,
 }));
 const fetchCdekTariffs = async () => {
   if (!cdekCityCode.value || (isCdekPickup.value && !selectedCdekPvzCode.value) || (isCdekCourier.value && !address.value)) return;
