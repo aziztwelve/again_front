@@ -26,17 +26,6 @@
           placeholder="Населённый пункт"
           @select="setCity"
       />
-      <FormInput
-          name="region"
-          placeholder="Регион / область"
-          v-model="region"
-      />
-      <FormInput
-          name="postal_code"
-          placeholder="Почтовый индекс"
-          v-model="postalCode"
-      />
-
       <!-- Адрес: для ПВЗ подставляется автоматически, для курьера — обязателен -->
       <FormInput
           name="address"
@@ -324,8 +313,6 @@ const countryCode       = defineModel<string>('countryCode', { default: '' });
 const countryName       = defineModel<string>('countryName', { default: '' });
 const cityName          = defineModel<string>('cityName', { default: '' });
 const address           = defineModel<string>('address', { default: '' });
-const region            = defineModel<string>('region', { default: '' });
-const postalCode        = defineModel<string>('postalCode', { default: '' });
 const entrance          = defineModel<string>('entrance', { default: '' });
 const floor             = defineModel<string>('floor', { default: '' });
 const intercom          = defineModel<string>('intercom', { default: '' });
@@ -366,12 +353,9 @@ watch(useMyAddress, (checked) => {
   const p = userStore.user?.profile;
   if (checked && p) {
     address.value   = p.delivery_address    || '';
-    postalCode.value = p.delivery_postal_code || '';
     if (p.delivery_country_id) countryId.value = p.delivery_country_id;
   } else {
     address.value    = '';
-    postalCode.value = '';
-    region.value     = '';
     countryCode.value = '';
     countryName.value = '';
     cityName.value   = '';
@@ -689,7 +673,6 @@ const evaluateFreeShipping = () => {
       countryId: geoCountryId.value,
       cityId: geoCityId.value,
       country: countryName.value || null,
-      region: region.value || null,
       city: cityName.value || null,
     });
   }, 300);

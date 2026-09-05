@@ -156,8 +156,6 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             city: form.city_name,
             address: form.delivery_address,
         };
-        if (form.region) addr.region = form.region;
-        if (form.postal_code) addr.postal_code = form.postal_code;
         // id гео из селектов — для правил бесплатной доставки на бэкенде.
         // Проверяем на null/undefined, а не на truthy: id = 0 валиден (Россия).
         if (form.country_id !== null && form.country_id !== undefined) addr.country_id = form.country_id;

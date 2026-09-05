@@ -112,8 +112,6 @@ export interface CheckoutForm {
     country_id?: number | null;
     city_id?: number | null;
     delivery_address: string;
-    region: string;
-    postal_code: string;
     entrance: string;
     floor: string;
     intercom: string;

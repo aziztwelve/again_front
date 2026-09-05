@@ -32,8 +32,6 @@
                   v-model:country-name="form.country_name"
                   v-model:city-name="form.city_name"
                   v-model:address="form.delivery_address"
-                  v-model:region="form.region"
-                  v-model:postal-code="form.postal_code"
                   v-model:entrance="form.entrance"
                   v-model:floor="form.floor"
                   v-model:intercom="form.intercom"
@@ -167,8 +165,6 @@ const form = reactive<CheckoutForm>({
   country_id: null,
   city_id: null,
   delivery_address: '',
-  region: '',
-  postal_code: '',
   entrance: '',
   floor: '',
   intercom: '',
