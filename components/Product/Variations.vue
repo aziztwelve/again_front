@@ -103,6 +103,7 @@ import type {AvailableVariation, Color, Product} from '~/types/catalog';
 import {ModalsSizes} from '#components';
 import {getFormatPrice} from "~/utils/getFormatPrice";
 import {GIFT_CERTIFICATE} from "~/constants";
+import {pickDefaultVariant, sortVariantsDefault} from '~/utils/productVariants';
 
 const props = defineProps<{
   variations?: AvailableVariation[],
@@ -124,12 +125,7 @@ const sizes = computed(() => {
   }
 
   const data = props.variations.filter(item => Number(item.color_id) === Number(selectedColor.value!.id));
-  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-  return data.sort((a, b) => {
-    const indexA = sizeOrder.indexOf(a.size) === -1 ? Infinity : sizeOrder.indexOf(a.size);
-    const indexB = sizeOrder.indexOf(b.size) === -1 ? Infinity : sizeOrder.indexOf(b.size);
-    return indexA - indexB;
-  });
+  return sortVariantsDefault(data);
 });
 
 // Проверка, является ли цвет принтом
@@ -137,24 +133,12 @@ const isPrintColor = (code: string) => {
   return code && code.toLowerCase().includes('print');
 };
 
-// Вариант в наличии и с ценой: цена продажи бывает задана в МС только у
-// части вариантов — по умолчанию и при смене цвета выбираем покупаемый.
-const variantInStock = (variant: AvailableVariation) =>
-    variant.in_stock !== false && Number(variant.quantity ?? 0) > 0;
-const variantPriced = (variant: AvailableVariation) => Number(variant.price ?? 0) > 0;
-const pickPurchasableVariant = (list: AvailableVariation[]): AvailableVariation | null => {
-  if (!list.length) return null;
-  return list.find(variant => variantInStock(variant) && variantPriced(variant))
-      ?? list.find(variantInStock)
-      ?? list[0];
-};
-
 onMounted(() => {
   const variations = props.variations ?? [];
   const colors = props.colors ?? [];
 
   if (variations.length) {
-    selectedSize.value = pickPurchasableVariant(variations);
+    selectedSize.value = pickDefaultVariant(variations, colors);
 
     const matchedColor = colors.find(c => c.id === selectedSize.value?.color_id) ?? colors[0] ?? null;
     selectedColor.value = matchedColor ?? null;
@@ -186,7 +170,7 @@ const emitColor = (color: Color) => {
 
   const dataForColor = (props.variations ?? []).filter(v => Number(v.color_id) === Number(color.id));
 
-  selectedSize.value = pickPurchasableVariant(dataForColor);
+  selectedSize.value = pickDefaultVariant(dataForColor, props.colors ?? []);
   emit('getSize', selectedSize.value);
 }
 

@@ -125,9 +125,10 @@
   </template>
 
   <script setup lang="ts">
-  import type {AvailableVariation, Product} from '~/types/catalog';
+  import type {Product} from '~/types/catalog';
   import MarketplaceLinksButtons from "~/components/Catalog/MarketplaceLinksButtons.vue";
   import {GIFT_CERTIFICATE} from "~/constants";
+  import {pickDefaultVariant, variantInStock, variantPriced} from '~/utils/productVariants';
 
   const route = useRoute();
   const {data: product} = await useApi<Product>(`/public/catalog/products/${route.params.slug}`)
@@ -154,22 +155,20 @@
 
   // Значения нужны уже при SSR: иначе кнопка покупки появляется только после
   // гидратации, а у товаров с размерами без цвета не появляется вовсе.
-  // Вариант по умолчанию — первый в наличии с ценой: у товаров, где цена
-  // продажи задана в МС только у части вариантов, карточка сразу открывается
-  // на покупаемом цвете/размере.
-  const variantInStock = (variant: AvailableVariation) =>
-      variant.in_stock !== false && Number(variant.quantity ?? 0) > 0;
-  const variantPriced = (variant: AvailableVariation) => Number(variant.price ?? 0) > 0;
-  const allVariants = product.value?.available_variants ?? [];
-  const firstInStockVariation = allVariants.find((variant) =>
-      variantInStock(variant) && variantPriced(variant)
-  ) ?? allVariants.find(variantInStock) ?? null;
+  // Вариант по умолчанию — первый в наличии и с ценой по сортировке по
+  // умолчанию (цвета в порядке карточки, размеры XS→XXXL): если покупаемы
+  // все варианты — это просто первый по сортировке; если цена в МС задана
+  // не у всех — первый покупаемый.
+  const defaultVariant = pickDefaultVariant(
+      product.value?.available_variants ?? [],
+      product.value?.colors ?? [],
+  );
   const selectedColor: Ref = ref(
-    product.value?.colors?.find((color) => Number(color.id) === Number(firstInStockVariation?.color_id))
+    product.value?.colors?.find((color) => Number(color.id) === Number(defaultVariant?.color_id))
     ?? product.value?.colors?.[0]
     ?? null
   );
-  const selectedSize: Ref = ref(firstInStockVariation);
+  const selectedSize: Ref = ref(defaultVariant);
   const isComingSoonView = computed(() => route.query.availability === 'coming-soon');
 
   // В режиме «Скоро в продаже» показываем только те цвета, у которых нет
