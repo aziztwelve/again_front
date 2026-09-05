@@ -67,14 +67,14 @@
             <div>
               <Quantity
                   class="product__quantity"
-                  v-if="(product.price && canPurchaseSelectedOption) || product.name == GIFT_CERTIFICATE"
+                  v-if="(getCurrentPrice() && canPurchaseSelectedOption) || product.name == GIFT_CERTIFICATE"
                   @get-quantity="getQuantity"
               />
 
-              <div class="product__actions" v-if="canPurchaseSelectedOption">
+              <div class="product__actions" v-if="canPurchaseSelectedOption && getCurrentPrice()">
                 <div class="product__actions-buttons">
                   <ProductActionsAddToCart
-                      v-if="product.price || product.name == GIFT_CERTIFICATE"
+                      v-if="getCurrentPrice() || product.name == GIFT_CERTIFICATE"
                       :quantity="quantity"
                       :product="product"
                       :variation="selectedSize"
@@ -125,7 +125,7 @@
   </template>
 
   <script setup lang="ts">
-  import type {Product} from '~/types/catalog';
+  import type {AvailableVariation, Product} from '~/types/catalog';
   import MarketplaceLinksButtons from "~/components/Catalog/MarketplaceLinksButtons.vue";
   import {GIFT_CERTIFICATE} from "~/constants";
 
@@ -154,9 +154,16 @@
 
   // Значения нужны уже при SSR: иначе кнопка покупки появляется только после
   // гидратации, а у товаров с размерами без цвета не появляется вовсе.
-  const firstInStockVariation = (product.value?.available_variants ?? []).find((variant) =>
-    variant.in_stock !== false && Number(variant.quantity ?? 0) > 0
-  ) ?? null;
+  // Вариант по умолчанию — первый в наличии с ценой: у товаров, где цена
+  // продажи задана в МС только у части вариантов, карточка сразу открывается
+  // на покупаемом цвете/размере.
+  const variantInStock = (variant: AvailableVariation) =>
+      variant.in_stock !== false && Number(variant.quantity ?? 0) > 0;
+  const variantPriced = (variant: AvailableVariation) => Number(variant.price ?? 0) > 0;
+  const allVariants = product.value?.available_variants ?? [];
+  const firstInStockVariation = allVariants.find((variant) =>
+      variantInStock(variant) && variantPriced(variant)
+  ) ?? allVariants.find(variantInStock) ?? null;
   const selectedColor: Ref = ref(
     product.value?.colors?.find((color) => Number(color.id) === Number(firstInStockVariation?.color_id))
     ?? product.value?.colors?.[0]
@@ -198,20 +205,24 @@
         : variants;
   });
 
-  // Товар может быть в наличии в целом, но не в выбранном цвете. В этом
-  // случае нельзя добавить вариант в корзину — предлагаем подписку на остатки.
+  // Покупаем только вариант в наличии и с ценой (цена продажи бывает задана
+  // в МС не у всех вариантов). Иначе нельзя добавить в корзину — предлагаем
+  // подписку на остатки, чтобы на странице всегда была хоть одна кнопка.
   const canPurchaseSelectedOption = computed(() => {
     if (isComingSoonView.value) return false;
     if (product.value?.name === GIFT_CERTIFICATE) return true;
-    if (!product.value?.has_variants) return Number(product.value?.stock_quantity ?? 0) > 0;
+    if (!product.value?.has_variants) {
+      return Number(product.value?.stock_quantity ?? 0) > 0
+          && Number(product.value?.price ?? 0) > 0;
+    }
 
     // У наборов без цветовых вариантов (например, BOX белья) доступность
     // определяется выбранным размером, а не отсутствующим цветом.
     if (!(product.value?.colors?.length ?? 0)) {
       return (product.value?.available_variants ?? []).some((variant) =>
         Number(variant.id) === Number(selectedSize.value?.id)
-        && variant.in_stock !== false
-        && Number(variant.quantity ?? 0) > 0
+        && variantInStock(variant)
+        && variantPriced(variant)
       );
     }
 
@@ -219,8 +230,8 @@
 
     return (product.value?.available_variants ?? []).some((variant) =>
       Number(variant.color_id) === Number(selectedColor.value.id)
-      && variant.in_stock !== false
-      && Number(variant.quantity ?? 0) > 0
+      && variantInStock(variant)
+      && variantPriced(variant)
     );
   });
 

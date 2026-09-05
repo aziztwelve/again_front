@@ -137,14 +137,26 @@ const isPrintColor = (code: string) => {
   return code && code.toLowerCase().includes('print');
 };
 
+// Вариант в наличии и с ценой: цена продажи бывает задана в МС только у
+// части вариантов — по умолчанию и при смене цвета выбираем покупаемый.
+const variantInStock = (variant: AvailableVariation) =>
+    variant.in_stock !== false && Number(variant.quantity ?? 0) > 0;
+const variantPriced = (variant: AvailableVariation) => Number(variant.price ?? 0) > 0;
+const pickPurchasableVariant = (list: AvailableVariation[]): AvailableVariation | null => {
+  if (!list.length) return null;
+  return list.find(variant => variantInStock(variant) && variantPriced(variant))
+      ?? list.find(variantInStock)
+      ?? list[0];
+};
+
 onMounted(() => {
   const variations = props.variations ?? [];
   const colors = props.colors ?? [];
 
   if (variations.length) {
-    selectedSize.value = variations[0];
+    selectedSize.value = pickPurchasableVariant(variations);
 
-    const matchedColor = colors.find(c => c.id === variations[0].color_id) ?? colors[0] ?? null;
+    const matchedColor = colors.find(c => c.id === selectedSize.value?.color_id) ?? colors[0] ?? null;
     selectedColor.value = matchedColor ?? null;
 
     emit('getColor', selectedColor.value);
@@ -173,10 +185,9 @@ const emitColor = (color: Color) => {
   }
 
   const dataForColor = (props.variations ?? []).filter(v => Number(v.color_id) === Number(color.id));
-  const newSize = dataForColor.length ? dataForColor[0] : null;
 
-  selectedSize.value = newSize;
-  emit('getSize', newSize);
+  selectedSize.value = pickPurchasableVariant(dataForColor);
+  emit('getSize', selectedSize.value);
 }
 
 
