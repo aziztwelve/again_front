@@ -38,7 +38,8 @@ export interface FreeShippingCandidateResult {
 export interface FreeShippingProgress {
     rule_id: number;
     rule_name: string;
-    delivery_type?: 'pickup' | 'courier' | 'postamat';
+    service?: 'cdek' | 'yandex' | null;
+    delivery_type?: 'pickup' | 'courier' | 'postamat' | null;
     min_order_amount: number;
     qualifying_amount: number;
     remaining: number;

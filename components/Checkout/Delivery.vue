@@ -659,13 +659,26 @@ const freeShippingHints = computed(() => {
     courier: 'Бесплатная доставка курьером',
     postamat: 'Бесплатная доставка до постамата',
   };
+  const service = isYandexDelivery.value ? 'yandex' : (isCdekDelivery.value ? 'cdek' : null);
+  const deliveryType = currentCode.value === 'cdek_postamat'
+      ? 'postamat'
+      : (isPickupDelivery.value ? 'pickup' : 'courier');
   const format = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.ceil(value));
 
   return freeShipping.progresses
-      // Яндекс.Доставка не поддерживает постаматы. Прогресс для правила СДЭК
-      // не должен появляться рядом с вариантами Яндекс ПВЗ/курьера.
-      .filter((progress) => labels[progress.delivery_type] && (!isYandexDelivery.value || progress.delivery_type !== 'postamat'))
-      .map((progress) => `${labels[progress.delivery_type]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`);
+      .filter((progress) => {
+        if (!service || (progress.service && progress.service !== service)) return false;
+        if (service === 'yandex' && progress.delivery_type === 'postamat') return false;
+
+        // «ПВЗ» в правилах СДЭК распространяется и на постаматы.
+        return !progress.delivery_type
+            || progress.delivery_type === deliveryType
+            || (deliveryType === 'postamat' && progress.delivery_type === 'pickup');
+      })
+      .map((progress) => {
+        const type = progress.delivery_type ?? deliveryType;
+        return `${labels[type]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`;
+      });
 });
 
 let freeShippingTimer: ReturnType<typeof setTimeout> | null = null;
