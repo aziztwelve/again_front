@@ -40,7 +40,7 @@
                     :disabled="isPaymentStarting"
                     @click="startCloudPayments"
                 >
-                  {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить картой' }}
+                  {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить онлайн' }}
                 </button>
                 <div
                     v-if="canBePaid && isYandexPayOrder"
