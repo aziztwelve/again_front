@@ -666,19 +666,8 @@ const freeShippingHints = computed(() => {
   const format = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.ceil(value));
 
   return freeShipping.progresses
-      .filter((progress) => {
-        if (!service || (progress.service && progress.service !== service)) return false;
-        if (service === 'yandex' && progress.delivery_type === 'postamat') return false;
-
-        // «ПВЗ» в правилах СДЭК распространяется и на постаматы.
-        return !progress.delivery_type
-            || progress.delivery_type === deliveryType
-            || (deliveryType === 'postamat' && progress.delivery_type === 'pickup');
-      })
-      .map((progress) => {
-        const type = progress.delivery_type ?? deliveryType;
-        return `${labels[type]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`;
-      });
+      .filter((progress) => service !== null && (!progress.service || progress.service === service))
+      .map((progress) => `${labels[deliveryType]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`);
 });
 
 let freeShippingTimer: ReturnType<typeof setTimeout> | null = null;
