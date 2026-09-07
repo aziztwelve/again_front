@@ -662,7 +662,9 @@ const freeShippingHints = computed(() => {
   const format = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.ceil(value));
 
   return freeShipping.progresses
-      .filter((progress) => labels[progress.delivery_type])
+      // Яндекс.Доставка не поддерживает постаматы. Прогресс для правила СДЭК
+      // не должен появляться рядом с вариантами Яндекс ПВЗ/курьера.
+      .filter((progress) => labels[progress.delivery_type] && (!isYandexDelivery.value || progress.delivery_type !== 'postamat'))
       .map((progress) => `${labels[progress.delivery_type]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`);
 });
 
