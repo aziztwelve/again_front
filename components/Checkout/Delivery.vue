@@ -660,14 +660,14 @@ const freeShippingHints = computed(() => {
     postamat: 'Бесплатная доставка до постамата',
   };
   const service = isYandexDelivery.value ? 'yandex' : (isCdekDelivery.value ? 'cdek' : null);
-  const deliveryType = currentCode.value === 'cdek_postamat'
-      ? 'postamat'
-      : (isPickupDelivery.value ? 'pickup' : 'courier');
   const format = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.ceil(value));
 
   return freeShipping.progresses
-      .filter((progress) => service !== null && (!progress.service || progress.service === service))
-      .map((progress) => `${labels[deliveryType]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`);
+      .filter((progress) => service !== null
+          && (!progress.service || progress.service === service)
+          && !!progress.delivery_type
+          && !(service === 'yandex' && progress.delivery_type === 'postamat'))
+      .map((progress) => `${labels[progress.delivery_type!]} от ${format(progress.min_order_amount)} ₽ — добавьте ещё ${format(progress.remaining)} ₽`);
 });
 
 let freeShippingTimer: ReturnType<typeof setTimeout> | null = null;
