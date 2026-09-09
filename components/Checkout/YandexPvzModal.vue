@@ -36,7 +36,7 @@
             </div>
 
             <!-- Нет ПВЗ -->
-            <div v-else-if="!filteredPoints.length" class="pvz-modal__state">
+          <div v-else-if="!filteredPoints.length" class="pvz-modal__state">
               <template v-if="!cityName && !geoId">
                 Укажите населённый пункт в форме доставки для показа ближайших ПВЗ.
               </template>
@@ -71,6 +71,10 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <div v-if="showingNearby" class="pvz-modal__nearby-note">
+            В вашем населённом пункте ПВЗ нет — показываем ближайшие доступные пункты.
           </div>
         </div>
 
@@ -108,6 +112,8 @@ const props = defineProps<{
   isOpen: boolean;
   geoId?: number;
   cityName?: string;
+  /** Координаты населённого пункта: [longitude, latitude]. */
+  coordinates?: [number, number];
 }>();
 
 const emit = defineEmits<{
@@ -119,6 +125,7 @@ const loading       = ref(false);
 const pvzList       = ref<PvzPoint[]>([]);
 const selectedPoint = ref<PvzPoint | null>(null);
 const searchQuery   = ref('');
+const showingNearby = ref(false);
 
 // ─── Карта ───────────────────────────────────────────────────────────────────
 const { load: loadYandexMaps } = useYandexMaps();
@@ -177,6 +184,7 @@ const loadPvz = async () => {
   pvzList.value  = [];
   selectedPoint.value = null;
   searchQuery.value   = '';
+  showingNearby.value = false;
 
   try {
     const query: Record<string, string> = {};
@@ -186,6 +194,27 @@ const loadPvz = async () => {
 
     if (!error.value && data.value?.success) {
       pvzList.value = data.value.points ?? [];
+    }
+
+    // Small settlements often have no own geo_id inventory. Ask the Platform
+    // API for a bounded area around the settlement instead of an unbounded
+    // all-Russia list, so nearby regional points remain selectable on the map.
+    if (!pvzList.value.length && props.coordinates) {
+      const [longitude, latitude] = props.coordinates;
+      const radiusKm = 120;
+      const latitudeDelta = radiusKm / 111;
+      const longitudeDelta = radiusKm / Math.max(111 * Math.cos(latitude * Math.PI / 180), 1);
+      const nearbyQuery = {
+        latitude_from: String(latitude - latitudeDelta),
+        latitude_to: String(latitude + latitudeDelta),
+        longitude_from: String(longitude - longitudeDelta),
+        longitude_to: String(longitude + longitudeDelta),
+      };
+      const { data: nearbyData, error: nearbyError } = await useApi('/public/delivery/yandex/pvz', { query: nearbyQuery });
+      if (!nearbyError.value && nearbyData.value?.success) {
+        pvzList.value = nearbyData.value.points ?? [];
+        showingNearby.value = pvzList.value.length > 0;
+      }
     }
   } catch (e) {
     console.error('Failed to load PVZ:', e);
@@ -423,6 +452,7 @@ watch(filteredPoints, () => {
 
 // ─── Тело ──────────────────────────────────────────────────────────────────────
 .pvz-modal__body {
+  position: relative;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -588,6 +618,20 @@ watch(filteredPoints, () => {
   font-size: 1.1rem;
   font-weight: 700;
   color: #000;
+}
+
+.pvz-modal__nearby-note {
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 2;
+  max-width: 31rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+  font-size: 1.2rem;
+  line-height: 1.35;
 }
 
 // ─── Футер ─────────────────────────────────────────────────────────────────────
