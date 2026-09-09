@@ -231,6 +231,7 @@
         :is-open="showPvzModal"
         :geo-id="yandexGeoId ?? undefined"
         :city-name="String(cityName ?? '')"
+        :coordinates="yandexCityCoordinates ?? undefined"
         @close="showPvzModal = false"
         @select="onPvzSelect"
     />
@@ -447,10 +448,15 @@ const canPickOnMap = computed(() => isYandexPickup.value || isCdekPickup.value);
 
 // ─── geo_id для фильтрации ПВЗ ────────────────────────────────────────────────
 const yandexGeoId       = ref<number | null>(null);
+const yandexCityCoordinates = ref<[number, number] | null>(null); // [longitude, latitude]
 const pvzGeoIdLoading   = ref(false);
 
 watch([isYandexDelivery, cityName], async ([isYandex, city]) => {
-  if (!isYandex || !city) { yandexGeoId.value = null; return; }
+  if (!isYandex || !city) {
+    yandexGeoId.value = null;
+    yandexCityCoordinates.value = null;
+    return;
+  }
   pvzGeoIdLoading.value = true;
   const { detectLocation } = useYandexDelivery();
   const loc = await detectLocation(String(city));
@@ -472,8 +478,24 @@ const hasValidYandexRecipientPhone = (phone?: string): boolean => {
   return /^7\d{10}$/.test(digits);
 };
 
-// Сброс при смене метода
-watch(selectedDeliveryMethod, () => {
+// При смене способа доставки не переносим адрес, ПВЗ или детали курьерской
+// доставки из предыдущего варианта. Город и страну сохраняем: они нужны для
+// поиска доступных ПВЗ и тарифов нового способа.
+watch(selectedDeliveryMethod, (method, previousMethod) => {
+  const changedByCustomer = !!previousMethod && method?.id !== previousMethod.id;
+
+  if (changedByCustomer) {
+    address.value = '';
+    entrance.value = '';
+    floor.value = '';
+    intercom.value = '';
+    courierDestination.value = null;
+    selectedCdekPvzCode.value = null;
+    selectedPvz.value = null;
+    pvzCode.value = null;
+    pvzAddress.value = null;
+  }
+
   yandexOffer.value       = null;
   yandexDeliveryData.value = null;
   selectedYandexOffer.value = null;
@@ -483,7 +505,7 @@ watch(selectedDeliveryMethod, () => {
   selectedCdekTariff.value = null;
   cdekTariffs.value = [];
   cdekError.value = '';
-  if (!isCdekPickup.value) selectedCdekPvzCode.value = null;
+  if (changedByCustomer || !isCdekPickup.value) selectedCdekPvzCode.value = null;
   if (!isYandexPickup.value) {
     selectedPvz.value = null;
     pvzCode.value     = null;
@@ -845,6 +867,10 @@ const onPickOnMap = async () => {
   if (isYandexPickup.value && pvzGeoIdLoading.value) {
     // Ждём завершения определения geo_id
     await until(pvzGeoIdLoading).toBe(false);
+  }
+  if (isYandexPickup.value && !yandexCityCoordinates.value && cityName.value) {
+    const { geocode } = useYandexDelivery();
+    yandexCityCoordinates.value = await geocode(String(cityName.value));
   }
   showPvzModal.value = true;
 };
