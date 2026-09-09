@@ -167,6 +167,19 @@ const getCoords = (point: PvzPoint): [number, number] | null => {
   return [p.latitude, p.longitude];
 };
 
+const distanceTo = (point: PvzPoint, [longitude, latitude]: [number, number]): number => {
+  const coords = getCoords(point);
+  if (!coords) return Number.POSITIVE_INFINITY;
+
+  const toRadians = (value: number) => value * Math.PI / 180;
+  const latitudeDelta = toRadians(coords[0] - latitude);
+  const longitudeDelta = toRadians(coords[1] - longitude);
+  const a = Math.sin(latitudeDelta / 2) ** 2
+      + Math.cos(toRadians(latitude)) * Math.cos(toRadians(coords[0])) * Math.sin(longitudeDelta / 2) ** 2;
+
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 // ─── Фильтрация ────────────────────────────────────────────────────────────────
 const filteredPoints = computed(() => {
   const q = searchQuery.value.toLowerCase().trim();
@@ -212,7 +225,8 @@ const loadPvz = async () => {
       };
       const { data: nearbyData, error: nearbyError } = await useApi('/public/delivery/yandex/pvz', { query: nearbyQuery });
       if (!nearbyError.value && nearbyData.value?.success) {
-        pvzList.value = nearbyData.value.points ?? [];
+        pvzList.value = [...(nearbyData.value.points ?? [])]
+            .sort((left, right) => distanceTo(left, props.coordinates!) - distanceTo(right, props.coordinates!));
         showingNearby.value = pvzList.value.length > 0;
       }
     }
