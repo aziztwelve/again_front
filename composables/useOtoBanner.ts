@@ -34,6 +34,9 @@ export const useOtoBanner = () => {
     const showOtoBanner = () => {
         const {ModalsOtoBanner} = useModals()
 
+        // The delayed callback can fire after a banner was closed or submitted
+        // in another component instance. Do not open it again this session.
+        if (otoBannerStore.isShown || !otoBannerStore.banner) return
 
         modal.openModal(ModalsOtoBanner, {
             banner: otoBannerStore.banner,
@@ -42,6 +45,19 @@ export const useOtoBanner = () => {
 
         // Трекаем просмотр
         otoBannerStore.trackView()
+
+        // The shared modal shell owns the close button and backdrop click.
+        // Mark this banner as handled when either closes it, not only after
+        // a successful form submit.
+        const stopWatchingClose = watch(
+            () => modal.isActive,
+            (isActive) => {
+                if (isActive) return
+
+                otoBannerStore.markAsShown()
+                stopWatchingClose()
+            },
+        )
     }
 
     /**
