@@ -235,7 +235,7 @@
         @close="showPvzModal = false"
         @select="onPvzSelect"
     />
-    <CheckoutCdekPvzModal :is-open="showCdekPvzModal" :points="cdekPvzPoints" :point-type="currentCode === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ'" :selected-code="selectedCdekPvzCode" @close="showCdekPvzModal = false" @select="selectedCdekPvzCode = $event.code" />
+    <CheckoutCdekPvzModal :is-open="showCdekPvzModal" :points="cdekPvzPoints" :nearby="cdekPvzNearby" :point-type="currentCode === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ'" :selected-code="selectedCdekPvzCode" @close="showCdekPvzModal = false" @select="onCdekPvzSelect" />
   </div>
 </template>
 
@@ -270,7 +270,7 @@ interface PvzPoint {
 }
 
 interface CdekCity { code: number; full_name: string; country_code?: string }
-interface CdekPvz { code: string; name?: string; type?: string; location?: { address?: string; address_full?: string; longitude?: number; latitude?: number } }
+interface CdekPvz { code: string; name?: string; type?: string; distance_km?: number; location?: { address?: string; address_full?: string; longitude?: number; latitude?: number; city_code?: number } }
 interface CdekTariff { tariff_code: number; tariff_name: string; display_name?: string; display_description?: string; show_tariff_label?: boolean; delivery_mode: number; price: number; currency: string; period: { min: number; max: number } }
 
 const cdekTariffTitles: Array<[RegExp, string]> = [
@@ -518,6 +518,7 @@ const cdekCities = ref<CdekCity[]>([]);
 const cdekCityCode = ref<number | null>(null);
 const cdekCityLoading = ref(false);
 const cdekPvzPoints = ref<CdekPvz[]>([]);
+const cdekPvzNearby = ref(false);
 const cdekPvzLoading = ref(false);
 const selectedCdekPvzCode = ref<string | null>(null);
 const showCdekPvzModal = ref(false);
@@ -531,6 +532,7 @@ watch([isCdekDelivery, currentCode, cityName], ([enabled, _code, city]) => {
   cdekCityCode.value = null;
   cdekCities.value = [];
   cdekPvzPoints.value = [];
+  cdekPvzNearby.value = false;
   selectedCdekPvzCode.value = null;
   if (!enabled || !city) return;
   if (cdekCityTimer) clearTimeout(cdekCityTimer);
@@ -564,6 +566,11 @@ const selectCdekCity = async (city: CdekCity) => {
     const pointType = currentCode.value === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ';
     const { data, error } = await useApi<{ points: CdekPvz[] }>('/public/delivery/cdek/pvz', { query: { city_code: city.code, type: pointType } });
     cdekPvzPoints.value = error.value ? [] : (data.value?.points ?? []);
+    if (!cdekPvzPoints.value.length && !error.value) {
+      const nearby = await useApi<{ points: CdekPvz[]; nearby?: boolean }>('/public/delivery/cdek/pvz', { query: { city_code: city.code, type: pointType, nearby: 1 } });
+      cdekPvzPoints.value = nearby.error.value ? [] : (nearby.data.value?.points ?? []);
+      cdekPvzNearby.value = !!nearby.data.value?.nearby && cdekPvzPoints.value.length > 0;
+    }
   } finally {
     cdekPvzLoading.value = false;
   }
@@ -616,6 +623,12 @@ watch(selectedCdekPvzCode, async (code) => {
   pvzAddress.value = pointAddress;
   await fetchCdekTariffs();
 });
+const onCdekPvzSelect = (point: CdekPvz) => {
+  // A nearby point belongs to another CDEK city; its code is required for the tariff request.
+  const pointCityCode = Number(point.location?.city_code);
+  if (cdekPvzNearby.value && Number.isInteger(pointCityCode) && pointCityCode > 0) cdekCityCode.value = pointCityCode;
+  selectedCdekPvzCode.value = point.code;
+};
 let cdekCourierTimer: ReturnType<typeof setTimeout> | null = null;
 watch([isCdekCourier, cdekCityCode, address], () => {
   if (!isCdekCourier.value || !cdekCityCode.value || !address.value) return;
