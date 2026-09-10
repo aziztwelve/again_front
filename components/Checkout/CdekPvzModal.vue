@@ -8,7 +8,17 @@
     <p v-if="nearby && filtered.length" class="cdek-modal__nearby">В выбранном населённом пункте нет точек СДЭК. Показываем ближайшие {{ pointType === 'POSTAMAT' ? 'постаматы' : 'ПВЗ' }} в регионе.</p>
     <p v-if="!filtered.length" class="cdek-modal__empty">В этом населённом пункте нет доступных ПВЗ СДЭК. Выберите курьерскую доставку или другой населённый пункт.</p>
         <div v-else-if="view === 'list'" class="cdek-modal__list"><button v-for="point in filtered" :key="point.code" type="button" class="cdek-modal__point" :class="{ _selected: selected?.code === point.code }" @click="select(point, true)"><span class="cdek-modal__radio"><i v-if="selected?.code === point.code" /></span><span><b>{{ point.name || point.code }}</b><em>{{ address(point) }}</em><small v-if="point.work_time">{{ point.work_time }}</small></span></button></div>
-        <div v-else class="cdek-modal__map-wrap"><div v-if="mapError" class="cdek-modal__map-error">Не удалось загрузить карту. Выберите пункт в режиме «Список».</div><div v-show="!mapError" ref="mapEl" class="cdek-modal__map" /></div>
+        <div v-else class="cdek-modal__map-wrap">
+          <iframe
+            v-if="!hasApiKey && mapWidgetUrl"
+            class="cdek-modal__map"
+            :src="mapWidgetUrl"
+            style="border: 0"
+            title="Карта выбранного пункта выдачи"
+          />
+          <div v-else-if="mapError" class="cdek-modal__map-error">Не удалось загрузить карту. Выберите пункт в режиме «Список».</div>
+          <div v-else ref="mapEl" class="cdek-modal__map" />
+        </div>
         <footer><div v-if="selected" class="cdek-modal__chosen"><b>{{ selected.name || selected.code }}</b><span>{{ address(selected) }}</span></div><button type="button" class="btn _primary" :disabled="!selected" @click="confirm">Выбрать этот {{ pointType === 'POSTAMAT' ? 'постамат' : 'пункт' }}</button></footer>
       </section>
     </div>
@@ -23,13 +33,22 @@ const emit = defineEmits<{ close: []; select: [point: Point] }>()
 const query = ref(''); const selected = ref<Point | null>(null); const view = ref<'list' | 'map'>('list')
 const address = (point: Point) => point.location?.address ?? point.location?.address_full ?? ''
 const filtered = computed(() => { const value = query.value.toLowerCase().trim(); return value ? props.points.filter((point) => `${point.name ?? ''} ${address(point)}`.toLowerCase().includes(value)) : props.points })
-const { load: loadYandexMaps } = useYandexMaps(); const mapEl = ref<HTMLElement | null>(null); const mapError = ref(false)
+const { load: loadYandexMaps, hasApiKey } = useYandexMaps(); const mapEl = ref<HTMLElement | null>(null); const mapError = ref(false)
 let ymaps: any = null; let map: any = null; let clusterer: any = null; const placemarks = new Map<string, any>()
 const coords = (point: Point): [number, number] | null => {
   const lat = Number(point.location?.latitude)
   const lng = Number(point.location?.longitude)
   return Number.isFinite(lat) && Number.isFinite(lng) ? [lat, lng] : null
 }
+const mapWidgetUrl = computed(() => {
+  const point = selected.value ?? filtered.value[0]
+  const pointCoords = point ? coords(point) : null
+  if (!pointCoords) return null
+
+  const [lat, lng] = pointCoords
+  const position = `${lng},${lat}`
+  return `https://yandex.ru/map-widget/v1/?ll=${encodeURIComponent(position)}&z=16&pt=${encodeURIComponent(`${position},pm2rdm`)}`
+})
 const renderMap = () => {
   if (!map || !ymaps || !clusterer) return
   clusterer.removeAll()
@@ -85,6 +104,7 @@ const ensureMap = async () => {
 const openMap = async () => {
   view.value = 'map'
   await nextTick()
+  if (!hasApiKey) return
   await ensureMap()
 }
 const destroyMap = () => { if (map) { try { map.destroy() } catch {} map = null } clusterer = null; placemarks.clear(); mapError.value = false }
