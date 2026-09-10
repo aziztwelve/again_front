@@ -54,7 +54,7 @@ const renderMap = () => {
   clusterer.add(objects)
   const selectedCoords = selected.value ? coords(selected.value) : null
   if (selectedCoords) {
-    map.setCenter(selectedCoords, Math.max(map.getZoom(), 14))
+    map.setCenter(selectedCoords, Math.max(map.getZoom(), 16))
     return
   }
 
@@ -92,7 +92,10 @@ const select = (point: Point, moveMap: boolean) => {
   selected.value = point
   renderMap()
   const pointCoords = coords(point)
-  if (moveMap && map && pointCoords) map.panTo(pointCoords, { flying: true })
+  if (moveMap && map && pointCoords) {
+    map.panTo(pointCoords, { flying: true })
+    map.setZoom(Math.max(map.getZoom(), 16), { duration: 250 })
+  }
 }
 const confirm = () => { if (selected.value) { emit('select', selected.value); emit('close') } }
 watch(() => props.isOpen, (open) => { if (open) { query.value = ''; view.value = 'list'; selected.value = props.points.find((point) => point.code === props.selectedCode) ?? null } else destroyMap() })
