@@ -16,5 +16,26 @@ defineProps<{
   // Описание приходит из админки обычным текстом или HTML. Сохраняем переносы
   // строк у текстовых описаний, не меняя уже размеченный HTML.
   white-space: pre-line;
+
+  :deep(img),
+  :deep(video),
+  :deep(iframe) {
+    max-width: 100%;
+  }
+
+  :deep(img) {
+    height: auto;
+  }
+
+  :deep(table) {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  :deep(th),
+  :deep(td) {
+    padding: .6rem;
+    border: 1px solid #d7d7d7;
+  }
 }
 </style>
