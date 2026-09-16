@@ -58,6 +58,8 @@
           name="delivery_date"
           placeholder="Желаемая дата доставки"
           v-model="deliveryDate"
+          :min-date="minimumDeliveryDate"
+          :disabled-week-days="[0, 4, 6]"
       />
 
       <!-- Выбор способа доставки -->
@@ -334,6 +336,19 @@ const cdekDeliveryData = defineModel<Record<string, unknown> | null>('cdekDelive
 
 const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
+
+// Доставка возможна не раньше чем через два календарных дня. Исключение —
+// заказ, оформленный в четверг: в этом случае можно выбрать пятницу. По
+// четвергам, субботам и воскресеньям доставку не осуществляем.
+const minimumDeliveryDate = computed(() => {
+  const orderDate = new Date();
+  const daysUntilDelivery = orderDate.getDay() === 4 ? 1 : 2;
+
+  orderDate.setHours(0, 0, 0, 0);
+  orderDate.setDate(orderDate.getDate() + daysUntilDelivery);
+
+  return orderDate;
+});
 
 // Идентификаторы локальных справочников гео. Населённый пункт выбирается по
 // справочнику СДЭК, поэтому его код не подменяет локальный city_id.

@@ -7,6 +7,8 @@
         :format="format"
         :format-locale="ru"
         :disabled="disabled"
+        :min-date="minDate"
+        :disabled-week-days="disabledWeekDays"
         select-text="Выбрать"
         cancel-text="Отменить"
     ></VueDatePicker>
@@ -25,9 +27,13 @@ const props = withDefaults(defineProps<{
   rowClass?: string,
   error?: string,
   disabled?: boolean,
+  minDate?: Date | string,
+  disabledWeekDays?: number[],
   highlight?: boolean
 }>(), {
   disabled: false,
+  minDate: undefined,
+  disabledWeekDays: () => [],
   highlight: false
 });
 
