@@ -29,6 +29,11 @@ defineProps<{
     font-family: inherit;
   }
 
+  :deep(strong),
+  :deep(b) {
+    font-weight: 800;
+  }
+
   :deep(img),
   :deep(video),
   :deep(iframe) {
