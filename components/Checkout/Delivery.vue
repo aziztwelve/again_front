@@ -59,7 +59,7 @@
           placeholder="Желаемая дата доставки"
           v-model="deliveryDate"
           :min-date="minimumDeliveryDate"
-          :disabled-week-days="[0, 4, 6]"
+          :disabled-week-days="[0, 6]"
       />
 
       <!-- Выбор способа доставки -->
@@ -338,8 +338,8 @@ const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
 
 // Доставка возможна не раньше чем через два календарных дня. Исключение —
-// заказ, оформленный в четверг: в этом случае можно выбрать пятницу. По
-// четвергам, субботам и воскресеньям доставку не осуществляем.
+// заказ, оформленный в четверг: в этом случае можно выбрать пятницу.
+// По выходным доставку не осуществляем.
 const minimumDeliveryDate = computed(() => {
   const orderDate = new Date();
   const daysUntilDelivery = orderDate.getDay() === 4 ? 1 : 2;
