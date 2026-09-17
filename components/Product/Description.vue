@@ -1,22 +1,34 @@
 <template>
   <div class="product__description">
     <h2 class="product__description-title fz-h2">Описание</h2>
-    <div class="product__description-text text__content" v-html="text"></div>
+    <div
+      class="product__description-text text__content"
+      :class="{'product__description-text--plain': !containsHtml}"
+      v-html="text"
+    ></div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import {computed} from 'vue'
+
+const props = defineProps<{
   text: string
 }>();
+
+// Переносы нужны для старых обычных текстовых описаний. Для HTML они уже
+// задаются тегами; pre-line превращает технические переводы строк редактора
+// в большие пустые отступы.
+const containsHtml = computed(() => /<\/?[a-z][^>]*>/i.test(props.text))
 </script>
 
 <style scoped lang="scss">
 .product__description-text {
-  // Описание приходит из админки обычным текстом или HTML. Сохраняем переносы
-  // строк у текстовых описаний, не меняя уже размеченный HTML.
-  white-space: pre-line;
   font-family: inherit;
+
+  &--plain {
+    white-space: pre-line;
+  }
 
   // Global storefront styles use a decorative font for headings. Product
   // content from the editor should keep the same readable font as its text.
