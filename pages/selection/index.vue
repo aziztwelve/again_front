@@ -6,64 +6,100 @@
       <div class="returns-block__header block__header _left">
         <h1 class="block__header-title fz-h2--mobile">Подбор по впитываемости и по размеру</h1>
       </div>
-      <table class="modal-sizes__table">
-        <thead>
-        <th>Размер</th>
-        <th>Размер</th>
-        <th>Обхват талии</th>
-        <th>Обхват бедер</th>
-        </thead>
-        <tbody>
-        <tr>
-          <td>XS</td>
-          <td>40-42</td>
-          <td>64-68</td>
-          <td>88-92</td>
-        </tr>
-        <tr>
-          <td>S</td>
-          <td>42-44</td>
-          <td>68-72</td>
-          <td>92-96</td>
-        </tr>
-        <tr>
-          <td>M</td>
-          <td>44-46</td>
-          <td>72-76</td>
-          <td>96-102</td>
-        </tr>
-        <tr>
-          <td>L</td>
-          <td>46-48</td>
-          <td>76-80</td>
-          <td>102-108</td>
-        </tr>
-        <tr>
-          <td>XL</td>
-          <td>48-50</td>
-          <td>80-84</td>
-          <td>108-112</td>
-        </tr>
-        <tr>
-          <td>2XL</td>
-          <td>50-52</td>
-          <td>84-88</td>
-          <td>112-118</td>
-        </tr>
-        <tr>
-          <td>3XL</td>
-          <td>54-56</td>
-          <td>88-92</td>
-          <td>118-122</td>
-        </tr>
-        <tr>
-          <td>4XL</td>
-          <td>56-58</td>
-          <td>92-96</td>
-          <td>122-126</td>
-        </tr>
-        </tbody>
-      </table>
+      <section class="size-section">
+        <h2 class="size-section__title">Взрослые размеры</h2>
+        <table class="modal-sizes__table">
+          <thead>
+          <th>Размер</th>
+          <th>Размер</th>
+          <th>Обхват талии</th>
+          <th>Обхват бедер</th>
+          </thead>
+          <tbody>
+          <tr>
+            <td>XS</td>
+            <td>40-42</td>
+            <td>64-68</td>
+            <td>88-92</td>
+          </tr>
+          <tr>
+            <td>S</td>
+            <td>42-44</td>
+            <td>68-72</td>
+            <td>92-96</td>
+          </tr>
+          <tr>
+            <td>M</td>
+            <td>44-46</td>
+            <td>72-76</td>
+            <td>96-102</td>
+          </tr>
+          <tr>
+            <td>L</td>
+            <td>46-48</td>
+            <td>76-80</td>
+            <td>102-108</td>
+          </tr>
+          <tr>
+            <td>XL</td>
+            <td>48-50</td>
+            <td>80-84</td>
+            <td>108-112</td>
+          </tr>
+          <tr>
+            <td>2XL</td>
+            <td>50-52</td>
+            <td>84-88</td>
+            <td>112-118</td>
+          </tr>
+          <tr>
+            <td>3XL</td>
+            <td>54-56</td>
+            <td>88-92</td>
+            <td>118-122</td>
+          </tr>
+          <tr>
+            <td>4XL</td>
+            <td>56-58</td>
+            <td>92-96</td>
+            <td>122-126</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="size-section">
+        <h2 class="size-section__title">Детские размеры</h2>
+        <table class="modal-sizes__table">
+          <thead>
+          <th>Размер</th>
+          <th>Обхват талии</th>
+          <th>Обхват бедер</th>
+          </thead>
+          <tbody>
+          <tr>
+            <td>2XS</td>
+            <td>59-61</td>
+            <td>84-86</td>
+          </tr>
+          <tr>
+            <td>XS</td>
+            <td>64-66</td>
+            <td>98-91</td>
+          </tr>
+          <tr>
+            <td>S</td>
+            <td>69-71</td>
+            <td>94-96</td>
+          </tr>
+          <tr>
+            <td>M</td>
+            <td>74-76</td>
+            <td>99-101</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
     </div>
   </div>
 </template>
@@ -75,6 +111,16 @@ definePageMeta( {
 </script>
 
 <style scoped lang="scss">
+.size-section + .size-section {
+  margin-top: 4rem;
+}
+
+.size-section__title {
+  margin-bottom: 1.6rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
 .modal-sizes__table {
   width: 100%;
   border-collapse: separate;
