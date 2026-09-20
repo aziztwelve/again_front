@@ -6,6 +6,55 @@
       <div class="returns-block__header block__header _left">
         <h1 class="block__header-title fz-h2--mobile">Подбор по впитываемости и по размеру</h1>
       </div>
+      <section class="size-section absorption-section">
+        <h2 class="size-section__title">Подбор белья по впитываемости</h2>
+        <div class="absorption-section__table-wrap">
+          <table class="modal-sizes__table absorption-section__table">
+            <thead>
+            <tr>
+              <th>Ваша ситуация</th>
+              <th>Сколько капель выбрать</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>Естественные выделения, овуляция, пот, вместо ежедневок</td>
+              <td>0 капель, естественная влага</td>
+            </tr>
+            <tr>
+              <td>Мажущие выделения, капельное недержание</td>
+              <td>1 капля, super light (5 мл, как 1 тампон)</td>
+            </tr>
+            <tr>
+              <td>Первый или последний день месячных, легкое подтекание мочи</td>
+              <td>2 капли, light (10 мл, как 2 тампона)</td>
+            </tr>
+            <tr>
+              <td>Скудные дни</td>
+              <td>3 капли, normal (15 мл, как 2–3 тампона)</td>
+            </tr>
+            <tr>
+              <td>Умеренные выделения, длительное ношение</td>
+              <td>4–6 капель, ultra night или maxi (20–30 мл, как 3–6 тампонов)</td>
+            </tr>
+            <tr>
+              <td>Ночь</td>
+              <td>4–6 капель, ultra night или maxi</td>
+            </tr>
+            <tr>
+              <td>Самые обильные дни</td>
+              <td>6 капель, maxi (30 мл, как 5–6 тампонов)</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="absorption-section__tips">
+          <h3>Несколько советов</h3>
+          <p>Интенсивность выделений меняется в течение цикла, поэтому удобнее иметь 2–3 пары с разным количеством капель: полегче для начала и конца месячных, помощнее для обильных дней и ночи.</p>
+          <p>Если впереди долгий день, дорога или тренировка, берите бельё на одну ступень впитываемости выше обычного.</p>
+          <p>В первый цикл понаблюдайте, как быстро наполняется ластовица. Так вы поймёте свой ритм и будете точно знать, сколько капель нужно в какой день.</p>
+        </div>
+      </section>
       <section class="size-section">
         <h2 class="size-section__title">Взрослые размеры</h2>
         <table class="modal-sizes__table">
@@ -119,6 +168,44 @@ definePageMeta( {
   margin-bottom: 1.6rem;
   font-size: 2rem;
   font-weight: 700;
+}
+
+.absorption-section__table-wrap {
+  overflow-x: auto;
+}
+
+.absorption-section__table {
+  min-width: 62rem;
+
+  th,
+  td {
+    width: 50%;
+  }
+
+  td {
+    vertical-align: top;
+  }
+}
+
+.absorption-section__tips {
+  margin-top: 3.2rem;
+  font-size: 1.6rem;
+  line-height: 1.4;
+
+  h3 {
+    margin-bottom: 1.6rem;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  p + p {
+    margin-top: 1.6rem;
+  }
+
+  @media (max-width: $mobile) {
+    margin-top: 2.4rem;
+    font-size: 1.4rem;
+  }
 }
 
 .modal-sizes__table {
