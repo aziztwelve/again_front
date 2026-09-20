@@ -10,7 +10,7 @@
           <picture class="delivery__card-pic">
             <img src="/img/delivery.again/logo.svg" class="delivery__card-img" alt="">
           </picture>
-          <div class="delivery__card-title fz-h2">Бесплатная доставка<br> от 5000 ₽ по всей России</div>
+          <div class="delivery__card-title fz-h2">Бесплатная доставка<br> от 4500 ₽ по всей России</div>
         </div>
         <div class="delivery__row">
           <div class="delivery__block _gray">
@@ -25,9 +25,9 @@
           <div class="delivery__block">
             <p><strong>Оплата заказа возможна:</strong></p>
             <ul>
-              <li>Картой РФ </li>
-              <li>SberPay, рассрочка, иностранная карта</li>
-              <li>Рассрочка Яндекс СПЛИТ (Visa Mastercard,<br> МИР и частями)</li>
+              <li>Картой РФ, TPay, СБП, МирPay</li>
+              <li>SberPay, оплата частями от ПОДЕЛИ, иностранной картой</li>
+              <li>Оплата частями от Яндекс.Сплит</li>
             </ul>
           </div>
         </div>
@@ -37,7 +37,7 @@
         <picture class="delivery__card-pic">
           <img src="/img/delivery.again/logo.svg" class="delivery__card-img" alt="">
         </picture>
-        <div class="delivery__card-title fz-h2">Бесплатная доставка<br> от 5000 ₽ по всей России</div>
+        <div class="delivery__card-title fz-h2">Бесплатная доставка<br> от 4500 ₽ по всей России</div>
       </div>
     </div>
   </div>

@@ -9,27 +9,33 @@
         <div class="care__list">
           <div class="care__list-item">
             <div class="care__list-icon">
-              <img src="/img/icons.again/icon-gradus.svg" alt="">
-            </div>
-            <div class="care__list-text">Стирка белья только на 30-40 градусах в обычной стиральной машине</div>
-          </div>
-          <div class="care__list-item">
-            <div class="care__list-icon">
               <img src="/img/icons.again/icon-soak.svg" alt="">
             </div>
-            <div class="care__list-text">Рекомендуется замочить белье до&nbsp;стирки на 30 минут </div>
+            <div class="care__list-text">Рекомендуется замочить белье до стирки на 30 минут <span>(по желанию)</span></div>
           </div>
           <div class="care__list-item">
             <div class="care__list-icon">
-              <img src="/img/icons.again/icon-dry.svg" alt="">
+              <img src="/img/icons.again/icon-gradus.svg" alt="">
             </div>
-            <div class="care__list-text">Сушить только в естественном виде, ластовицей наружу </div>
+            <div class="care__list-text">Стирка белья только на 30–40 градусах в обычной стиральной машине</div>
+          </div>
+          <div class="care__list-item">
+            <div class="care__list-icon">
+              <img src="/img/icons.again/icon-spin.svg" alt="">
+            </div>
+            <div class="care__list-text">Отжим от 1000 оборотов, так белье быстрее высохнет</div>
           </div>
           <div class="care__list-item">
             <div class="care__list-icon">
               <img src="/img/icons.again/icon-not-dry.svg" alt="">
             </div>
-            <div class="care__list-text">Нельзя сушить белье на батарее</div>
+            <div class="care__list-text">Сушить только в естественном виде, ластовицей наружу <span>(нельзя сушить на батарее)</span></div>
+          </div>
+          <div class="care__list-item">
+            <div class="care__list-icon">
+              <img src="/img/icons.again/icon-detergent.svg" alt="">
+            </div>
+            <div class="care__list-text"><strong>Обращаем ваше внимание!</strong> Выбирайте обычные стиральные средства и порошки — лучше не использовать ЭКО/БИО, так как они бывают плохо справляются со стиркой вещей.</div>
           </div>
         </div>
       </div>
@@ -108,6 +114,10 @@ definePageMeta( {
 
 .care__list-text {
   margin-left: 2.38rem;
+
+  span {
+    white-space: nowrap;
+  }
 }
 
 .care__form {
