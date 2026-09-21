@@ -45,13 +45,16 @@
           </ul>
           <p>После рассмотрения заявки (в срок до 10 дней) на Вашу электронную почту будут высланы инструкции по отправке белья на наш адрес.</p>
           <a href="https://wa.me/79991178888" class="btn _left" target="_blank">Написать в WhatsApp</a>
+          <a href="https://max.ru/id4707052811_1_bot" class="btn _left _border" target="_blank" rel="noopener noreferrer">Написать в MAX</a>
         </div>
         <div class="returns__text-col">
           <p><img src="/img/returns.again/main.jpg" alt=""></p>
+          <p><img src="/img/returns.again/secondary.jpg" alt=""></p>
           <p>В случае обнаружения брака или при ошибке в заказе повторную доставку и все расходы на доставку белья на склад оплачивает AGAIN. В случае обмена из-за неподошедшего размера расходы на доставку берет на себя покупатель.</p>
           <p>Возврат денежных средств производится в течение 15 банковских дней после получения возвращаемых товаров на склад интернет-магазина, после экспертизы*, подтверждающей соблюдение условий возврата.</p>
           <p>*Если экспертиза установит факт нарушения условий возврата, компания пересылает возвращенные товары покупателю Почтой России наложенным платежом (пересылка за счет покупателя).</p>
           <a href="https://wa.me/79991178888" class="btn _left _mobile" target="_blank">Написать в WhatsApp</a>
+          <a href="https://max.ru/id4707052811_1_bot" class="btn _left _border _mobile" target="_blank" rel="noopener noreferrer">Написать в MAX</a>
         </div>
       </div>
     </div>
@@ -120,6 +123,10 @@ definePageMeta( {
 
   & p {
     margin-bottom: 2rem;
+  }
+
+  & .btn + .btn {
+    margin-top: 1rem;
   }
 
   & strong {
