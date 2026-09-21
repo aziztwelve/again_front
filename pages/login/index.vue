@@ -129,7 +129,7 @@ const login = async () => {
 }
 
 .login {
-  padding: 2.2rem 0 0;
+  padding: 2.2rem 0 9rem;
 
   @media (max-width: $mobile) {
     padding-bottom: 4.5rem;
@@ -187,6 +187,7 @@ const login = async () => {
 
 .login__media {
   min-width: 56.6rem;
+  margin-top: 9rem;
 
   @media (max-width: $tablet) {
     margin-top: 3rem;
