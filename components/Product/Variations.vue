@@ -36,7 +36,7 @@
     </div>
 
 
-    <div class="product-variables__block" data-type="size" v-if="sizes && sizes.length > 0 ">
+    <div class="product-variables__block" data-type="size" v-if="showSizeSelector">
 
       <div v-if="product?.name != GIFT_CERTIFICATE">
         <div class="product-variables__header">
@@ -126,6 +126,24 @@ const sizes = computed(() => {
 
   const data = props.variations.filter(item => Number(item.color_id) === Number(selectedColor.value!.id));
   return sortVariantsDefault(data);
+});
+
+// У некоторых товаров есть только выбор цвета: ровно по одному варианту на
+// цвет, а название варианта совпадает с названием цвета. Такой вариант не
+// является размером и не должен выводиться в блоке «Размер».
+const showSizeSelector = computed(() => {
+  const variations = props.variations ?? [];
+  const colors = props.colors ?? [];
+
+  if (!variations.length) return false;
+  if (!colors.length) return true;
+
+  return variations.some((variation) => {
+    const color = colors.find((item) => Number(item.id) === Number(variation.color_id));
+    const variantsForColor = variations.filter((item) => Number(item.color_id) === Number(variation.color_id));
+
+    return variantsForColor.length > 1 || !color || variation.size !== color.name;
+  });
 });
 
 // Проверка, является ли цвет принтом
