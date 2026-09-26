@@ -160,9 +160,9 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         // Проверяем на null/undefined, а не на truthy: id = 0 валиден (Россия).
         if (form.country_id !== null && form.country_id !== undefined) addr.country_id = form.country_id;
         if (form.city_id !== null && form.city_id !== undefined) addr.city_id = form.city_id;
+        // «Номер квартиры» уходит в легаси-ключ entrance (order_addresses.entrance).
         if (form.entrance) addr.entrance = form.entrance;
         if (form.floor) addr.floor = form.floor;
-        if (form.intercom) addr.intercom = form.intercom;
         if (form.delivery_date) addr.delivery_date = form.delivery_date;
         if (form.buyer_comment) addr.buyer_comment = form.buyer_comment;
         return addr;

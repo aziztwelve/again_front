@@ -26,10 +26,10 @@
           placeholder="Населённый пункт"
           @select="setCity"
       />
-      <!-- Адрес: для ПВЗ подставляется автоматически, для курьера — обязателен -->
+      <!-- Адрес: для ПВЗ подставляется автоматически, для курьера — обязателен (улица + дом) -->
       <FormInput
           name="address"
-          :placeholder="isPickupDelivery ? 'Адрес (заполняется при выборе ПВЗ)' : 'Адрес*'"
+          :placeholder="isPickupDelivery ? 'Адрес (заполняется при выборе ПВЗ)' : 'Улица, дом*'"
           :readonly="isPickupDelivery"
           v-model="address"
       />
@@ -37,18 +37,13 @@
       <div v-if="!isPickupDelivery" class="checkout__delivery-extras">
         <FormInput
             name="entrance"
-            placeholder="Подъезд"
+            placeholder="Номер квартиры"
             v-model="entrance"
         />
         <FormInput
             name="floor"
             placeholder="Этаж"
             v-model="floor"
-        />
-        <FormInput
-            name="intercom"
-            placeholder="Домофон"
-            v-model="intercom"
         />
       </div>
 
@@ -316,9 +311,9 @@ const countryCode       = defineModel<string>('countryCode', { default: '' });
 const countryName       = defineModel<string>('countryName', { default: '' });
 const cityName          = defineModel<string>('cityName', { default: '' });
 const address           = defineModel<string>('address', { default: '' });
+// «Номер квартиры» хранится в легаси-ключе entrance (order_addresses.entrance).
 const entrance          = defineModel<string>('entrance', { default: '' });
 const floor             = defineModel<string>('floor', { default: '' });
-const intercom          = defineModel<string>('intercom', { default: '' });
 const deliveryDate      = defineModel<string | number>('deliveryDate', { default: '' });
 const buyerComment      = defineModel<string>('buyerComment', { default: '' });
 const deliveryMethodId  = defineModel<number | null>('deliveryMethodId', { default: null });
@@ -503,7 +498,6 @@ watch(selectedDeliveryMethod, (method, previousMethod) => {
     address.value = '';
     entrance.value = '';
     floor.value = '';
-    intercom.value = '';
     courierDestination.value = null;
     selectedCdekPvzCode.value = null;
     selectedPvz.value = null;

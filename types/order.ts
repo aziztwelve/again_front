@@ -112,9 +112,9 @@ export interface CheckoutForm {
     country_id?: number | null;
     city_id?: number | null;
     delivery_address: string;
+    /** Номер квартиры из чекаута; уходит в легаси-ключ entrance. */
     entrance: string;
     floor: string;
-    intercom: string;
     delivery_date: string | number;
     buyer_comment: string;
     delivery_method_id: number | null;
