@@ -17,6 +17,10 @@ export default defineNuxtConfig({
             ]
         },
     },
+    routeRules: {
+        // Сохраняем рабочими старые ссылки из поисковой выдачи и публикаций.
+        '/care': { redirect: '/useandcare' },
+    },
     compatibilityDate: '2025-05-15',
     devtools: {enabled: true},
     vite: {

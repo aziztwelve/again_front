@@ -14,7 +14,7 @@
       <ul class="footer__menu-list">
         <li><NuxtLink to="/articles">Статьи</NuxtLink></li>
         <li><NuxtLink to="/returns">Условия обмена и&nbsp;возврата</NuxtLink></li>
-        <li><NuxtLink to="/care">Правила ухода и&nbsp;использования</NuxtLink></li>
+        <li><NuxtLink to="/useandcare">Правила ухода и&nbsp;использования</NuxtLink></li>
         <li><NuxtLink to="/faq">Отвечаем на ваши вопросы</NuxtLink></li>
         <li><NuxtLink to="/sertificates">Сертификаты</NuxtLink></li>
       </ul>

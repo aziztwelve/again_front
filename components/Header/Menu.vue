@@ -148,7 +148,7 @@ const menuItems = computed(() => {
           title: 'Обмен и возврат',
         },
         {
-          link: '/care',
+          link: '/useandcare',
           title: 'Уход и использование',
         },
         {
