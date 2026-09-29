@@ -690,8 +690,9 @@ onMounted(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    font-family: var(--ff-heading);
     font-size: 1.8rem;
-    font-weight: 300;
+    font-weight: 400;
     color: #000;
     @media (max-width: $mobile) {
       min-height: 3.84rem;

@@ -16,7 +16,13 @@
   font-display: swap;
 }
 
-@include font('Open Sans', normal, 300, '../resources/fonts/open-sans/OpenSans-Light');
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../resources/fonts/open-sans/OpenSans-Light.ttf') format('truetype');
+  font-display: swap;
+}
 
 :root {
   --ff-text: "Open Sans", sans-serif;
