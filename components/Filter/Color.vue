@@ -55,6 +55,15 @@ const isPrintColor = (code: string) => {
   .colors__label {
     border: .2rem solid #ccc;
     overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+
+  .colors__input:checked + .colors__label {
+    border-color: #343434;
+    box-shadow: 0 0 0 .2rem var(--fg-white), 0 0 0 .4rem #343434;
+    transform: scale(1.08);
+    position: relative;
+    z-index: 1;
   }
 }
 
