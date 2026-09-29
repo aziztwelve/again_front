@@ -212,7 +212,7 @@ const login = async () => {
   height: 100%;
   object-position: center;
   object-fit: cover;
-  border-radius: 3rem 3rem 0 0;
+  border-radius: 3rem;
 
   @media (max-width: $mobile) {
     position: relative;
