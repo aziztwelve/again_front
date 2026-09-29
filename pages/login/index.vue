@@ -187,10 +187,9 @@ const login = async () => {
 
 .login__media {
   min-width: 56.6rem;
-  margin-top: 9rem;
+  margin-top: 0;
 
   @media (max-width: $tablet) {
-    margin-top: 3rem;
     min-width: auto;
   }
 }
