@@ -7,31 +7,26 @@
 @import "./mixins";
 
 
-// Шрифты
-@include font('Manrope', normal, 300, '../resources/fonts/manrope/Manrope-Light');
-@include font('Manrope', normal, 400, '../resources/fonts/manrope/Manrope-Regular');
-@include font('Manrope', normal, 500, '../resources/fonts/manrope/Manrope-Medium');
-@include font('Manrope', normal, 600, '../resources/fonts/manrope/Manrope-Semibold');
-@include font('Manrope', normal, 700, '../resources/fonts/manrope/Manrope-Bold');
+// Шрифты брендбука: Felidae для заголовков, Open Sans Light для интерфейса и текста.
+@font-face {
+  font-family: 'Felidae';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../resources/fonts/felidae/Felidae.ttf') format('truetype');
+  font-display: swap;
+}
 
-@include font('Cormorant', normal, 300, '../resources/fonts/cormorant/Cormorant-Light');
-
-@include font('SF Pro Display', normal, 400, '../resources/fonts/sf-pro-display/SFProDisplay-Regular');
-@include font('SF Pro Display', normal, 500, '../resources/fonts/sf-pro-display/SFProDisplay-Medium');
-
-@include font('HelveticaNeueCyr', normal, 300, '../resources/fonts/helveticaneuecyr/HelveticaNeueCyr-Light');
-@include font('HelveticaNeueCyr', normal, 500, '../resources/fonts/helveticaneuecyr/HelveticaNeueCyr-Roman');
-
-@include font('Mulish', normal, 200, '../resources/fonts/mulish/Mulish-ExtraLight');
-@include font('Mulish', normal, 400, '../resources/fonts/mulish/Mulish-Regular');
-@include font('Mulish', normal, 700, '../resources/fonts/mulish/Mulish-Bold');
+@include font('Open Sans', normal, 300, '../resources/fonts/open-sans/OpenSans-Light');
 
 :root {
-  --ff-regular: "Manrope", sans-serif;
-  --ff-cormorant: "Cormorant", sans-serif;
-  --ff-sf-pro: "SF Pro Display", sans-serif;
-  --ff-helvetica-neue: "HelveticaNeueCyr", sans-serif;
-  --ff-mulish: "Mulish", sans-serif;
+  --ff-text: "Open Sans", sans-serif;
+  --ff-heading: "Felidae", serif;
+  // Legacy aliases keep all existing components on the brand typography.
+  --ff-regular: var(--ff-text);
+  --ff-cormorant: var(--ff-heading);
+  --ff-sf-pro: var(--ff-text);
+  --ff-helvetica-neue: var(--ff-text);
+  --ff-mulish: var(--ff-text);
 }
 
 // Сброс CSS
@@ -72,7 +67,7 @@ body {
   color: var(--fg-regular-85);
   font-family: var(--ff-regular);
   font-size: var(--fz-regular);
-  font-weight: 400;
+  font-weight: 300;
   line-height: 145%;
   background: inherit;
   overscroll-behavior: none;
@@ -110,14 +105,14 @@ body._lock {
 h1 {
   font-family: var(--ff-cormorant);
   font-size: var(--fz-h1);
-  font-weight: 300;
+  font-weight: 400;
   line-height: var(--fz-h1);
 }
 
 h2, .fz-h2 {
   font-family: var(--ff-cormorant);
   font-size: var(--fz-h2);
-  font-weight: 300;
+  font-weight: 400;
   line-height: var(--fz-h2);
 }
 
@@ -125,13 +120,13 @@ h3, .fz-h3 {
   font-size: var(--fz-h3);
   font-family: var(--ff-cormorant);
   line-height: var(--fz-h3);
-  font-weight: 300;
+  font-weight: 400;
 }
 
 h4, .fz-h4 {
   font-size: var(--fz-h4);
-  font-weight: 700;
-  font-family: var(--ff-sf-pro);
+  font-weight: 400;
+  font-family: var(--ff-heading);
   line-height: var(--fz-h4);
 }
 

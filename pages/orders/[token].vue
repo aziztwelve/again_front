@@ -520,7 +520,7 @@ const repeatOrder = async () => {
 .order-view {
   padding: 4rem 0 6rem;
   color: #1a1a1a;
-  font-family: 'Mulish', sans-serif;
+  font-family: var(--ff-text);
 }
 
 .container {
