@@ -1,14 +1,32 @@
 <template>
     <div class="colors__list">
-      <div class="colors__item" v-for="color in colors" :style="{ '--color': color.code }">
+      <div
+          v-for="color in colors"
+          :key="color.id"
+          class="colors__item"
+          :class="{
+            '_white': isWhiteColor(color.code),
+            '_print': isPrintColor(color.code),
+          }"
+          :style="isPrintColor(color.code) ? {} : { '--color': color.code }"
+      >
         <input
+            :id="`filter-color-${color.id}`"
             type="radio"
             class="colors__input"
             name="color"
             :value="color.id"
             @change="change( color.id )"
         >
-        <label for="color" class="colors__label"><span></span></label>
+        <label :for="`filter-color-${color.id}`" class="colors__label">
+          <span v-if="!isPrintColor(color.code)"></span>
+          <img
+              v-else
+              :src="`/img_colors_print/${color.name}.jpg`"
+              :alt="color.name"
+              class="colors__print-img"
+          >
+        </label>
       </div>
     </div>
 </template>
@@ -24,8 +42,28 @@ const emit = defineEmits(['selectColor']);
 const change = ( value: number|string ) => {
   emit('selectColor', value);
 }
+
+const isPrintColor = (code: string) => {
+  return code?.toLowerCase().includes('print');
+}
 </script>
 
 <style scoped lang="scss">
+.colors__item._print {
+  --color: #3a3a3a;
+
+  .colors__label {
+    border: .2rem solid #ccc;
+    overflow: hidden;
+  }
+}
+
+.colors__print-img {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
 </style>
