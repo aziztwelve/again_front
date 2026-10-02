@@ -40,8 +40,12 @@
         </div>
       </div>
       <div class="care__form">
-        <div class="care__form-text">Напиши нам в WhatsApp, и мы ответим  на любой ваш вопрос перед покупкой</div>
-        <a href="https://wa.me/79991178888" class="btn care__form-btn" target="_blank">Написать в WhatsApp</a>
+        <div class="care__form-text">Напиши нам в удобный мессенджер, и мы ответим на любой ваш вопрос перед покупкой</div>
+        <div class="care__form-actions">
+          <a href="https://wa.me/79991178888" class="btn care__form-btn" target="_blank" rel="noopener noreferrer">Написать в WhatsApp</a>
+          <a href="https://t.me/again8help_bot" class="btn care__form-btn" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
+          <a href="https://max.ru/id4707052811_1_bot" class="btn care__form-btn" target="_blank" rel="noopener noreferrer">Написать в MAX</a>
+        </div>
       </div>
     </div>
   </div>
@@ -147,6 +151,28 @@ definePageMeta( {
     font-size: 1.8rem;
     max-width: 29.6rem;
     margin: 0 auto 1.5rem;
+  }
+}
+
+.care__form-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+
+  @media (max-width: $mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.care__form-btn {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 1rem;
+  font-size: 1.4rem;
+  white-space: nowrap;
+
+  @media (max-width: $mobile) {
+    font-size: 1.5rem;
   }
 }
 
