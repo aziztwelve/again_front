@@ -31,6 +31,13 @@
         />
 
         <FormCheckbox
+            class="form__personal-data-consent"
+            name="personal_data_consent"
+            :label="getPersonalDataConsentLink()"
+            v-model="isCheckedPersonalDataConsent"
+        />
+
+        <FormCheckbox
             class="form__oferta"
             name="oferta"
             :label="getOfertaLink()"
@@ -50,7 +57,12 @@
 </template>
 
 <script setup lang="ts">
-import { getMarketingConsentLink, getPrivacyPolicyLink, getOfertaLink } from '~/utils/getPolicyLink';
+import {
+  getMarketingConsentLink,
+  getPersonalDataConsentLink,
+  getPrivacyPolicyLink,
+  getOfertaLink,
+} from '~/utils/getPolicyLink';
 import { PAYMENT_OPTIONS, type PaymentOption } from '~/constants/payment';
 
 withDefaults(defineProps<{
@@ -83,11 +95,12 @@ onMounted(() => {
 });
 
 const isCheckedPolicy = ref(false);
+const isCheckedPersonalDataConsent = ref(false);
 const isCheckedOferta = ref(false);
 const isCheckedMarketing = ref(false);
 
-watch(isCheckedPolicy, (newValue) => {
-  isDisabled.value = !newValue;
+watch([isCheckedPolicy, isCheckedPersonalDataConsent], ([policyAccepted, personalDataAccepted]) => {
+  isDisabled.value = !policyAccepted || !personalDataAccepted;
 }, {
   immediate: true,
 });

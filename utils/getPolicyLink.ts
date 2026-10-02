@@ -11,5 +11,5 @@ export const getMarketingConsentLink = () => {
 }
 
 export const getPersonalDataConsentLink = () => {
-    return 'Я соглашаюсь с <a href="/personal-data-consent" target="_blank">обработкой персональных данных</a>';
+    return 'Я даю согласие на <a href="/personal-data-consent" target="_blank">обработку персональных данных</a>';
 }
