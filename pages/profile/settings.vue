@@ -150,6 +150,7 @@ onMounted(() => {
   form.value.last_name.value = user?.profile?.last_name || '';
   form.value.birthday.value = user?.profile?.birthday || '';
   form.value.email.value = user.email;
+  isCheckedMarketing.value = Boolean(user?.subscribed_to_newsletter);
 
   // ДР: если заполнено — блокируем, если нет — подсвечиваем
   if (user?.profile?.birthday) {
@@ -226,7 +227,8 @@ const save = async () => {
         last_name: form.value.last_name.value,
         phone: form.value.phone.value,
         email: form.value.email.value,
-        birthday: getDateFormat().formatDateOutput(form.value.birthday.value)
+        birthday: getDateFormat().formatDateOutput(form.value.birthday.value),
+        subscribed_to_newsletter: isCheckedMarketing.value,
       }
     }, '', 'PUT');
 
@@ -238,6 +240,7 @@ const save = async () => {
       }
     } else {
       authStore.updateProfile(form);
+      authStore.user.subscribed_to_newsletter = isCheckedMarketing.value;
 
       // После сохранения ДР — блокируем поле и убираем подсветку
       if (form.value.birthday.value) {
