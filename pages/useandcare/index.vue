@@ -42,9 +42,18 @@
       <div class="care__form">
         <div class="care__form-text">Напиши нам в удобный мессенджер, и мы ответим на любой ваш вопрос перед покупкой</div>
         <div class="care__form-actions">
-          <a href="https://wa.me/79991178888" class="btn care__form-btn" target="_blank" rel="noopener noreferrer">Написать в WhatsApp</a>
-          <a href="https://t.me/again8help_bot" class="btn care__form-btn" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
-          <a href="https://max.ru/id4707052811_1_bot" class="btn care__form-btn" target="_blank" rel="noopener noreferrer">Написать в MAX</a>
+          <a href="https://wa.me/79991178888" class="care__form-btn care__form-btn--whatsapp" target="_blank" rel="noopener noreferrer">
+            <img src="/icons/chat/whatsapp.svg" alt="" aria-hidden="true">
+            <span>WhatsApp</span>
+          </a>
+          <a href="https://t.me/again8help_bot" class="care__form-btn care__form-btn--telegram" target="_blank" rel="noopener noreferrer">
+            <img src="/icons/chat/telegram.svg" alt="" aria-hidden="true">
+            <span>Telegram</span>
+          </a>
+          <a href="https://max.ru/id4707052811_1_bot" class="care__form-btn care__form-btn--max" target="_blank" rel="noopener noreferrer">
+            <img src="/icons/chat/max.svg" alt="" aria-hidden="true">
+            <span>MAX</span>
+          </a>
         </div>
       </div>
     </div>
@@ -125,7 +134,7 @@ definePageMeta( {
 }
 
 .care__form {
-  padding: 3.6rem 7.7rem 3.1rem;
+  padding: 3.6rem 4rem 3.4rem;
   border-radius: 4.2rem;
   background: var(--bg-gray-item);
   max-width: 58.5rem;
@@ -135,7 +144,7 @@ definePageMeta( {
   }
 
   @media (max-width: $mobile) {
-    padding: 2rem 1rem 3rem;
+    padding: 2rem 1.2rem;
     border-radius: 2rem;
     width: 100%;
   }
@@ -145,7 +154,7 @@ definePageMeta( {
   text-align: center;
   font-size: 2.2rem;
   line-height: 150%;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 
   @media (max-width: $mobile) {
     font-size: 1.8rem;
@@ -157,31 +166,70 @@ definePageMeta( {
 .care__form-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.2rem;
+  gap: .8rem;
 
   @media (max-width: $mobile) {
-    grid-template-columns: 1fr;
-    gap: .8rem;
+    gap: .6rem;
   }
 }
 
 .care__form-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
   width: 100%;
-  min-width: 0;
-  padding-inline: 1.5rem;
-  // Текст длиннее колонки: без переноса надпись вылезала за пилюлю.
-  white-space: normal;
+  min-height: 4.8rem;
+  padding: .8rem;
+  border: .1rem solid #e1e1e1;
+  border-radius: 1.2rem;
+  background: #fff;
+  color: var(--fg-regular-85);
   font-size: 1.3rem;
-  line-height: 1.9rem;
-  text-align: center;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--tr-regular);
+
+  img {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+  }
+
+  @media (any-hover: hover) {
+    &:hover {
+      transform: translateY(-.15rem);
+      box-shadow: 0 .5rem 1.2rem rgba(0, 0, 0, .1);
+    }
+  }
+
+  &--whatsapp:hover {
+    border-color: #91DD5A;
+  }
+
+  &--telegram:hover {
+    border-color: #24A1DE;
+  }
+
+  &--max:hover {
+    border-color: #545454;
+  }
 
   @media (max-width: $tablet) {
-    padding-inline: 1rem;
+    gap: .5rem;
   }
 
   @media (max-width: $mobile) {
-    font-size: 1.5rem;
-    line-height: 2rem;
+    min-height: 4.4rem;
+    padding: .6rem .3rem;
+    font-size: 1.05rem;
+
+    img {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
   }
 }
 
