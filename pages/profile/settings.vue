@@ -59,6 +59,13 @@
         />
 
         <FormCheckbox
+            class="form__personal-data-consent"
+            name="personal_data_consent"
+            :label="getPersonalDataConsentLink()"
+            v-model="isCheckedPersonalDataConsent"
+        />
+
+        <FormCheckbox
             class="form__marketing"
             name="marketing_consent"
             :label="getMarketingConsentLink()"
@@ -73,7 +80,7 @@
 import {FormDatepicker, FormInput, FormPhoneWithCountry, ModalsSuccess} from "#components";
 import {useFormValidator} from "~/composables/useFormValidator";
 import type {Countries, Country} from "~/types/countries";
-import {getMarketingConsentLink, getPrivacyPolicyLink, getOfertaLink} from '~/utils/getPolicyLink';
+import {getMarketingConsentLink, getPersonalDataConsentLink, getPrivacyPolicyLink, getOfertaLink} from '~/utils/getPolicyLink';
 
 definePageMeta({
   layout: 'profile',
@@ -150,6 +157,7 @@ onMounted(() => {
   form.value.last_name.value = user?.profile?.last_name || '';
   form.value.birthday.value = user?.profile?.birthday || '';
   form.value.email.value = user.email;
+  isCheckedPersonalDataConsent.value = Boolean(user?.personal_data_consent);
   isCheckedMarketing.value = Boolean(user?.subscribed_to_newsletter);
 
   // ДР: если заполнено — блокируем, если нет — подсвечиваем
@@ -183,6 +191,7 @@ const isLoading = ref(false);
 
 const isCheckedPolicy = ref(false);
 const isCheckedOferta = ref(false);
+const isCheckedPersonalDataConsent = ref(false);
 const isCheckedMarketing = ref(false);
 
 const isButtonDisabled = ref(true);
@@ -228,6 +237,7 @@ const save = async () => {
         phone: form.value.phone.value,
         email: form.value.email.value,
         birthday: getDateFormat().formatDateOutput(form.value.birthday.value),
+        personal_data_consent: isCheckedPersonalDataConsent.value,
         subscribed_to_newsletter: isCheckedMarketing.value,
       }
     }, '', 'PUT');
@@ -240,6 +250,7 @@ const save = async () => {
       }
     } else {
       authStore.updateProfile(form);
+      authStore.user.personal_data_consent = isCheckedPersonalDataConsent.value;
       authStore.user.subscribed_to_newsletter = isCheckedMarketing.value;
 
       // После сохранения ДР — блокируем поле и убираем подсветку
