@@ -157,22 +157,31 @@ definePageMeta( {
 .care__form-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.2rem;
 
   @media (max-width: $mobile) {
     grid-template-columns: 1fr;
+    gap: .8rem;
   }
 }
 
 .care__form-btn {
   width: 100%;
   min-width: 0;
-  padding-inline: 1rem;
-  font-size: 1.4rem;
-  white-space: nowrap;
+  padding-inline: 1.5rem;
+  // Текст длиннее колонки: без переноса надпись вылезала за пилюлю.
+  white-space: normal;
+  font-size: 1.3rem;
+  line-height: 1.9rem;
+  text-align: center;
+
+  @media (max-width: $tablet) {
+    padding-inline: 1rem;
+  }
 
   @media (max-width: $mobile) {
     font-size: 1.5rem;
+    line-height: 2rem;
   }
 }
 
