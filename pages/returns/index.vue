@@ -152,8 +152,10 @@ definePageMeta( {
 
     & img {
       width: 100%;
-      aspect-ratio: 1;
+      // Горизонтальный кадр оставляет бельё в центре и срезает только края.
+      aspect-ratio: 4 / 3;
       object-fit: cover;
+      object-position: center;
       border-radius: var(--br-regular);
     }
   }
