@@ -152,10 +152,11 @@ definePageMeta( {
 
     & img {
       width: 100%;
-      // Центральная горизонтальная часть исходной фотографии.
+      // Сохраняем размер кадра: показываем верх исходной фотографии,
+      // а лишнюю часть обрезаем снизу.
       aspect-ratio: 20 / 9;
       object-fit: cover;
-      object-position: center;
+      object-position: center top;
       border-radius: var(--br-regular);
     }
   }
