@@ -35,6 +35,9 @@
       <div class="returns__text">
         <div class="returns__text-col">
           <h3>Процедура возврата</h3>
+          <div class="returns__photo">
+            <img src="/img/returns.again/main.jpg" alt="Коллекция белья AGAIN">
+          </div>
           <p>Все возвраты осуществляются по письменной заявке на адрес электронной почты info@again8.ru</p>
           <p><strong>В заявке необходимо указать:</strong></p>
           <ul>
@@ -48,8 +51,7 @@
           <a href="https://max.ru/id4707052811_1_bot" class="btn _left _border" target="_blank" rel="noopener noreferrer">Написать в MAX</a>
         </div>
         <div class="returns__text-col">
-          <div class="returns__photos" aria-label="Фотографии товаров AGAIN">
-            <img src="/img/returns.again/main.jpg" alt="Коллекция белья AGAIN">
+          <div class="returns__photo">
             <img src="/img/returns.again/secondary.jpg" alt="Коллекция белья AGAIN">
           </div>
           <p>В случае обнаружения брака или при ошибке в заказе повторную доставку и все расходы на доставку белья на склад оплачивает AGAIN. В случае обмена из-за неподошедшего размера расходы на доставку берет на себя покупатель.</p>
@@ -144,16 +146,13 @@ definePageMeta( {
     }
   }
 
-  & .returns__photos {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.2rem;
+  & .returns__photo {
     margin-bottom: 2rem;
 
     & img {
       width: 100%;
-      // Горизонтальный кадр оставляет бельё в центре и срезает только края.
-      aspect-ratio: 4 / 3;
+      // Центральная горизонтальная часть исходной фотографии.
+      aspect-ratio: 20 / 9;
       object-fit: cover;
       object-position: center;
       border-radius: var(--br-regular);
