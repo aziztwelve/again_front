@@ -160,6 +160,16 @@ definePageMeta( {
     }
   }
 
+  // У первой фотографии сверху расположен заголовок «Процедура возврата».
+  // Отступ у правой колонки выравнивает верхние края самих фотографий.
+  & .returns__text-col:nth-child(2) .returns__photo {
+    margin-top: 4.75rem;
+
+    @media (max-width: $mobile) {
+      margin-top: 0;
+    }
+  }
+
   @media (max-width: $mobile) {
     & .btn { text-align: center; }
   }
