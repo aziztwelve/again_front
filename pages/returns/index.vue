@@ -165,10 +165,9 @@ definePageMeta( {
   & .returns__text-col:nth-child(2) .returns__photo {
     margin-top: 4.75rem;
 
-    // У secondary.jpg сохраняем размер кадра, добавляем верх фотографии
-    // и обрезаем лишнюю часть снизу.
+    // Кадр начинается у головы и сохраняет видимой нижнюю часть с трусами.
     & img {
-      object-position: center top;
+      object-position: center 12%;
     }
 
     @media (max-width: $mobile) {
