@@ -147,6 +147,7 @@ definePageMeta( {
   }
 
   & .returns__photo {
+    max-width: 49.6rem;
     margin-bottom: 2rem;
 
     & img {
