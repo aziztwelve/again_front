@@ -152,11 +152,10 @@ definePageMeta( {
 
     & img {
       width: 100%;
-      // Сохраняем размер кадра: показываем верх исходной фотографии,
-      // а лишнюю часть обрезаем снизу.
+      // Центральная горизонтальная часть исходной фотографии.
       aspect-ratio: 20 / 9;
       object-fit: cover;
-      object-position: center top;
+      object-position: center;
       border-radius: var(--br-regular);
     }
   }
@@ -165,6 +164,12 @@ definePageMeta( {
   // Отступ у правой колонки выравнивает верхние края самих фотографий.
   & .returns__text-col:nth-child(2) .returns__photo {
     margin-top: 4.75rem;
+
+    // У secondary.jpg сохраняем размер кадра, добавляем верх фотографии
+    // и обрезаем лишнюю часть снизу.
+    & img {
+      object-position: center top;
+    }
 
     @media (max-width: $mobile) {
       margin-top: 0;
