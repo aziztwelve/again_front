@@ -99,8 +99,10 @@ const isCheckedPersonalDataConsent = ref(false);
 const isCheckedOferta = ref(false);
 const isCheckedMarketing = ref(false);
 
-watch([isCheckedPolicy, isCheckedPersonalDataConsent], ([policyAccepted, personalDataAccepted]) => {
-  isDisabled.value = !policyAccepted || !personalDataAccepted;
+// Первые три галочки обязательны: без них кнопка «Подтвердить заказ»
+// неактивна. Согласие на рассылку — добровольное.
+watch([isCheckedPolicy, isCheckedPersonalDataConsent, isCheckedOferta], ([policyAccepted, personalDataAccepted, ofertaAccepted]) => {
+  isDisabled.value = !policyAccepted || !personalDataAccepted || !ofertaAccepted;
 }, {
   immediate: true,
 });

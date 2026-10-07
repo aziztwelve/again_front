@@ -196,8 +196,12 @@ const isCheckedMarketing = ref(false);
 
 const isButtonDisabled = ref(true);
 
-watch(isCheckedPolicy, (newValue) => {
-  isButtonDisabled.value = !newValue;
+// Первые три галочки обязательны: без них кнопка «Сохранить изменения»
+// неактивна. Согласие на рассылку — добровольное.
+watch([isCheckedPolicy, isCheckedOferta, isCheckedPersonalDataConsent], ([policy, oferta, personalData]) => {
+  isButtonDisabled.value = !policy || !oferta || !personalData;
+}, {
+  immediate: true,
 });
 
 const handleCountryChange = (country: Country) => {
