@@ -147,7 +147,8 @@ definePageMeta( {
   }
 
   & .returns__photo {
-    max-width: 49.6rem;
+    // Ширина колонки = ширине верхней плашки .returns__alert: обе секции
+    // сидят в одинаковой сетке 2×1fr, фото растягивается на всю колонку.
     margin-bottom: 2rem;
 
     & img {
@@ -179,9 +180,4 @@ definePageMeta( {
     & .btn { text-align: center; }
   }
 }
-
-.returns__text-col:first-child {
-  max-width: 49.6rem;
-}
-
 </style>
