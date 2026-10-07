@@ -6,8 +6,7 @@
           :slidesPerView="2.2"
           :spaceBetween="10"
           :pagination="{ clickable: true }"
-          :modules="[Pagination, Autoplay]"
-          :autoplay="{ delay: 7000 }"
+          :modules="[Pagination]"
           :breakpoints="{
             0: { slidesPerView: 2.2, spaceBetween: 10 },
             600: { slidesPerView: 3.5, spaceBetween: 10, pagination: false },
@@ -28,7 +27,7 @@ import {ref} from 'vue';
 import {register} from 'swiper/element/bundle';
 import "swiper/css";
 import "swiper/css/pagination";
-import {Autoplay, Pagination} from "swiper/modules";
+import {Pagination} from "swiper/modules";
 
 register();
 
