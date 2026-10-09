@@ -9,6 +9,7 @@
               ref="mainSwiperEl"
               thumbs-swiper=".my-thumbs"
               :spaceBetween="15"
+              :autoHeight="true"
               :touchStartPreventDefault="false"
               :preventClicks="false"
               :preventClicksPropagation="false"
