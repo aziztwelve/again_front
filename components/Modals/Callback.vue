@@ -53,6 +53,13 @@
       />
 
       <FormCheckbox
+          class="form__personal-data"
+          name="personal_data_consent"
+          :label="getPersonalDataConsentLink()"
+          v-model="isCheckedPersonalData"
+      />
+
+      <FormCheckbox
           class="form__oferta"
           name="oferta"
           :label="getOfertaLink()"
@@ -74,7 +81,7 @@
 import {FormInput, FormPhoneWithCountry, FormTextarea, ModalsSuccess} from "#components";
 import {useFormValidator} from "~/composables/useFormValidator";
 import type {Country} from "~/types/countries";
-import {getPrivacyPolicyLink, getOfertaLink, getMarketingConsentLink} from '~/utils/getPolicyLink';
+import {getPrivacyPolicyLink, getPersonalDataConsentLink, getOfertaLink, getMarketingConsentLink} from '~/utils/getPolicyLink';
 
 // Загружаем список стран
 const {data: countries} = await useCountries();
@@ -105,14 +112,11 @@ const form = ref({
 const selectedCountry = ref<Country | null>(null);
 
 const isCheckedPolicy = ref(false);
+const isCheckedPersonalData = ref(false);
 const isCheckedOferta = ref(false);
 const isCheckedMarketing = ref(false);
 
-const isButtonDisabled = ref(true);
-
-watch(isCheckedPolicy, (newValue) => {
-  isButtonDisabled.value = !newValue;
-});
+const isButtonDisabled = computed(() => !isCheckedPolicy.value || !isCheckedPersonalData.value || !isCheckedOferta.value);
 
 
 const modal = useModal();
@@ -124,6 +128,8 @@ const handleCountryChange = (country: Country) => {
 };
 
 const send = async () => {
+  if (isButtonDisabled.value) return;
+
   const {isFormError, validateForm, resetErrors, resetForm} = useFormValidator(form);
   resetErrors();
   validateForm();

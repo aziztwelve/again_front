@@ -55,6 +55,12 @@
               v-model="isCheckedPolicy"
           />
           <FormCheckbox
+              class="form__personal-data"
+              name="personal_data_consent"
+              :label="getPersonalDataConsentLink()"
+              v-model="isCheckedPersonalData"
+          />
+          <FormCheckbox
               class="form__policy"
               name="oferta"
               :label="getOfertaLink()"
@@ -80,7 +86,7 @@ import {FormInput, FormPhoneWithCountry} from "#components"
 import {useFormValidator} from "~/composables/useFormValidator"
 import type {OtoBanner} from "~/types/oto-banner/otoBanner"
 import type {Country} from "~/types/countries"
-import {getMarketingConsentLink, getOfertaLink, getPrivacyPolicyLink} from '~/utils/getPolicyLink';
+import {getMarketingConsentLink, getPersonalDataConsentLink, getOfertaLink, getPrivacyPolicyLink} from '~/utils/getPolicyLink';
 
 // Загружаем список стран
 const {data: countries} = await useCountries();
@@ -102,17 +108,14 @@ const form = ref({
 const isLoading = ref(false)
 
 const isCheckedPolicy = ref(false);
+const isCheckedPersonalData = ref(false);
 const isCheckedOferta = ref(false);
 const isCheckedMarketing = ref(false);
 
-const isButtonDisabled = ref(true);
+const isButtonDisabled = computed(() => isLoading.value || !isCheckedPolicy.value || !isCheckedPersonalData.value || !isCheckedOferta.value);
 
 // Храним выбранную страну для валидации телефона
 const selectedCountry = ref<Country | null>(null);
-
-watch(isCheckedPolicy, (newValue) => {
-  isButtonDisabled.value = !newValue
-})
 
 const {submitOtoBanner} = useOtoBanner()
 
@@ -122,6 +125,8 @@ const handleCountryChange = (country: Country) => {
 };
 
 const send = async () => {
+  if (isButtonDisabled.value) return
+
   const {isFormError, validateForm, resetErrors, resetForm} = useFormValidator(form)
   resetErrors()
   validateForm()

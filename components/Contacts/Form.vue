@@ -112,7 +112,7 @@ const isCheckedPersonalData = ref(false);
 const isCheckedOferta = ref(false);
 const isCheckedMarketing = ref(false);
 
-const isButtonDisabled = computed(() => !isCheckedPolicy.value || !isCheckedPersonalData.value);
+const isButtonDisabled = computed(() => !isCheckedPolicy.value || !isCheckedPersonalData.value || !isCheckedOferta.value);
 
 const modal = useModal();
 
@@ -121,6 +121,8 @@ const handleCountryChange = (country: Country) => {
 };
 
 const send = async () => {
+  if (isButtonDisabled.value) return;
+
   const {isFormError, validateForm, resetErrors, resetForm} = useFormValidator(form);
   resetErrors();
   validateForm();
