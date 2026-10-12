@@ -96,7 +96,14 @@ export interface CheckoutFormUser {
     email: string;
 }
 
-export interface CheckoutForm {
+export interface CheckoutConsents {
+    privacy_policy_accepted: boolean;
+    personal_data_consent: boolean;
+    oferta_accepted: boolean;
+    subscribed_to_newsletter: boolean;
+}
+
+export interface CheckoutForm extends CheckoutConsents {
     promo_code: string;
     gift_card_data: string;
     gift_card_code: string;
@@ -136,7 +143,7 @@ export interface CheckoutForm {
 }
 
 // Тело POST /public/orders.
-export interface CheckoutPayload {
+export interface CheckoutPayload extends CheckoutConsents {
     promo_code?: string;
     gift_card_code?: string;
     gift_card_data?: unknown;

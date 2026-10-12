@@ -94,10 +94,10 @@ onMounted(() => {
   }
 });
 
-const isCheckedPolicy = ref(false);
-const isCheckedPersonalDataConsent = ref(false);
-const isCheckedOferta = ref(false);
-const isCheckedMarketing = ref(false);
+const isCheckedPolicy = defineModel<boolean>('privacyPolicyAccepted', { required: true });
+const isCheckedPersonalDataConsent = defineModel<boolean>('personalDataConsent', { required: true });
+const isCheckedOferta = defineModel<boolean>('ofertaAccepted', { required: true });
+const isCheckedMarketing = defineModel<boolean>('subscribedToNewsletter', { required: true });
 
 // Первые три галочки обязательны: без них кнопка «Подтвердить заказ»
 // неактивна. Согласие на рассылку — добровольное.

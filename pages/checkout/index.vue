@@ -59,6 +59,10 @@
 
               <CheckoutPayment
                   v-model:payment-method="form.payment_method"
+                  v-model:privacy-policy-accepted="form.privacy_policy_accepted"
+                  v-model:personal-data-consent="form.personal_data_consent"
+                  v-model:oferta-accepted="form.oferta_accepted"
+                  v-model:subscribed-to-newsletter="form.subscribed_to_newsletter"
                   @click-to-button="onSubmit"
                   :is-loading="isLoading"
                   :error="submitError"
@@ -102,6 +106,7 @@ import type { CheckoutForm } from '~/types/order';
 import { useCheckoutSubmit } from '~/composables/useCheckoutSubmit';
 
 const cartStore = useCartStore();
+const authStore = useAuthStore();
 const giftCardPaymentStore = useGiftCardPaymentStore();
 const promotionStore = usePromotionStore();
 
@@ -172,6 +177,10 @@ const form = reactive<CheckoutForm>({
   delivery_method_name: '',
   delivery_method_code: '',
   payment_method: '',
+  privacy_policy_accepted: false,
+  personal_data_consent: false,
+  oferta_accepted: false,
+  subscribed_to_newsletter: Boolean(authStore.user?.subscribed_to_newsletter),
   yandex_offer: null,
   yandex_delivery_data: null,
   cdek_delivery_data: null,

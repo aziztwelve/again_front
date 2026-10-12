@@ -93,7 +93,6 @@ const {data: countries} = await useCountries();
 
 const modal = useModal();
 const authStore = useAuthStore();
-const {user} = authStore;
 
 const form = ref({
   first_name: {
@@ -152,11 +151,15 @@ const selectedCountry = ref<Country | null>(null);
 const isBirthdayDisabled = ref(false);
 const isBirthdayHighlight = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
+  await authStore.checkAuth();
+  const user = authStore.user;
   form.value.first_name.value = user?.profile?.first_name || '';
   form.value.last_name.value = user?.profile?.last_name || '';
   form.value.birthday.value = user?.profile?.birthday || '';
   form.value.email.value = user.email;
+  isCheckedPolicy.value = Boolean(user?.privacy_policy_accepted);
+  isCheckedOferta.value = Boolean(user?.oferta_accepted);
   isCheckedPersonalDataConsent.value = Boolean(user?.personal_data_consent);
   isCheckedMarketing.value = Boolean(user?.subscribed_to_newsletter);
 
@@ -241,21 +244,25 @@ const save = async () => {
         phone: form.value.phone.value,
         email: form.value.email.value,
         birthday: getDateFormat().formatDateOutput(form.value.birthday.value),
+        privacy_policy_accepted: isCheckedPolicy.value,
+        oferta_accepted: isCheckedOferta.value,
         personal_data_consent: isCheckedPersonalDataConsent.value,
         subscribed_to_newsletter: isCheckedMarketing.value,
       }
     }, '', 'PUT');
 
-    if (status.value === 'error' && error?.value?.data?.errors) {
-      for (const item in error.value.data.errors) {
+    if (status.value === 'error' || error.value || data.value?.success === false) {
+      for (const item in error.value?.data?.errors ?? {}) {
         if (form.value[item]) {
           form.value[item].error = error.value.data.errors[item][0];
         }
       }
     } else {
       authStore.updateProfile(form);
-      authStore.user.personal_data_consent = isCheckedPersonalDataConsent.value;
-      authStore.user.subscribed_to_newsletter = isCheckedMarketing.value;
+      authStore.user.privacy_policy_accepted = Boolean(data.value?.user?.privacy_policy_accepted);
+      authStore.user.oferta_accepted = Boolean(data.value?.user?.oferta_accepted);
+      authStore.user.personal_data_consent = Boolean(data.value?.user?.personal_data_consent);
+      authStore.user.subscribed_to_newsletter = Boolean(data.value?.user?.subscribed_to_newsletter);
 
       // После сохранения ДР — блокируем поле и убираем подсветку
       if (form.value.birthday.value) {

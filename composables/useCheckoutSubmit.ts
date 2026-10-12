@@ -172,6 +172,10 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
     const buildPayload = (): CheckoutPayload => {
         const { form } = deps;
         const payload: CheckoutPayload = {
+            privacy_policy_accepted: form.privacy_policy_accepted,
+            personal_data_consent: form.personal_data_consent,
+            oferta_accepted: form.oferta_accepted,
+            subscribed_to_newsletter: form.subscribed_to_newsletter,
             promo_code: form.promo_code || undefined,
             gift_card_code: form.gift_card_code || undefined,
             items: cartStore.getCartForCheckout(),
@@ -288,6 +292,11 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         try {
         submitError.value = '';
 
+        if (!deps.form.privacy_policy_accepted || !deps.form.personal_data_consent || !deps.form.oferta_accepted) {
+            await showError('Подтвердите политику конфиденциальности, обработку персональных данных и оферту.');
+            return { success: false };
+        }
+
         // 1. Данные сертификата (если он в корзине)
         if (cartStore.hasGiftCertificateInCart) {
             if (!deps.validateGiftCardData()) {
@@ -334,6 +343,11 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             'POST',
         );
         if (data.value?.success === true) {
+            if (authStore.isAuthenticated) {
+                // Read persisted values, including an idempotent retry of a previous order.
+                await authStore.checkAuth();
+            }
+
             // setEmptyCart внутри уже чистит promotion + giftCardPayment + giftCardPurchase.
             cartStore.setEmptyCart();
             return {
