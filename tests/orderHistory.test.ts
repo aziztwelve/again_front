@@ -39,6 +39,17 @@ describe('Repeat order cart merge', () => {
     expect(() => mergeHistoryItem([], inactive, item, 'new')).toThrow('больше недоступен');
   });
 
+  it('restores a missing historical color from the exact saved variant', () => {
+    const existing = [{ id: 1, product_variant_id: 11, color_id: 5, quantity: 1, item_key: 'same' }] as HistoryCartItem[];
+    const next = mergeHistoryItem(existing, product, { ...item, color_id: null }, 'new');
+    expect(next).toHaveLength(1);
+    expect(next[0]).toMatchObject({ quantity: 3, color_id: 5, item_key: 'same', selected_color: { id: 5 }, selected_variant: { id: 11 } });
+  });
+
+  it('does not substitute a different color when the historical color is known', () => {
+    expect(() => mergeHistoryItem([], product, { ...item, color_id: 99 }, 'new')).toThrow('больше недоступен');
+  });
+
   it('preserves quantities of a different product and adds a simple product separately', () => {
     const cart = [{ id: 2, product_variant_id: null, color_id: null, quantity: 1, item_key: 'other' }] as HistoryCartItem[];
     const next = mergeHistoryItem(cart, { ...product, has_variants: false }, { ...item, product_variant_id: null, color_id: null }, 'new');

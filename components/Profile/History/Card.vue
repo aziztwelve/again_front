@@ -124,10 +124,10 @@ const repeatOrder = async () => {
     const products = new Map<string, Product>();
     await Promise.all([...new Set(items.map(item => item.product_slug!))].map(async slug => {
       try {
-        const response = await $fetch<{ data: Product }>(`${apiBase}/public/catalog/products/${encodeURIComponent(slug)}`, {
+        const product = await $fetch<Product>(`${apiBase}/public/catalog/products/${encodeURIComponent(slug)}`, {
           credentials: 'include', headers: authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {},
         });
-        products.set(slug, response.data);
+        products.set(slug, product);
       } catch { throw new Error('Не удалось проверить товары. Возможно, часть из них снята с продажи. Корзина не изменена.'); }
     }));
     // Stage every line first: a failed stock check must leave the existing cart intact.
