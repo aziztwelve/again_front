@@ -1,6 +1,6 @@
-// Development storefront protection restored after the server review.
+// Temporarily open for the authorized repeat-order browser test; restore afterwards.
 // See AGENTS.md and lara_admin/docs/deploy-runbook.md.
-const DEV_BASIC_AUTH_ENABLED = true;
+const DEV_BASIC_AUTH_ENABLED = false;
 
 export default defineEventHandler((event) => {
     const host = getRequestHeader(event, "host") || "";
