@@ -1,8 +1,12 @@
+// Temporary access for storefront review. Restore to true after all review work.
+// See AGENTS.md and lara_admin/docs/deploy-runbook.md.
+const DEV_BASIC_AUTH_ENABLED = false;
+
 export default defineEventHandler((event) => {
     const host = getRequestHeader(event, "host") || "";
     const hostname = host.split(":")[0];
     const isDevDomain = hostname === "againdev3.ru";
-    if (!isDevDomain) return;
+    if (!isDevDomain || !DEV_BASIC_AUTH_ENABLED) return;
 
     const auth = getRequestHeader(event, "authorization") || "";
 
