@@ -4,6 +4,7 @@ import type { OrderHistoryItem } from '~/types/orders';
 export interface HistoryCartItem extends Product {
     product_variant_id: number | null;
     color_id: number | null;
+    selected_color?: { id: number };
     item_key: string;
     quantity: number;
 }
