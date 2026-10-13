@@ -259,10 +259,14 @@ const save = async () => {
       }
     } else {
       authStore.updateProfile(form);
-      authStore.user.privacy_policy_accepted = Boolean(data.value?.user?.privacy_policy_accepted);
-      authStore.user.oferta_accepted = Boolean(data.value?.user?.oferta_accepted);
-      authStore.user.personal_data_consent = Boolean(data.value?.user?.personal_data_consent);
-      authStore.user.subscribed_to_newsletter = Boolean(data.value?.user?.subscribed_to_newsletter);
+      // Keep the submitted values in the store immediately. The API response
+      // is authoritative when it contains the fields, but never replace a
+      // checked consent with false just because an older response omitted it.
+      const savedUser = data.value?.user;
+      authStore.user.privacy_policy_accepted = savedUser?.privacy_policy_accepted ?? isCheckedPolicy.value;
+      authStore.user.oferta_accepted = savedUser?.oferta_accepted ?? isCheckedOferta.value;
+      authStore.user.personal_data_consent = savedUser?.personal_data_consent ?? isCheckedPersonalDataConsent.value;
+      authStore.user.subscribed_to_newsletter = savedUser?.subscribed_to_newsletter ?? isCheckedMarketing.value;
 
       // После сохранения ДР — блокируем поле и убираем подсветку
       if (form.value.birthday.value) {
