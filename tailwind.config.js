@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Open Sans', 'sans-serif'],
-        serif: ['Felidae', 'serif'],
+        serif: ['Vollkorn', 'serif'],
       },
       // Map existing chat utility classes to loaded brand faces.
       fontWeight: {
