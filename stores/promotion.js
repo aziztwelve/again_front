@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 /**
  * Стор акций на чекауте — мультиакционная (стекируемая) модель.
@@ -48,6 +48,16 @@ export const usePromotionStore = defineStore('promotionStore', () => {
     // и из watch на странице). Применяем результат только самого последнего запроса,
     // чтобы устаревший ответ не затирал актуальный стейт (и не сбрасывал выбор подарка).
     let requestId = 0;
+    const authStore = useAuthStore();
+    watch(() => authStore.token, () => {
+        requestId += 1;
+        isLoading.value = false;
+        reset();
+        const cartStore = useCartStore();
+        if (cartStore.cart.length && cartStore.total > 0) {
+            checkApplicable(cartStore.cart, cartStore.total, !!cartStore.promoCode);
+        }
+    });
 
     // Ключ выбора варианта/цвета, привязанный к акции (дубли подарков — Q3).
     const keyOf = (promotionId, giftId) => `${promotionId}:${giftId}`;
