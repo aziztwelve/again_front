@@ -52,6 +52,8 @@ export interface AvailableVariation {
     size: string,
     quantity: number,
     price: number
+    old_price?: number | null
+    is_active?: boolean
     images?: Image[]
     in_stock?: boolean
 }

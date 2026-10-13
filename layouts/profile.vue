@@ -52,7 +52,7 @@ const authStore = useAuthStore();
 }
 
 .profile__content {
-
+  min-width: 0;
 }
 
 .profile__title {

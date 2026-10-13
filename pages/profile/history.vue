@@ -1,10 +1,11 @@
 <template>
   <div class="profile-history">
-    <template v-if="pending && !data">
+    <template v-if="pending && !orders.length">
       <div class="profile-history__loader">Загрузка…</div>
     </template>
 
     <template v-else-if="orders.length">
+      <p v-if="error" class="profile-history__error" role="alert">Не удалось загрузить следующие заказы. Попробуйте ещё раз.</p>
       <div class="profile-history__row">
         <ProfileHistoryCard
             v-for="order in orders"
@@ -20,8 +21,15 @@
           :disabled="pending"
           @click="loadMore"
       >
-        {{ pending ? 'Загрузка…' : 'Показать все заказы' }}
+        {{ pending ? 'Загрузка…' : 'Показать ещё заказы' }}
       </button>
+    </template>
+
+    <template v-else-if="error">
+      <div class="profile-history__empty" role="alert">
+        <p>Не удалось загрузить историю заказов.</p>
+        <button type="button" class="btn _border" @click="refresh()">Попробовать снова</button>
+      </div>
     </template>
 
     <template v-else>
@@ -44,34 +52,36 @@ definePageMeta({
 
 useBirthdayReminder();
 
-// Грузим первую страницу с дефолтным per_page=10 (см. OrderController::getUserOrders).
-// «Показать все заказы» докручивает per_page; при желании можно перейти на
-// «по странице» — для этого появится last_page в PaginationHelper.
-const perPage = ref(10);
-
-const { data, pending, refresh } = await useApi<UserOrdersResponse>(
-    '/orders/user',
-    { query: { per_page: perPage } },
-);
-
-const orders = computed<Order[]>(() => data.value?.orders ?? []);
-
-const hasMore = computed(() => {
-  const p = data.value?.pagination;
-  if (!p) return false;
-  return p.total > orders.value.length;
+const page = ref(1);
+const orders = ref<Order[]>([]);
+const total = ref(0);
+const { data, pending, error, refresh } = await useApi<UserOrdersResponse>('/orders/user', {
+  query: { page, per_page: 10 },
+  watch: false,
 });
 
+watch(data, response => {
+  if (!response) return;
+  total.value = response.pagination?.total ?? response.orders.length;
+  if (page.value === 1) orders.value = response.orders;
+  else {
+    const known = new Set(orders.value.map(order => order.id));
+    orders.value = [...orders.value, ...response.orders.filter(order => !known.has(order.id))];
+  }
+}, { immediate: true });
+
+const hasMore = computed(() => total.value > orders.value.length);
 const loadMore = async () => {
-  if (!data.value?.pagination) return;
-  // useFetch уже подписан на perPage через query — увеличиваем размер страницы
-  // и просим Nuxt сделать рефетч.
-  perPage.value = Math.max(perPage.value * 2, data.value.pagination.total);
+  if (pending.value) return;
+  page.value += 1;
   await refresh();
+  if (error.value) page.value -= 1;
 };
 </script>
 
 <style scoped lang="scss">
+.profile-history__row { min-width: 0; }
+.profile-history__error { color: var(--fg-red); font-size: 1.3rem; line-height: 1.5; margin-bottom: 1.5rem; }
 .profile-history__loader {
   padding: 4rem 0;
   text-align: center;
