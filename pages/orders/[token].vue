@@ -233,10 +233,19 @@ const isPaymentStarting = ref(false);
 const messengerLinks = ref<MessengerLinks['links']>({});
 const yandexPayButton = ref<HTMLElement | null>(null);
 
+const recordOrderActivity = async (event: 'opened' | 'payment_started') => {
+  try {
+    await useApi(`/public/orders/${token}/activity`, { method: 'POST', body: { event } });
+  } catch {
+    // Analytics must not block viewing or paying for an order.
+  }
+};
+
 // Обновляем токен текущей сессии сразу после оформления заказа. Поэтому
 // deeplink из виджета на этой странице несёт именно этот order_id, даже если
 // пользователь открывает меню мессенджеров позднее.
 onMounted(async () => {
+  if (order.value) await recordOrderActivity('opened');
   try {
     const externalId = await getExternalIdClient();
     const response = await useGetMessengerLinks(externalId, token);
@@ -359,7 +368,8 @@ const startCloudPayments = async () => {
         await navigateTo(`/orders/${token}`, { replace: true });
       }
     };
-    await widget.start(paymentParams);
+    const paymentAttempt = widget.start(paymentParams);
+    await Promise.all([paymentAttempt, recordOrderActivity('payment_started')]);
   } catch (error: any) {
     showToast(error?.message || 'Не удалось открыть форму оплаты. Попробуйте ещё раз.');
   } finally {
@@ -418,6 +428,7 @@ const startYandexPay = async (): Promise<string> => {
     if (error.value || !intent.value?.success || !intent.value.payment_url) {
       throw new Error(intent.value?.message || 'Не удалось подготовить оплату.');
     }
+    await recordOrderActivity('payment_started');
     return intent.value.payment_url;
   } catch (error: any) {
     showToast(error?.message || 'Не удалось открыть Яндекс Пэй. Попробуйте ещё раз.');
