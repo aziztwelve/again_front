@@ -147,7 +147,7 @@ const hasLinks = computed(() => {
 .ozon-btn {
   background: linear-gradient(135deg, #005BFF 0%, #0047CC 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .ozon-btn:hover {
@@ -164,7 +164,7 @@ const hasLinks = computed(() => {
 .zy-btn {
   background: linear-gradient(135deg, #E3FE52 0%, #D4ED3A 100%);
   color: #1a1a1a;
-  font-weight: 700;
+  font-weight: 600;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 2px 8px rgba(227, 254, 82, 0.25);
 }

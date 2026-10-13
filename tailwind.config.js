@@ -8,7 +8,17 @@ export default {
     './features/**/*.{vue,js,ts}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Open Sans', 'sans-serif'],
+        serif: ['Felidae', 'serif'],
+      },
+      // Map existing chat utility classes to loaded brand faces.
+      fontWeight: {
+        thin: '300', extralight: '300', light: '300', normal: '400',
+        medium: '600', semibold: '600', bold: '600', extrabold: '600', black: '600',
+      },
+    },
   },
   plugins: [],
 }

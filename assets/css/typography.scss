@@ -1,0 +1,16 @@
+// Apply the brand roles after Tailwind preflight without changing spacing or sizes.
+body {
+  font-family: var(--ff-text);
+  font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6,
+.fz-h2, .fz-h3, .fz-h4,
+.block__header-title {
+  font-family: var(--ff-heading);
+  font-weight: 400;
+}
+
+strong, b {
+  font-weight: 600;
+}

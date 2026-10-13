@@ -214,7 +214,7 @@ const emitResetFilter = () => {
 
   @media (max-width: $tablet) {
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 600;
   }
 }
 
@@ -232,7 +232,7 @@ const emitResetFilter = () => {
 .filter__view-title {
   @media (max-width: $tablet) {
     font-size: 1.8rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--bg-filter-button);
   }
 }
@@ -346,7 +346,7 @@ const emitResetFilter = () => {
 
   button {
     display: inline-block;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1.343rem;
     padding-bottom: .459rem;
     border-bottom: .1rem dashed #C8C8C8;

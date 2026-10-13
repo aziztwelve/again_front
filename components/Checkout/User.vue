@@ -83,7 +83,7 @@ defineExpose({ setEmailError });
     line-height: 150%;
 
     & a {
-      font-weight: 700;
+      font-weight: 600;
     }
 
     & span {

@@ -131,7 +131,7 @@ function addDays(dateString: string, days: number) {
 }
 
 .profile-sales__item-alert {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--fg-red);
   line-height: 100%;
 }

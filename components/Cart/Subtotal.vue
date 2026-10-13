@@ -39,7 +39,7 @@ const total = computed(() => {
 }
 
 .cart__subtotal-title {
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -.05rem;
 }
 

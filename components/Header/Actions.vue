@@ -145,7 +145,7 @@ const clickToMenu = () => {
   color: white;
   border-radius: 9px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 18px;
   text-align: center;
   border: 2px solid white;

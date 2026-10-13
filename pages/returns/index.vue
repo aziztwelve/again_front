@@ -104,10 +104,10 @@ definePageMeta( {
   }
 
   & h3 {
-    font-family: var(--ff-regular);
+    font-family: var(--ff-text);
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    font-weight: 700;
+    font-weight: 600;
 
     @media (max-width: $mobile) {
       font-size: 1.8rem;
@@ -132,7 +132,7 @@ definePageMeta( {
   }
 
   & strong {
-    font-weight: 700;
+    font-weight: 600;
   }
 
   & ul,

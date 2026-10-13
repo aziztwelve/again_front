@@ -4,7 +4,7 @@
   width: 38.8rem;
   margin: 0 auto;
   font-size: var(--fz-regular);
-  font-family: var(--ff-mulish);
+  font-family: var(--ff-text);
   line-height: 2.38rem;
   text-transform: uppercase;
   border-radius: 6.5rem;
@@ -97,7 +97,7 @@
   &._thin {
     padding: 1.8rem 0;
     line-height: 117%;
-    font-family: var(--ff-sf-pro);
+    font-family: var(--ff-text);
     min-height: auto;
     text-transform: none;
   }

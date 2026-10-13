@@ -43,7 +43,7 @@ const containsHtml = computed(() => /<\/?[a-z][^>]*>/i.test(props.text))
 
   :deep(strong),
   :deep(b) {
-    font-weight: 800;
+    font-weight: 600;
   }
 
   :deep(img),

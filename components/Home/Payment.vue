@@ -143,8 +143,8 @@
   font-size: 7rem;
   color: var(--fg-regular);
   opacity: .1;
-  font-weight: 300;
-  font-family: var(--ff-cormorant);
+  font-weight: 400;
+  font-family: var(--ff-heading);
   line-height: 87.2%;
   margin-bottom: 2rem;
 

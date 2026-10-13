@@ -143,7 +143,7 @@ const auth = useAuthStore();
   @media(any-hover: hover) {
     &:hover {
       color: #292D32;
-      font-weight: 700;
+      font-weight: 600;
 
       &:before {
         opacity: 1;
@@ -153,7 +153,7 @@ const auth = useAuthStore();
 
   &._active {
     color: #292D32;
-    font-weight: 700;
+    font-weight: 600;
 
     &:before {
       opacity: 1;
@@ -165,7 +165,7 @@ const auth = useAuthStore();
     border: .1rem solid #EAEAEA;
     border-radius: 4rem;
     font-size: 1.4rem;
-    font-family: var(--ff-sf-pro);
+    font-family: var(--ff-text);
   }
 }
 

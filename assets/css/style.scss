@@ -7,7 +7,7 @@
 @import "./mixins";
 
 
-// Шрифты брендбука: Felidae для заголовков, Open Sans Light для интерфейса и текста.
+// Шрифты брендбука: Felidae 400 — заголовки; Open Sans 300/400/600 — текст и интерфейс.
 @font-face {
   font-family: 'Felidae';
   font-style: normal;
@@ -21,6 +21,22 @@
   font-style: normal;
   font-weight: 300;
   src: url('../resources/fonts/open-sans/OpenSans-Light.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../resources/fonts/open-sans/OpenSans-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../resources/fonts/open-sans/OpenSans-SemiBold.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -71,7 +87,7 @@ html {
 
 body {
   color: var(--fg-regular-85);
-  font-family: var(--ff-regular);
+  font-family: var(--ff-text);
   font-size: var(--fz-regular);
   font-weight: 300;
   line-height: 145%;
@@ -109,14 +125,14 @@ body._lock {
 }
 
 h1 {
-  font-family: var(--ff-cormorant);
+  font-family: var(--ff-heading);
   font-size: var(--fz-h1);
   font-weight: 400;
   line-height: var(--fz-h1);
 }
 
 h2, .fz-h2 {
-  font-family: var(--ff-cormorant);
+  font-family: var(--ff-heading);
   font-size: var(--fz-h2);
   font-weight: 400;
   line-height: var(--fz-h2);
@@ -124,7 +140,7 @@ h2, .fz-h2 {
 
 h3, .fz-h3 {
   font-size: var(--fz-h3);
-  font-family: var(--ff-cormorant);
+  font-family: var(--ff-heading);
   line-height: var(--fz-h3);
   font-weight: 400;
 }

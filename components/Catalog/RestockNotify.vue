@@ -320,7 +320,7 @@ const submit = async () => {
 .restock__color-check {
   color: var(--fg-red);
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 }
 

@@ -179,8 +179,8 @@ const {data: products} = await useApi<{
 
 .technology-features__item-title {
   font-size: var(--fz-h3);
-  font-weight: 300;
-  font-family: var(--ff-cormorant);
+  font-weight: 400;
+  font-family: var(--ff-heading);
   line-height: 87%;
 }
 

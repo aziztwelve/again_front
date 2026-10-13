@@ -112,6 +112,6 @@ defineExpose({
 
 .filter-fit-type__label {
   font-size: 1.4rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 </style>

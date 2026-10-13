@@ -167,7 +167,7 @@ const repeatOrder = async () => {
   cursor: pointer;
   &::-webkit-details-marker { display: none; }
 }
-.history-order__number { margin: 0 0 .5rem; font-size: 1.8rem; font-weight: 500; line-height: 1.4; }
+.history-order__number { margin: 0 0 .5rem; font-size: 1.8rem; font-weight: 600; line-height: 1.4; }
 .history-order__date { font-size: 1.3rem; color: var(--fg-gray-2); }
 .history-order__heading-end { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; justify-content: flex-end; }
 .history-order__toggle { font-size: 1.2rem; color: var(--fg-gray-2); text-decoration: underline; text-underline-offset: .3rem; }
@@ -183,7 +183,7 @@ const repeatOrder = async () => {
 .history-order__image { position: relative; width: 6.4rem; height: 6.4rem; border: 1px solid var(--br-dark); border-radius: .5rem; background: var(--bg-gray-item); }
 .history-order__image img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
 .history-order__quantity { position: absolute; right: -.5rem; top: -.6rem; min-width: 2rem; height: 2rem; padding: 0 .4rem; display: flex; align-items: center; justify-content: center; background: var(--fg-regular); color: var(--fg-white); border-radius: 1rem; font-size: 1.1rem; }
-.history-order__name { display: block; font-size: 1.3rem; font-weight: 500; line-height: 1.5; text-transform: uppercase; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+.history-order__name { display: block; font-size: 1.3rem; font-weight: 600; line-height: 1.5; text-transform: uppercase; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
 a.history-order__name:hover { text-decoration: underline; }
 .history-order__variant, .history-order__discount { font-size: 1.2rem; color: var(--fg-gray-2); margin-top: .3rem; line-height: 1.5; overflow-wrap: anywhere; }
 .history-order__price { display: flex; flex-direction: column; text-align: right; gap: .2rem; font-size: 1.3rem; line-height: 1.5; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -192,7 +192,7 @@ a.history-order__name:hover { text-decoration: underline; }
 .history-order__totals > div { display: flex; justify-content: space-between; gap: 1.2rem; padding: .4rem 0; font-size: 1.3rem; line-height: 1.5; }
 .history-order dt, .history-order dd { margin: 0; }
 .history-order__totals dd { white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
-.history-order__totals .history-order__total { font-size: 1.8rem; font-weight: 500; border-top: 1px solid var(--br-dark); margin-top: 1rem; padding: 1.4rem 0 1.8rem; }
+.history-order__totals .history-order__total { font-size: 1.8rem; font-weight: 600; border-top: 1px solid var(--br-dark); margin-top: 1rem; padding: 1.4rem 0 1.8rem; }
 .history-order__savings { font-size: 1.2rem; color: #49624b; margin: -.8rem 1.6rem 1.8rem; line-height: 1.5; }
 .history-order__delivery { margin: 0; }
 .history-order__delivery > div { display: grid; grid-template-columns: 7.6rem minmax(0, 1fr); gap: 1rem; padding: 1.5rem 1.4rem; font-size: 1.3rem; line-height: 1.6; border-bottom: 1px solid var(--br-dark); &:last-child { border-bottom: 0; } }

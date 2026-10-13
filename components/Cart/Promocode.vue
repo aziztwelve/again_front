@@ -249,7 +249,7 @@ onMounted(() => {
 .cart__promo-remove {
   background: rgba(255, 99, 71, 0.2);
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 600;
   color: #d32f2f;
 
   &:hover {

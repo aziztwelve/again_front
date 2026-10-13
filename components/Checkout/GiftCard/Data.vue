@@ -102,7 +102,7 @@ onMounted(() => {
 
   &.success {
     color: #2e7d32;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   @media (max-width: $mobile) {

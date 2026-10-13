@@ -107,7 +107,7 @@
     border-top: .1rem solid #E7E7E7;
     border-bottom: .1rem solid #E7E7E7;;
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 600;
     text-align: left;
 
     &:first-child {
@@ -130,7 +130,7 @@
     border-right: .1rem solid #E7E7E7;
     padding: 1.5rem 2rem;
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 600;
 
     &:first-child {
       border-left: .1rem solid #E7E7E7;

@@ -167,7 +167,7 @@ definePageMeta( {
 .size-section__title {
   margin-bottom: 1.6rem;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .absorption-section__table-wrap {
@@ -195,7 +195,7 @@ definePageMeta( {
   h3 {
     margin-bottom: 1.6rem;
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   p + p {
@@ -219,7 +219,7 @@ definePageMeta( {
     border-top: .1rem solid #E7E7E7;
     border-bottom: .1rem solid #E7E7E7;;
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 600;
     text-align: left;
 
     &:first-child {
@@ -242,7 +242,7 @@ definePageMeta( {
     border-right: .1rem solid #E7E7E7;
     padding: 1.5rem 2rem;
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 600;
 
     &:first-child {
       border-left: .1rem solid #E7E7E7;

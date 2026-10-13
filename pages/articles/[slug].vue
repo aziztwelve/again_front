@@ -158,7 +158,7 @@ if (!post) {
   }
 
   & strong {
-    font-weight: 700;
+    font-weight: 600;
   }
 }
 

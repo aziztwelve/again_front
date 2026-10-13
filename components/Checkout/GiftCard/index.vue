@@ -169,7 +169,7 @@ watch(() => cartStore.total, () => {
   border-radius: 0.6rem;
   color: #f57c00;
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 600;
 
   @media (max-width: $mobile) {
     font-size: 1.2rem;
@@ -281,7 +281,7 @@ watch(() => cartStore.total, () => {
 .checkout__gift-card-remove {
   background: rgba(255, 99, 71, 0.2);
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 600;
   color: #d32f2f;
 
   &:hover {
@@ -350,7 +350,7 @@ watch(() => cartStore.total, () => {
     margin-top: 1rem;
 
     .label, .value {
-      font-weight: 700;
+      font-weight: 600;
       color: #3F3F3F;
     }
 

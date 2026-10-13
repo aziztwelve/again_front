@@ -210,7 +210,7 @@ const handleInput = () => {
 
     padding: 0 2.7rem 0 2rem;
     font-size: 1.6rem;
-    font-family: var(--ff-regular);
+    font-family: var(--ff-text);
 
     &::placeholder {
       color: var(--fg-input-plachoder);

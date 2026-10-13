@@ -648,7 +648,7 @@ onMounted(() => {
     & span {
       margin-top: .6rem;
       line-height: 100%;
-      font-weight: 700;
+      font-weight: 600;
       margin-right: .1rem;
       font-size: 1.4rem;
     }
@@ -730,7 +730,7 @@ onMounted(() => {
       line-height: 100%;
       opacity: .3;
       text-decoration: line-through;
-      font-weight: 700;
+      font-weight: 600;
 
       @media (max-width: $mobile) {
         font-size: 1rem;

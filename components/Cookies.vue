@@ -60,7 +60,7 @@ const useCookie = useCookieStore();
 
   &__title {
     font-size: 1.6rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: .5rem;
   }
 

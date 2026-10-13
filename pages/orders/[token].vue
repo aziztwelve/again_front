@@ -705,7 +705,7 @@ const repeatOrder = async () => {
     text-align: left;
     padding: 1rem 1.2rem;
     border-bottom: 1px solid #ddd;
-    font-weight: 500;
+    font-weight: 600;
     color: #7a7a7a;
   }
 
@@ -727,7 +727,7 @@ const repeatOrder = async () => {
   }
 
   .order-view__total-row td {
-    font-weight: 700;
+    font-weight: 600;
     font-size: 1.6rem;
     background: #fff;
   }

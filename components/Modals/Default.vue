@@ -236,9 +236,9 @@ const close = ( event : any ) => {
 :global(.modal__title){
   font-size: var(--fz-h1);
   line-height: var(--fz-h1);
-  font-weight: 300;
+  font-weight: 400;
   text-align: center;
-  font-family: var(--ff-cormorant);
+  font-family: var(--ff-heading);
 }
 
 :global(.modal__title--small){

@@ -82,7 +82,7 @@ const handleInput = ($event: InputEvent) => {
   font-size: 1.168rem;
   line-height: normal;
   color: var(--fg-gray);
-  font-family: var(--ff-regular);
+  font-family: var(--ff-text);
 
   :deep(a) {
     position: relative;

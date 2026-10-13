@@ -196,7 +196,7 @@ onUnmounted(() => {
       &._active {
         text-decoration: underline;
         color: var(--fg-red);
-        font-weight: 700;
+        font-weight: 600;
       }
     }
   }
@@ -262,7 +262,7 @@ onUnmounted(() => {
       &._active {
         text-decoration: underline;
         color: var(--fg-red);
-        font-weight: 700;
+        font-weight: 600;
       }
     }
   }

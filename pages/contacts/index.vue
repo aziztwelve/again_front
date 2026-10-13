@@ -92,7 +92,7 @@ definePageMeta( {
 
   &-title {
     font-size: 1.8rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 1rem;
   }
 

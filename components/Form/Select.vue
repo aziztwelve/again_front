@@ -155,7 +155,7 @@ onBeforeUnmount(() => {
     border: 0.1rem solid var(--fg-input-border);
     padding: 0 2.7rem;
     font-size: 1.6rem;
-    font-family: var(--ff-regular);
+    font-family: var(--ff-text);
 
     display: flex;
     align-items: center;

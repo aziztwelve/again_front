@@ -1168,7 +1168,7 @@ const formatPrice = (price: number): string => {
 
 .checkout__selected-pvz-icon {
   color: #27ae60;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .checkout__selected-pvz-title {
@@ -1274,7 +1274,7 @@ const formatPrice = (price: number): string => {
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary, #000);
   flex-shrink: 0;
   transition: border-color 0.15s;
@@ -1310,7 +1310,7 @@ const formatPrice = (price: number): string => {
 
 .checkout__yandex-offer-price {
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }

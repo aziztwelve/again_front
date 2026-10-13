@@ -43,6 +43,7 @@ export default defineNuxtConfig({
     css: [
         '~/assets/css/style.scss',
         '~/assets/css/tailwind.css',
+        '~/assets/css/typography.scss',
     ],
     runtimeConfig: {
         public: {

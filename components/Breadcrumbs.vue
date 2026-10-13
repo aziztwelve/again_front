@@ -36,7 +36,7 @@ const route = useRoute();
   display: flex;
   align-items: center;
   font-size: 1.4rem;
-  font-family: var(--ff-sf-pro);
+  font-family: var(--ff-text);
   color: #7B8990;
 
   @media (max-width: $mobile) {
@@ -50,7 +50,7 @@ const route = useRoute();
 }
 
 .breadcrumbs__link {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--fg-gray-2);
 }
 

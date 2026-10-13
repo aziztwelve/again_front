@@ -23,13 +23,13 @@
 .top {
   background: var(--fg-red);
   padding: .8rem 0 1rem;
-  font-weight: 200;
+  font-weight: 300;
   font-size: 1.8rem;
   line-height: 2.7rem;
   color: var(--fg-white);
   text-align: center;
   box-shadow: 0 -1px 23px 2px rgba(0, 0, 0, 0.09);
-  font-family: var(--ff-mulish);
+  font-family: var(--ff-text);
   position: relative;
   z-index: 1000;
   display: flex;

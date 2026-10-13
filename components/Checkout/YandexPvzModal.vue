@@ -427,7 +427,7 @@ watch(filteredPoints, () => {
 .pvz-modal__title {
   margin: 0;
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .pvz-modal__close {
@@ -630,7 +630,7 @@ watch(filteredPoints, () => {
   background: #fc0;
   border-radius: 0.4rem;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
 }
 

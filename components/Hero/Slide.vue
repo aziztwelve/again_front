@@ -70,7 +70,7 @@ defineProps<{
 }
 
 .hero-slide__subtitle {
-  font-weight: 200;
+  font-weight: 300;
   font-size: 2rem;
   line-height: 4.71rem;
   color: #C1AE94;
@@ -84,11 +84,11 @@ defineProps<{
 .hero-slide__title {
   max-width: 75%;
   margin: 0 auto 1rem;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .hero-slide__text {
-  font-family: var(--ff-helvetica-neue);
+  font-family: var(--ff-text);
   font-size: 2rem;
   line-height: 100%;
   max-width: 38.11rem;
@@ -102,7 +102,7 @@ defineProps<{
   }
 
   & strong {
-    font-weight: 500;
+    font-weight: 600;
   }
 }
 

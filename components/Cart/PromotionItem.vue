@@ -208,7 +208,7 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
 
 .cart__promotion-choice-label {
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #2F2F2F;
   margin-bottom: 0.8rem;
 }
@@ -233,7 +233,7 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
   border: 2px solid #e0e0e0;
   background: #fff;
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 
@@ -268,7 +268,7 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
 
 .cart__promotion-gifts-label {
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #2F2F2F;
   margin-bottom: 0.8rem;
 }
@@ -320,7 +320,7 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
 
 .cart__promotion-gift-name {
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #2F2F2F;
 }
 
@@ -347,7 +347,7 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  font-weight: bold;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -367,7 +367,7 @@ const variantsByColor = (gift: GiftProduct) => promotionStore.variantsForGiftByC
 
 .cart__promotion-gift-variants-label {
   font-size: 1.2rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #2F2F2F;
   margin-bottom: 0.6rem;
 }

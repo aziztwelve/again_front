@@ -250,7 +250,7 @@ const getInputType = () => {
   margin-bottom: 1rem;
   font-size: 3.2rem;
   line-height: 110%;
-  font-weight: 700;
+  font-weight: 600;
 
   @media (max-width: $tablet) {
     font-size: 2.8rem;

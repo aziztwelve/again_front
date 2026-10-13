@@ -42,7 +42,7 @@ const isActive = ref( false );
   &--active {
     #{$root}__title {
       color: #856B50;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     #{$root}__icon {

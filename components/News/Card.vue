@@ -121,7 +121,7 @@ const to = computed(() => {
   display: flex;
   align-items: center;
   color: var(--fg-red);
-  font-weight: 700;
+  font-weight: 600;
 
   & svg {
     margin-left: .5rem;

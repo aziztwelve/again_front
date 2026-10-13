@@ -89,7 +89,7 @@ definePageMeta( {
 
   & strong {
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 600;
 
     @media (max-width: $mobile) {
       font-size: 1.6rem;

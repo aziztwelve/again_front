@@ -347,7 +347,7 @@ onMounted(() => {
 
 .form__label {
   font-size: 1.4rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #3F3F3F;
 }
 
@@ -406,7 +406,7 @@ onMounted(() => {
   margin: 0;
   font-size: 1.3rem;
   color: #FFB800;
-  font-weight: 500;
+  font-weight: 600;
   padding: 1rem;
   background: rgba(255, 184, 0, 0.1);
   border-radius: 0.6rem;
