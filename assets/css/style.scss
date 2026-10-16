@@ -7,7 +7,17 @@
 @import "./mixins";
 
 
-// Шрифты брендбука: Vollkorn 400 — заголовки; Open Sans 300/400/600 — текст и интерфейс.
+// Временное сравнение: Panama 400 — заголовки; Open Sans 300/400/600 — текст.
+// Vollkorn остаётся зарегистрированным для быстрого возврата, но не выбран.
+// Источник демонстрационного файла и статус лицензии: assets/resources/fonts/panama/README.md.
+@font-face {
+  font-family: 'Panama';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../resources/fonts/panama/PanamaProportionalRegular-preview.woff') format('woff');
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'Vollkorn';
   font-style: normal;
@@ -54,7 +64,7 @@
 
 :root {
   --ff-text: "Open Sans", sans-serif;
-  --ff-heading: "Vollkorn", serif;
+  --ff-heading: "Panama", serif;
   // Legacy aliases keep all existing components on the brand typography.
   --ff-regular: var(--ff-text);
   --ff-cormorant: var(--ff-heading);
