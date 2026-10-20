@@ -33,8 +33,8 @@
 
       </div>
       <div class="returns__text">
+        <h3>Процедура возврата</h3>
         <div class="returns__text-col">
-          <h3>Процедура возврата</h3>
           <div class="returns__photo">
             <img src="/img/returns.again/main.jpg" alt="Коллекция белья AGAIN">
           </div>
@@ -93,17 +93,18 @@ definePageMeta( {
 .returns__text {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2.9rem;
+  gap: 0 2.9rem;
   line-height: 150%;
   margin-top: 4rem;
 
   @media (max-width: $mobile) {
     margin-top: 3.5rem;
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 0;
   }
 
-  & h3 {
+  & > h3 {
+    grid-column: 1 / -1;
     font-family: var(--ff-text);
     font-size: 2.5rem;
     margin-bottom: 1rem;
@@ -161,22 +162,13 @@ definePageMeta( {
     }
   }
 
-  // У первой фотографии сверху расположен заголовок «Процедура возврата».
-  // Отступ у правой колонки выравнивает верхние края самих фотографий.
-  & .returns__text-col:nth-child(2) .returns__photo {
-    margin-top: 4.75rem;
-
+  & .returns__text-col:nth-of-type(2) .returns__photo img {
     // Кадр начинается у головы и сохраняет видимой нижнюю часть с трусами.
-    & img {
-      object-position: center 12%;
-    }
-
-    @media (max-width: $mobile) {
-      margin-top: 0;
-    }
+    object-position: center 12%;
   }
 
   @media (max-width: $mobile) {
+    & .returns__text-col + .returns__text-col { margin-top: 2rem; }
     & .btn { text-align: center; }
   }
 }
