@@ -7,6 +7,7 @@
           :spaceBetween="10"
           :pagination="{ clickable: true }"
           :modules="[Pagination]"
+          :watchSlidesProgress="true"
           :breakpoints="{
             0: { slidesPerView: 2.2, spaceBetween: 10 },
             600: { slidesPerView: 3.5, spaceBetween: 10, pagination: false },

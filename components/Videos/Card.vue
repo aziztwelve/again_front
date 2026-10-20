@@ -1,13 +1,13 @@
 <template>
   <div
       class="videos__item"
-      :class="{ '_started': hasStarted }"
+      :class="{ '_started': hasStarted, 'swiper-no-swiping': hasStarted }"
       :role="hasStarted ? undefined : 'button'"
       :tabindex="hasStarted ? undefined : 0"
       :aria-label="hasStarted ? undefined : 'Воспроизвести видеоотзыв'"
       @click="playVideo"
-      @keydown.enter.prevent="playVideo"
-      @keydown.space.prevent="playVideo"
+      @keydown.enter.self.prevent="playVideo"
+      @keydown.space.self.prevent="playVideo"
   >
     <!-- Один плеер остаётся в карточке: без модалки и перехода из страницы. -->
     <video
@@ -25,7 +25,7 @@
     <button
         v-if="!hasStarted"
         type="button"
-        class="videos__play-btn"
+        class="videos__play-btn swiper-no-swiping"
         aria-label="Воспроизвести видеоотзыв"
         @click.stop="playVideo"
     >
@@ -53,7 +53,8 @@ const videoPlayer = ref<HTMLVideoElement | null>(null)
 const hasStarted = ref(false)
 
 const playVideo = async () => {
-  if (!videoPlayer.value) return
+  // Once started, native controls own play/pause and keyboard shortcuts.
+  if (hasStarted.value || !videoPlayer.value) return
 
   try {
     await videoPlayer.value.play()
