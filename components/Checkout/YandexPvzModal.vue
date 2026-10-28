@@ -481,10 +481,13 @@ watch(filteredPoints, () => {
   position: relative;
   flex: 1 1 60%;
   min-height: 0;
+  // Десктоп: список слева, карта справа.
+  order: 2;
 
   @media (max-width: 768px) {
     flex: none;
     height: 32vh;
+    order: 0;
   }
 }
 
@@ -514,7 +517,8 @@ watch(filteredPoints, () => {
   max-width: 38rem;
   overflow-y: auto;
   padding: 1.2rem 1.6rem;
-  border-left: 1px solid #eee;
+  border-right: 1px solid #eee;
+  order: 1;
 
   @media (max-width: 768px) {
     flex: 1;
