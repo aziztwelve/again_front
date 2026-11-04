@@ -79,12 +79,22 @@
         </div>
 
         <!-- Футер с кнопкой подтверждения -->
-        <div class="pvz-modal__footer" v-if="selectedPoint">
+        <div class="pvz-modal__footer">
           <div class="pvz-modal__footer-info">
-            <div class="pvz-modal__footer-name">{{ selectedPoint.name }}</div>
-            <div class="pvz-modal__footer-address">{{ formatAddress(selectedPoint) }}</div>
+            <template v-if="selectedPoint">
+              <div class="pvz-modal__footer-name">{{ selectedPoint.name }}</div>
+              <div class="pvz-modal__footer-address">{{ formatAddress(selectedPoint) }}</div>
+            </template>
+            <div v-else class="pvz-modal__footer-address">
+              Выберите пункт в списке или на карте
+            </div>
           </div>
-          <button class="pvz-modal__confirm btn _primary" @click="confirm">
+          <button
+              class="pvz-modal__confirm btn _primary"
+              :disabled="!selectedPoint"
+              :style="selectedPoint ? undefined : 'opacity: 0.5; cursor: default;'"
+              @click="confirm"
+          >
             Выбрать этот пункт
           </button>
         </div>
