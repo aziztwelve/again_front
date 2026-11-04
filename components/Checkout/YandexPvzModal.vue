@@ -471,6 +471,8 @@ watch(filteredPoints, () => {
   min-height: 0;
   display: flex;
   gap: 0;
+  // Слои карты Яндекса не должны вылезать за блок и перекрывать футер с кнопкой.
+  overflow: hidden;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -654,6 +656,8 @@ watch(filteredPoints, () => {
 
 // ─── Футер ─────────────────────────────────────────────────────────────────────
 .pvz-modal__footer {
+  position: relative;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 1.5rem;
