@@ -191,6 +191,8 @@ const login = async () => {
 
   @media (max-width: $tablet) {
     min-width: auto;
+    // Колонка: отделяем картинку от кнопки формы
+    margin-top: 3rem;
   }
 }
 
