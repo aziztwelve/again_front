@@ -44,9 +44,30 @@ const close = ( event : any ) => {
 
 <style scoped lang="scss">
 
+// На мобильном крестик внутри контента уезжает вместе с прокруткой длинного
+// попапа, поэтому показываем закреплённый на экране крестик, а внутренний прячем.
 @media (max-width: $mobile) {
   .modal > .modal__close {
-    display: none !important;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50%;
+    background: var(--fg-white);
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.3);
+
+    &:before,
+    &:after {
+      --closer-color: var(--fg-black);
+      width: 2rem;
+      height: 0.2rem;
+    }
+  }
+
+  .modal .modal__close--mobile {
+    display: none;
   }
 }
 
