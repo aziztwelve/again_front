@@ -141,6 +141,16 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         if (!form.user.first_name) missing.push('имя');
         if (!form.user.last_name) missing.push('фамилию');
         if (!form.user.phone) missing.push('телефон');
+        // Самовывоз: без выбранного пункта выдачи заказ оформить нельзя.
+        if (['cdek_pickup', 'cdek_postamat', 'yandex_pickup'].includes(String(form.delivery_method_code))) {
+            const hasPoint = !!(
+                form.pvz_code
+                || form.cdek_delivery_data?.pvz?.code
+                || form.cdek_delivery_data?.pvz_code
+                || form.yandex_delivery_data?.pvz
+            );
+            if (!hasPoint) missing.push('пункт выдачи (кнопка «Выбрать ПВЗ»)');
+        }
         if (missing.length) {
             await showError(joinMissing(missing));
             return false;
