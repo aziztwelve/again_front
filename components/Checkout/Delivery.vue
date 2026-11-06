@@ -602,7 +602,7 @@ const selectCdekCity = async (city: CdekCity) => {
   cdekPvzLoading.value = true;
   try {
     const pointType = currentCode.value === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ';
-    const { data, error } = await useApi<{ points: CdekPvz[] }>('/public/delivery/cdek/pvz', { query: { city_code: city.code, type: pointType } });
+    const { data, error } = await useApi<{ points: CdekPvz[] }>('/public/delivery/cdek/pvz', { query: { city_code: city.code, type: pointType, country_code: city.country_code || countryCode.value || 'RU' } });
     cdekPvzPoints.value = error.value ? [] : (data.value?.points ?? []);
     if (!cdekPvzPoints.value.length && !error.value) {
       const nearby = await useApi<{ points: CdekPvz[]; nearby?: boolean }>('/public/delivery/cdek/pvz', { query: { city_code: city.code, type: pointType, nearby: 1 } });
