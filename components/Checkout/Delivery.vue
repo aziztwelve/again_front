@@ -345,6 +345,23 @@ const minimumDeliveryDate = computed(() => {
   return orderDate;
 });
 
+// Ближайший рабочий день, доступный для доставки (выходные пропускаем).
+const firstAllowedDeliveryDate = computed(() => {
+  const date = new Date(minimumDeliveryDate.value);
+  while (date.getDay() === 0 || date.getDay() === 6) {
+    date.setDate(date.getDate() + 1);
+  }
+  // Полдень, чтобы смещение часового пояса не сдвинуло дату при отправке.
+  date.setHours(12, 0, 0, 0);
+  return date;
+});
+
+const dateKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const formatMinDate = (d: Date) =>
+  `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+
 // Идентификаторы локальных справочников гео. Населённый пункт выбирается по
 // справочнику СДЭК, поэтому его код не подменяет локальный city_id.
 // Уходят в заказ (delivery_address.country_id / city_id) и в оценку правил
@@ -440,6 +457,18 @@ watch(deliveryMethodsList, (list) => {
 const isYandexPickup  = computed(() => currentCode.value === 'yandex_pickup');
 const isYandexCourier = computed(() => currentCode.value === 'yandex_courier');
 const isYandexDelivery = computed(() => isYandexPickup.value || isYandexCourier.value);
+
+// Календарь показан не для Яндекса: если клиент дату не выбрал, подставляем
+// ближайшую разрешённую, чтобы заказ не уходил в день оформления.
+watch(
+    [isYandexDelivery, deliveryDate],
+    ([yandex, value]) => {
+      if (!yandex && !value) {
+        deliveryDate.value = firstAllowedDeliveryDate.value as unknown as string;
+      }
+    },
+    { immediate: true },
+);
 const isCdekPickup = computed(() => ['cdek_pickup', 'cdek_postamat'].includes(currentCode.value));
 const isCdekCourier = computed(() => currentCode.value === 'cdek_courier');
 const isCdekDelivery = computed(() => isCdekPickup.value || isCdekCourier.value);
@@ -803,9 +832,16 @@ const fetchYandexOffers = async (params: {
     );
 
     if (!error.value && data.value?.success) {
-      yandexOffers.value = data.value.offers ?? [];
-      if (!yandexOffers.value.length) {
+      const allOffers = data.value.offers ?? [];
+      // Доставка не раньше минимальной даты: тарифы с более ранней датой скрываем.
+      const minKey = dateKey(minimumDeliveryDate.value);
+      yandexOffers.value = allOffers.filter(
+          (offer) => !offer.delivery_date || String(offer.delivery_date).slice(0, 10) >= minKey,
+      );
+      if (!allOffers.length) {
         yandexError.value = 'Для указанного адреса нет доступных тарифов.';
+      } else if (!yandexOffers.value.length) {
+        yandexError.value = `Доставка возможна не ранее ${formatMinDate(minimumDeliveryDate.value)}. Подходящих тарифов Яндекс.Доставки сейчас нет, выберите другой способ доставки.`;
       }
     } else {
       yandexError.value = (error.value as any)?.data?.message
