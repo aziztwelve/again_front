@@ -10,6 +10,61 @@
 // Временное сравнение: Panama 400 — заголовки; Open Sans 300/400/600 — текст.
 // Vollkorn остаётся зарегистрированным для быстрого возврата, но не выбран.
 // Источник демонстрационного файла и статус лицензии: assets/resources/fonts/panama/README.md.
+// Заголовки и подзаголовки: Tenor Sans (бесплатный, OFL — tenor-sans/README.md).
+// Единственное начертание Regular; диапазон весов 400–900 отключает
+// искусственный жирный там, где заголовкам заданы 500–700.
+@font-face {
+  font-family: 'Tenor Sans';
+  font-style: normal;
+  font-weight: 400 900;
+  src: url('../resources/fonts/tenor-sans/TenorSans-Cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tenor Sans';
+  font-style: normal;
+  font-weight: 400 900;
+  src: url('../resources/fonts/tenor-sans/TenorSans-LatinExt.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tenor Sans';
+  font-style: normal;
+  font-weight: 400 900;
+  src: url('../resources/fonts/tenor-sans/TenorSans-Latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+  font-display: swap;
+}
+
+// Основной текст: TT Norms Pro (платный, лицензия — tt-norms-pro/README.md).
+// Есть только Regular и Medium, поэтому диапазоны весов закрывают весь набор
+// (300 → Regular, 600/700 → Medium): иначе браузер рисует искусственный жирный.
+@font-face {
+  font-family: 'TT Norms Pro';
+  font-style: normal;
+  font-weight: 100 400;
+  src: url('../resources/fonts/tt-norms-pro/TT_Norms_Pro_Regular.woff2') format('woff2'),
+    url('../resources/fonts/tt-norms-pro/TT_Norms_Pro_Regular.woff') format('woff');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TT Norms Pro';
+  font-style: normal;
+  font-weight: 500 900;
+  src: url('../resources/fonts/tt-norms-pro/TT_Norms_Pro_Medium.woff2') format('woff2'),
+    url('../resources/fonts/tt-norms-pro/TT_Norms_Pro_Medium.woff') format('woff');
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'Panama';
   font-style: normal;
@@ -63,8 +118,8 @@
 }
 
 :root {
-  --ff-text: "Open Sans", sans-serif;
-  --ff-heading: "Panama", serif;
+  --ff-text: "TT Norms Pro", "Open Sans", sans-serif;
+  --ff-heading: "Tenor Sans", sans-serif;
   // Legacy aliases keep all existing components on the brand typography.
   --ff-regular: var(--ff-text);
   --ff-cormorant: var(--ff-heading);
