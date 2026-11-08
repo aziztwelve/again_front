@@ -131,7 +131,14 @@
   import {pickDefaultVariant, variantInStock, variantPriced} from '~/utils/productVariants';
 
   const route = useRoute();
-  const {data: product} = await useApi<Product>(`/public/catalog/products/${route.params.slug}`)
+  const {data: product, error: productError} = await useApi<Product>(`/public/catalog/products/${route.params.slug}`)
+
+  // Товара нет (или он скрыт): отдаём настоящий 404, а не пустую страницу с кодом 200 —
+  // иначе поисковики индексируют несуществующие адреса, а кэш копит их. Сбой API (5xx)
+  // под 404 не маскируем.
+  if (!product.value && (productError.value as any)?.statusCode === 404) {
+    throw createError({statusCode: 404, statusMessage: 'Товар не найден', message: 'Товар не найден', fatal: true});
+  }
 
   if (product.value?.slug && product.value.slug !== String(route.params.slug)) {
     await navigateTo({
