@@ -111,6 +111,8 @@ const checkAndApplyPromoCode = async () => {
       } else {
         params.append(`product_ids[${productId}]`, '');
       }
+      // Количества нужны для фиксированного промокода: его номинал делится на весь заказ.
+      params.append(`quantities[${productId}][${variantId ?? 0}]`, String(Math.max(1, Number(item.quantity) || 1)));
     });
 
     const {data, error} = await useApi(`/promo-codes/validate?${params.toString()}`, {});

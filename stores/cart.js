@@ -474,6 +474,47 @@ export const useCartStore = defineStore('cartStore', () => {
         return giftCardPaymentStore.getFinalTotal(total.value);
     };
 
+    // Фиксированный промокод — скидка на весь заказ, поэтому доля каждой позиции зависит
+    // от состава и количеств корзины. При их смене пересчитываем промокод на сервере,
+    // иначе цены на витрине разойдутся с расчётом при оформлении.
+    let promoRevalidateTimer = null;
+    const revalidateFixedPromo = async () => {
+        if (!promoCode.value || promoData.value?.discount_type !== 'fixed' || !cart.value.length) return;
+
+        const params = new URLSearchParams();
+        params.append('code', promoCode.value);
+        cart.value.forEach((item) => {
+            const variantId = item?.selected_variant?.id ?? item?.product_variant_id ?? null;
+            if (variantId) {
+                params.append(`product_ids[${item.id}][]`, String(variantId));
+            } else {
+                params.append(`product_ids[${item.id}]`, '');
+            }
+            params.append(`quantities[${item.id}][${variantId ?? 0}]`, String(Math.max(1, Number(item.quantity) || 1)));
+        });
+
+        const { data, error } = await useApi(`/promo-codes/validate?${params.toString()}`, {});
+        const status = error.value?.statusCode ?? error.value?.status;
+        if (error.value && status >= 400 && status < 500) {
+            // Промокод больше не подходит к составу корзины.
+            removePromoFromCart();
+            return;
+        }
+        if (!error.value && data.value?.success) {
+            applyPromoToCart(data.value);
+        }
+    };
+
+    if (import.meta.client) {
+        watch(
+            () => cart.value.map((item) => `${item.id}:${item.product_variant_id ?? item.selected_variant?.id ?? 0}:${item.quantity ?? 1}`).join('|'),
+            () => {
+                clearTimeout(promoRevalidateTimer);
+                promoRevalidateTimer = setTimeout(revalidateFixedPromo, 300);
+            }
+        );
+    }
+
     return {
         cart: skipHydrate(cart),
         addToCart,
