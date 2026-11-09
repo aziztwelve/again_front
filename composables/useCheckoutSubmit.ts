@@ -151,6 +151,13 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             );
             if (!hasPoint) missing.push('пункт выдачи (кнопка «Выбрать ПВЗ»)');
         }
+        // СДЭК: пункт выбран, но тариф — нет. Без тарифа заказ уходил в формате Яндекса,
+        // и в админке пункт СДЭК «терялся» (заказ нельзя было отправить).
+        if (['cdek_pickup', 'cdek_postamat'].includes(String(form.delivery_method_code))
+            && (form.pvz_code || form.cdek_delivery_data?.pvz?.code)
+            && !form.cdek_delivery_data?.tariff_code) {
+            missing.push('тариф СДЭК (выберите вариант доставки под пунктом выдачи)');
+        }
         if (missing.length) {
             await showError(joinMissing(missing));
             return false;
