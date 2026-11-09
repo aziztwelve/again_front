@@ -364,6 +364,10 @@ const startCloudPayments = async () => {
     widget.oncomplete = async (result) => {
       if (result?.status === 'success') {
         showToast('Платёж принят. Обновляем статус заказа…');
+        // Оплачено: если в локальной корзине осталось то же, что в заказе, убираем её.
+        if (cartStore.isOrderedCart()) {
+          await cartStore.setEmptyCart();
+        }
         await refreshNuxtData();
         await navigateTo(`/orders/${token}`, { replace: true });
       }

@@ -229,6 +229,35 @@ export const useCartStore = defineStore('cartStore', () => {
         return items;
     }
 
+    // Корзина, повторяющая только что оформленный заказ, — не «брошенная». После оплаты
+    // (возврат из банка/СБП, перезагрузка страницы) браузер мог поднять прежнюю корзину,
+    // и она зеркалилась на сервер как новая: клиентке слали «вы забыли оформить» (заказ 40660).
+    // Запоминаем состав оформленного заказа и 3 часа не зеркалим такую корзину.
+    const ORDERED_MARK_KEY = 'lastOrderedItems';
+    const ORDERED_MARK_TTL_MS = 3 * 60 * 60 * 1000;
+    const cartItemKey = (item) =>
+        `${item?.id ?? item?.product_id}:${item?.product_variant_id ?? item?.selected_variant?.id ?? 0}`;
+
+    const markCartOrdered = () => {
+        try {
+            const keys = cart.value.map(cartItemKey);
+            if (keys.length) {
+                localStorage.setItem(ORDERED_MARK_KEY, JSON.stringify({ at: Date.now(), keys }));
+            }
+        } catch { /* localStorage недоступен: страховка на бэкенде остаётся */ }
+    };
+
+    const isOrderedCart = () => {
+        try {
+            if (!cart.value.length) return false;
+            const mark = JSON.parse(localStorage.getItem(ORDERED_MARK_KEY) || 'null');
+            if (!mark || Date.now() - Number(mark.at) > ORDERED_MARK_TTL_MS) return false;
+            return cart.value.every((item) => mark.keys.includes(cartItemKey(item)));
+        } catch {
+            return false;
+        }
+    };
+
     const setEmptyCart = async () => {
         cart.value = [];
         quantity.value = 0;
@@ -524,6 +553,8 @@ export const useCartStore = defineStore('cartStore', () => {
         init,
         getCartForCheckout,
         setEmptyCart,
+        markCartOrdered,
+        isOrderedCart,
         countCartPromocode,
         applyPromoToCart,
         removePromoFromCart,

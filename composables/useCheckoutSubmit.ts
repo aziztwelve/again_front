@@ -365,6 +365,9 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
                 await authStore.checkAuth();
             }
 
+            // Запоминаем состав оформленного заказа: если после оплаты браузер поднимет эту же
+            // корзину, она не должна уйти на сервер как «брошенная».
+            cartStore.markCartOrdered();
             // setEmptyCart внутри уже чистит promotion + giftCardPayment + giftCardPurchase.
             cartStore.setEmptyCart();
             return {

@@ -15,7 +15,7 @@ export default defineNuxtPlugin(() => {
 
     // Первичная синхронизация после гидрации.
     onNuxtReady(() => {
-        if (cartStore.cart.length) {
+        if (cartStore.cart.length && !cartStore.isOrderedCart()) {
             mirrorCart();
         }
     });
@@ -25,7 +25,10 @@ export default defineNuxtPlugin(() => {
         () => cartStore.cart,
         () => {
             if (cartStore.cart.length) {
-                mirrorCart();
+                // Корзина = только что оформленный заказ: на сервер не зеркалим (см. cart.js).
+                if (!cartStore.isOrderedCart()) {
+                    mirrorCart();
+                }
                 return;
             }
 
