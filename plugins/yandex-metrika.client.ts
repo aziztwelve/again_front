@@ -44,12 +44,20 @@ export default defineNuxtPlugin(async () => {
         const counterId = settings.yandex_metrika_id
 
         // Подготовка опций
-        const options: Record<string, boolean> = {
+        const options: Record<string, unknown> = {
             clickmap: settings.yandex_metrika_clickmap ?? true,
             trackLinks: settings.yandex_metrika_tracklinks ?? true,
             accurateTrackBounce: settings.yandex_metrika_accurateTrackBounce ?? true,
             webvisor: settings.yandex_metrika_webvisor ?? true,
+            // Как в коде счётчика из кабинета Метрики: электронная коммерция через dataLayer,
+            // реферер и адрес страницы.
+            ecommerce: 'dataLayer',
+            referrer: document.referrer,
+            url: location.href,
         }
+
+        // Массив для событий электронной коммерции (его читает счётчик).
+        ;(window as any).dataLayer = (window as any).dataLayer || []
 
         // Загрузка скрипта Яндекс.Метрики
         loadYandexMetrika(counterId, options)
@@ -63,7 +71,7 @@ export default defineNuxtPlugin(async () => {
 /**
  * Загружает скрипт Яндекс.Метрики
  */
-function loadYandexMetrika(counterId: string, options: Record<string, boolean>) {
+function loadYandexMetrika(counterId: string, options: Record<string, unknown>) {
     // Инициализация глобального объекта ym
     (function(m: any, e: Document, t: string, r: string, i: string, k: HTMLScriptElement | null, a: HTMLScriptElement | null) {
         m[i] = m[i] || function() {
@@ -95,7 +103,7 @@ function loadYandexMetrika(counterId: string, options: Record<string, boolean>) 
 
     // Инициализация счетчика
     // @ts-ignore
-    window.ym(counterId, 'init', options)
+    window.ym(Number(counterId), 'init', options)
 
     // Добавление noscript для случаев, когда JS отключен
     addNoScriptPixel(counterId)
