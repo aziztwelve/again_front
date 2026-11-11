@@ -111,7 +111,7 @@ const {data: products} = await useApi<{
 }
 
 .technology__content {
-  max-width: 40rem;
+  max-width: 44rem;
 
   @media (max-width: $tablet) {
     max-width: none;
@@ -125,6 +125,8 @@ const {data: products} = await useApi<{
   line-height: var(--fz-h1);
   margin-bottom: 1rem;
   color: var(--fg-black);
+  // Tenor Sans шире прежнего шрифта: «AGAIN» не должен рваться посреди слова
+  overflow-wrap: normal;
 
   @media (max-width: $mobile) {
     max-width: 24rem;
