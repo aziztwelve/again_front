@@ -65,7 +65,9 @@ defineProps<{
 
   @media (max-width: $mobile) {
     padding: 2.4rem 2.5rem;
-    min-height: 39.5rem;
+    // Мобильный макет баннера 600x800: высота по ширине, картинка показывается без обрезки
+    aspect-ratio: 3 / 4;
+    min-height: 0;
   }
 }
 
