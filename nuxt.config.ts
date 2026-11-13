@@ -13,7 +13,8 @@ export default defineNuxtConfig({
         head: {
             link: [{rel: 'icon', href: "/favicon.ico"}],
             meta: [
-                {name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'}
+                {name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'},
+                {name: 'yandex-verification', content: 'a8189c5e7213294d'}
             ]
         },
     },
