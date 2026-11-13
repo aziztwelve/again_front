@@ -120,8 +120,9 @@ const selectedColor = ref<Color | null>(null);
 const sizes = computed(() => {
   if (!props.variations || !props.variations.length) return [];
 
+  // Размеры всегда по порядку (XS→XXXL), даже если цвет не выбран/не заведён.
   if (!selectedColor.value) {
-    return props.variations.slice();
+    return sortVariantsDefault(props.variations);
   }
 
   const data = props.variations.filter(item => Number(item.color_id) === Number(selectedColor.value!.id));

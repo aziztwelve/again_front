@@ -1,10 +1,10 @@
 import type {AvailableVariation, Color} from '~/types/catalog';
 
 // Порядок размеров, как в списке размеров карточки (Variations.vue).
-const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+const SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
 const sizeRank = (size: string): number => {
-    const index = SIZE_ORDER.indexOf(size);
+    const index = SIZE_ORDER.indexOf(String(size).trim().toUpperCase());
     return index === -1 ? Number.POSITIVE_INFINITY : index;
 };
 
@@ -25,7 +25,11 @@ export const sortVariantsDefault = (
         const colorA = colorRank.get(Number(a.color_id)) ?? Number.POSITIVE_INFINITY;
         const colorB = colorRank.get(Number(b.color_id)) ?? Number.POSITIVE_INFINITY;
         if (colorA !== colorB) return colorA - colorB;
-        return sizeRank(a.size) - sizeRank(b.size);
+        const rankA = sizeRank(a.size);
+        const rankB = sizeRank(b.size);
+        if (rankA !== rankB) return rankA - rankB;
+        // Нестандартные размеры (числовые и т.п.) — по значению, затем по названию.
+        return String(a.size).localeCompare(String(b.size), 'ru', {numeric: true});
     });
 };
 
