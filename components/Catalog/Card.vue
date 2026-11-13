@@ -695,8 +695,8 @@ onMounted(() => {
     font-weight: 400;
     color: #000;
     @media (max-width: $mobile) {
-      min-height: 3.84rem;
-      font-size: 1.6rem; // Оставляем только размер шрифта
+      min-height: 3.36rem;
+      font-size: 1.4rem; // Оставляем только размер шрифта
     }
   }
 
