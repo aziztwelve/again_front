@@ -55,9 +55,6 @@
         <span class="label">Скидка по промокоду:</span>
         <span class="value highlight">-{{ getFormatPrice().formattedPrice(cart.promoDiscount) }} ₽</span>
       </div>
-      <div v-if="cart.promoData.description" class="cart__promo-description">
-        {{ cart.promoData.description }}
-      </div>
     </div>
   </div>
 </template>
@@ -336,15 +333,6 @@ onMounted(() => {
       font-size: 1.5rem;
     }
   }
-}
-
-.cart__promo-description {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(46, 125, 50, 0.2);
-  font-size: 1.2rem;
-  color: #666;
-  font-style: italic;
 }
 
 @keyframes slideDown {
