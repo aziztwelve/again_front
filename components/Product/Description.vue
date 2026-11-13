@@ -65,8 +65,9 @@ const containsHtml = computed(() => /<\/?[a-z][^>]*>/i.test(props.text))
     padding-left: 2rem;
   }
 
-  :deep(ul) { list-style: disc; }
-  :deep(ol) { list-style: decimal; }
+  // Маркер задаём именно на li: глобальный сброс ставит им list-style: none.
+  :deep(ul > li) { list-style: disc outside; }
+  :deep(ol > li) { list-style: decimal outside; }
 
   :deep(li) {
     margin: 0 0 .5rem;
