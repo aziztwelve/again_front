@@ -584,12 +584,15 @@ const selectCdekCity = async (city: CdekCity) => {
 // Габариты/вес берутся из карточки товара (предпочитается выбранная вариантная
 // позиция), отсутствующие поля бэкенд заменит значениями из настроек СДЭК
 // («Вес по умолчанию», «Длина/Ширина/Высота»).
+// Первое положительное значение: у варианта часто «0.000» (строка), и обычный
+// `??` не переходил к значению товара.
+const firstPositive = (...values: any[]) => values.find((value) => Number(value) > 0) ?? null;
 const cdekItems = () => useCartStore().cart.map((item: any) => ({
   name: item.name ?? 'Товар',
-  weight: item.selected_variant?.weight ?? item.weight ?? null,
-  length: item.selected_variant?.length ?? item.length ?? null,
-  width: item.selected_variant?.width ?? item.width ?? null,
-  height: item.selected_variant?.height ?? item.height ?? null,
+  weight: firstPositive(item.selected_variant?.weight, item.weight),
+  length: firstPositive(item.selected_variant?.length, item.length),
+  width: firstPositive(item.selected_variant?.width, item.width),
+  height: firstPositive(item.selected_variant?.height, item.height),
   price: item.price ?? 0,
   quantity: item.quantity ?? 1,
 }));
