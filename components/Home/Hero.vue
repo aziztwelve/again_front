@@ -1,8 +1,10 @@
 <template>
-  <section class="hero">
+  <section v-if="visibleSlides.length" class="hero">
     <div class="hero__container container">
       <ClientOnly>
+        <!-- key: при переходе через границу мобильной ширины слайды другие, слайдер собираем заново -->
         <swiper-container
+            :key="isMobile ? 'mobile' : 'desktop'"
             class="hero__slider"
             slides-per-view="1"
             space-between="5"
@@ -24,13 +26,13 @@
                }
             }"
         >
-          <swiper-slide v-for="(slide, index) in slides" :key="index">
+          <swiper-slide v-for="(slide, index) in visibleSlides" :key="index">
             <HeroSlide
                 :title="slide.title"
                 :subtitle="slide.subtitle"
                 :text="slide.text"
-                :desktop-image="slide?.image_urls"
-                :mobile-image="slide?.mobile_image_urls"
+                :desktop-image="isMobile ? undefined : slide.image_urls"
+                :mobile-image="isMobile ? slide.mobile_image_urls : undefined"
             />
           </swiper-slide>
         </swiper-container>
@@ -48,6 +50,7 @@ import "swiper/css/pagination";
 register();
 
 type Slide = {
+  id?: number,
   title: string,
   subtitle: string,
   text: string,
@@ -64,6 +67,29 @@ type Slide = {
 }
 
 const { data: slides } = await useApi<Slide[]>( '/get_slides' );
+
+// Мобильная вёрстка включается до этой ширины (как $mobile в стилях).
+const MOBILE_QUERY = '(max-width: 575px)';
+const isMobile = ref(false);
+let mobileQuery: MediaQueryList | null = null;
+const onMobileChange = (event: MediaQueryListEvent) => { isMobile.value = event.matches; };
+
+onMounted(() => {
+  mobileQuery = window.matchMedia(MOBILE_QUERY);
+  isMobile.value = mobileQuery.matches;
+  mobileQuery.addEventListener('change', onMobileChange);
+});
+onBeforeUnmount(() => mobileQuery?.removeEventListener('change', onMobileChange));
+
+// Слайд показывается только там, где для него загружена картинка: только
+// мобильная картинка — только на телефонах, только десктопная — только на
+// компьютерах, обе — везде. Слайд без картинок вообще (только текст) — везде.
+const visibleSlides = computed(() => (slides.value ?? []).filter((slide) => {
+  const hasDesktop = Boolean(slide.image_urls?.original);
+  const hasMobile = Boolean(slide.mobile_image_urls?.original || slide.mobile_image_urls?.sm);
+  if (!hasDesktop && !hasMobile) return true;
+  return isMobile.value ? hasMobile : hasDesktop;
+}));
 </script>
 
 <style scoped lang="scss">
