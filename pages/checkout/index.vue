@@ -34,7 +34,6 @@
                   v-model:address="form.delivery_address"
                   v-model:entrance="form.entrance"
                   v-model:floor="form.floor"
-                  v-model:delivery-date="form.delivery_date"
                   v-model:buyer-comment="form.buyer_comment"
                   v-model:delivery-method-id="form.delivery_method_id"
                   v-model:delivery-method-name="form.delivery_method_name"
@@ -171,7 +170,6 @@ const form = reactive<CheckoutForm>({
   delivery_address: '',
   entrance: '',
   floor: '',
-  delivery_date: '',
   buyer_comment: '',
   delivery_method_id: null,
   delivery_method_name: '',

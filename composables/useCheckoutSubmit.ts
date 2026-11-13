@@ -180,7 +180,6 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         // «Номер квартиры» уходит в легаси-ключ entrance (order_addresses.entrance).
         if (form.entrance) addr.entrance = form.entrance;
         if (form.floor) addr.floor = form.floor;
-        if (form.delivery_date) addr.delivery_date = form.delivery_date;
         if (form.buyer_comment) addr.buyer_comment = form.buyer_comment;
         return addr;
     };

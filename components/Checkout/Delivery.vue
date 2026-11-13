@@ -47,16 +47,6 @@
         />
       </div>
 
-      <FormDatepicker
-          v-if="!isYandexDelivery"
-          class="checkout__delivery-date"
-          name="delivery_date"
-          placeholder="Желаемая дата доставки"
-          v-model="deliveryDate"
-          :min-date="minimumDeliveryDate"
-          :disabled-week-days="[0, 6]"
-      />
-
       <!-- Выбор способа доставки -->
       <div v-if="deliveryMethodsList.length" class="checkout__delivery-methods">
         <div class="checkout__delivery-methods-title">Способ доставки*</div>
@@ -314,7 +304,6 @@ const address           = defineModel<string>('address', { default: '' });
 // «Номер квартиры» хранится в легаси-ключе entrance (order_addresses.entrance).
 const entrance          = defineModel<string>('entrance', { default: '' });
 const floor             = defineModel<string>('floor', { default: '' });
-const deliveryDate      = defineModel<string | number>('deliveryDate', { default: '' });
 const buyerComment      = defineModel<string>('buyerComment', { default: '' });
 const deliveryMethodId  = defineModel<number | null>('deliveryMethodId', { default: null });
 const deliveryMethodName = defineModel<string>('deliveryMethodName', { default: '' });
@@ -343,17 +332,6 @@ const minimumDeliveryDate = computed(() => {
   orderDate.setDate(orderDate.getDate() + daysUntilDelivery);
 
   return orderDate;
-});
-
-// Ближайший рабочий день, доступный для доставки (выходные пропускаем).
-const firstAllowedDeliveryDate = computed(() => {
-  const date = new Date(minimumDeliveryDate.value);
-  while (date.getDay() === 0 || date.getDay() === 6) {
-    date.setDate(date.getDate() + 1);
-  }
-  // Полдень, чтобы смещение часового пояса не сдвинуло дату при отправке.
-  date.setHours(12, 0, 0, 0);
-  return date;
 });
 
 const dateKey = (d: Date) =>
@@ -458,17 +436,6 @@ const isYandexPickup  = computed(() => currentCode.value === 'yandex_pickup');
 const isYandexCourier = computed(() => currentCode.value === 'yandex_courier');
 const isYandexDelivery = computed(() => isYandexPickup.value || isYandexCourier.value);
 
-// Календарь показан не для Яндекса: если клиент дату не выбрал, подставляем
-// ближайшую разрешённую, чтобы заказ не уходил в день оформления.
-watch(
-    [isYandexDelivery, deliveryDate],
-    ([yandex, value]) => {
-      if (!yandex && !value) {
-        deliveryDate.value = firstAllowedDeliveryDate.value as unknown as string;
-      }
-    },
-    { immediate: true },
-);
 const isCdekPickup = computed(() => ['cdek_pickup', 'cdek_postamat'].includes(currentCode.value));
 const isCdekCourier = computed(() => currentCode.value === 'cdek_courier');
 const isCdekDelivery = computed(() => isCdekPickup.value || isCdekCourier.value);
@@ -1033,12 +1000,6 @@ const formatPrice = (price: number): string => {
 
   @media (max-width: $mobile) {
     grid-template-columns: 1fr;
-  }
-}
-
-.checkout__delivery-date {
-  @media (max-width: $mobile) {
-    margin-top: 1.5rem;
   }
 }
 
