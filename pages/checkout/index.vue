@@ -27,7 +27,9 @@
                   ref="giftCardDataRef"
               />
 
+              <!-- Электронная подарочная карта ничего не везёт: адрес и доставку не спрашиваем -->
               <CheckoutDelivery
+                  v-if="cartStore.requiresDelivery"
                   v-model:country-code="form.country_code"
                   v-model:country-name="form.country_name"
                   v-model:city-name="form.city_name"
@@ -185,6 +187,35 @@ const form = reactive<CheckoutForm>({
   pvz_code: null,
   pvz_address: null,
 });
+
+// Корзина стала «только электронная карта» (или покупатель переключил тип карты на электронную):
+// блок доставки исчезает, поэтому стираем всё, что в нём было выбрано, и убираем строку «Доставка»
+// из итогов. Иначе к цене сертификата прибавилась бы стоимость уже невидимого тарифа.
+const freeShippingStore = useFreeShippingStore();
+watch(() => cartStore.requiresDelivery, (needsDelivery) => {
+  if (needsDelivery) return;
+
+  freeShippingStore.reset();
+  Object.assign(form, {
+    country_code: '',
+    country_name: '',
+    city_name: '',
+    country_id: null,
+    city_id: null,
+    delivery_address: '',
+    entrance: '',
+    floor: '',
+    buyer_comment: '',
+    delivery_method_id: null,
+    delivery_method_name: '',
+    delivery_method_code: '',
+    yandex_offer: null,
+    yandex_delivery_data: null,
+    cdek_delivery_data: null,
+    pvz_code: null,
+    pvz_address: null,
+  });
+}, { immediate: true });
 
 // Вся валидация + сборка payload'а + POST живут в composable.
 // Здесь только связка с DOM (refs + scrollIntoView).

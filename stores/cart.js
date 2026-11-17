@@ -29,6 +29,18 @@ export const useCartStore = defineStore('cartStore', () => {
         return cart.value.some(item => item.name === GIFT_CERTIFICATE);
     });
 
+    // В корзине только электронные сертификаты: везти нечего, адрес и доставка не нужны,
+    // карта уходит на почту после оплаты. Пластиковая карта или любой обычный товар
+    // возвращают доставку (тип карты выбирается в модалке «Данные подарочной карты»).
+    const isElectronicGiftCardOnly = computed(() => {
+        if (!cart.value.length) return false;
+        if (!cart.value.every(item => item.name === GIFT_CERTIFICATE)) return false;
+
+        return useGiftCardPurchaseStore().purchaseData.type === 'electronic';
+    });
+
+    const requiresDelivery = computed(() => !isElectronicGiftCardOnly.value);
+
     // ========================================
     // МЕТОДЫ
     // ========================================
@@ -572,6 +584,8 @@ export const useCartStore = defineStore('cartStore', () => {
         promoDiscount,
         regularDiscount,
         hasGiftCertificateInCart,
+        isElectronicGiftCardOnly,
+        requiresDelivery,
         getFinalTotal
     }
 });

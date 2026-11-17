@@ -135,14 +135,16 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
     const validateRequired = async (): Promise<boolean> => {
         const { form } = deps;
         const missing: string[] = [];
-        if (!form.country_name) missing.push('страну');
-        if (!form.city_name) missing.push('город');
-        if (!form.delivery_address) missing.push('адрес доставки');
+        // Электронная подарочная карта ничего не везёт: адрес и доставку не спрашиваем.
+        const needsDelivery = cartStore.requiresDelivery;
+        if (needsDelivery && !form.country_name) missing.push('страну');
+        if (needsDelivery && !form.city_name) missing.push('город');
+        if (needsDelivery && !form.delivery_address) missing.push('адрес доставки');
         if (!form.user.first_name) missing.push('имя');
         if (!form.user.last_name) missing.push('фамилию');
         if (!form.user.phone) missing.push('телефон');
         // Самовывоз: без выбранного пункта выдачи заказ оформить нельзя.
-        if (['cdek_pickup', 'cdek_postamat', 'yandex_pickup'].includes(String(form.delivery_method_code))) {
+        if (needsDelivery && ['cdek_pickup', 'cdek_postamat', 'yandex_pickup'].includes(String(form.delivery_method_code))) {
             const hasPoint = !!(
                 form.pvz_code
                 || form.cdek_delivery_data?.pvz?.code
@@ -153,14 +155,14 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         }
         // СДЭК: пункт выбран, но тариф — нет. Без тарифа заказ уходил в формате Яндекса,
         // и в админке пункт СДЭК «терялся» (заказ нельзя было отправить).
-        if (['cdek_pickup', 'cdek_postamat'].includes(String(form.delivery_method_code))
+        if (needsDelivery && ['cdek_pickup', 'cdek_postamat'].includes(String(form.delivery_method_code))
             && (form.pvz_code || form.cdek_delivery_data?.pvz?.code)
             && !form.cdek_delivery_data?.tariff_code) {
             missing.push('тариф СДЭК (выберите вариант доставки под пунктом выдачи)');
         }
         // СДЭК курьером: без выбранного тарифа заказ уходил без цены и данных доставки
         // (доставка получалась «бесплатной», заявка в СДЭК не создавалась — заказ 41378).
-        if (String(form.delivery_method_code) === 'cdek_courier' && !form.cdek_delivery_data?.tariff_code) {
+        if (needsDelivery && String(form.delivery_method_code) === 'cdek_courier' && !form.cdek_delivery_data?.tariff_code) {
             missing.push('тариф СДЭК (выберите вариант доставки курьером под адресом)');
         }
         if (missing.length) {
@@ -205,31 +207,37 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             // order_addresses.recipient_* за один проход.
             user: { ...form.user },
             recipient: { ...form.user },
-            delivery_address: buildDeliveryAddress(),
         };
 
         if (form.payment_method) {
             payload.payment_method = form.payment_method;
         }
-        if (form.delivery_method_name) {
-            payload.delivery_method = { name: form.delivery_method_name };
-        }
 
-        // Яндекс.Доставка: передаём выбранный тариф
-        if (form.yandex_offer) {
-            payload.yandex_offer = form.yandex_offer.offer_id;
-            payload.delivery_data = form.yandex_delivery_data ?? undefined;
-        }
+        // Электронная подарочная карта ничего не везёт: адрес и данные доставки в заказ не отправляем,
+        // карта уходит на почту после оплаты. Для пластика и обычных товаров всё как раньше.
+        if (cartStore.requiresDelivery) {
+            payload.delivery_address = buildDeliveryAddress();
 
-        if (form.cdek_delivery_data) {
-            payload.delivery_data = form.cdek_delivery_data;
-        }
+            if (form.delivery_method_name) {
+                payload.delivery_method = { name: form.delivery_method_name };
+            }
 
-        // Яндекс.Доставка (ПВЗ): передаём выбранный пункт выдачи.
-        if (form.pvz_code) {
-            payload.pvz_code = form.pvz_code;
-            if (form.pvz_address) {
-                payload.pvz_address = form.pvz_address;
+            // Яндекс.Доставка: передаём выбранный тариф
+            if (form.yandex_offer) {
+                payload.yandex_offer = form.yandex_offer.offer_id;
+                payload.delivery_data = form.yandex_delivery_data ?? undefined;
+            }
+
+            if (form.cdek_delivery_data) {
+                payload.delivery_data = form.cdek_delivery_data;
+            }
+
+            // Яндекс.Доставка (ПВЗ): передаём выбранный пункт выдачи.
+            if (form.pvz_code) {
+                payload.pvz_code = form.pvz_code;
+                if (form.pvz_address) {
+                    payload.pvz_address = form.pvz_address;
+                }
             }
         }
 

@@ -154,7 +154,8 @@ export interface CheckoutPayload extends CheckoutConsents {
     }>;
     user: CheckoutFormUser;
     recipient: CheckoutFormUser;
-    delivery_address: Record<string, unknown>;
+    /** Нет у заказа из одних электронных подарочных карт: везти нечего. */
+    delivery_address?: Record<string, unknown>;
     delivery_method?: { name: string };
     payment_method?: string;
     yandex_offer?: string;
