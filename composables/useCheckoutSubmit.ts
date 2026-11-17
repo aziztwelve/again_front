@@ -158,6 +158,11 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
             && !form.cdek_delivery_data?.tariff_code) {
             missing.push('тариф СДЭК (выберите вариант доставки под пунктом выдачи)');
         }
+        // СДЭК курьером: без выбранного тарифа заказ уходил без цены и данных доставки
+        // (доставка получалась «бесплатной», заявка в СДЭК не создавалась — заказ 41378).
+        if (String(form.delivery_method_code) === 'cdek_courier' && !form.cdek_delivery_data?.tariff_code) {
+            missing.push('тариф СДЭК (выберите вариант доставки курьером под адресом)');
+        }
         if (missing.length) {
             await showError(joinMissing(missing));
             return false;
