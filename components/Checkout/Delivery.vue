@@ -609,7 +609,11 @@ const fetchCdekTariffs = async () => {
     });
     if (!error.value && data.value?.success) {
       cdekTariffs.value = data.value.tariffs ?? [];
-      if (cdekTariffs.value.length === 1) selectCdekTariff(cdekTariffs.value[0]);
+      // Сразу отмечаем самый дешёвый тариф: цена доставки появляется в «Итого», а покупатель
+      // может выбрать другой вариант. Без выбранного тарифа заказ с курьером не оформить.
+      if (cdekTariffs.value.length) {
+        selectCdekTariff([...cdekTariffs.value].sort((left, right) => left.price - right.price)[0]);
+      }
     }
     else cdekError.value = (error.value as any)?.data?.message ?? data.value?.message ?? 'Не удалось рассчитать доставку СДЭК.';
     if (!cdekTariffs.value.length && !cdekError.value) cdekError.value = 'Для указанного адреса нет доступных тарифов СДЭК.';
