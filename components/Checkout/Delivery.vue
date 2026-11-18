@@ -228,6 +228,7 @@
 
 <script setup lang="ts">
 import { until } from '@vueuse/core';
+import { availableCheckoutDeliveryMethods } from '~/utils/checkoutDeliveryMethods';
 import type { Countries } from '~/types/countries';
 
 interface DeliveryMethod {
@@ -398,11 +399,10 @@ const { data: deliveryMethods } = await useApi<{
   meta: { total_methods: number };
 }>('/public/delivery/methods', { query: { active: 1 } });
 
-const CHECKOUT_DELIVERY_CODES = ['cdek_pickup', 'cdek_courier', 'cdek_postamat', 'yandex_pickup', 'yandex_courier'];
+// Яндекс.Доставка возит только по России: для другой страны её способы не показываем
+// (правило — в utils/checkoutDeliveryMethods.ts). Способы СДЭК остаются для любой страны.
 const deliveryMethodsList = computed<DeliveryMethod[]>(() =>
-    (deliveryMethods.value?.data ?? []).filter((method) =>
-      CHECKOUT_DELIVERY_CODES.includes(method.delivery_type_code ?? method.code ?? ''),
-    ).sort((left, right) => CHECKOUT_DELIVERY_CODES.indexOf(left.delivery_type_code ?? left.code ?? '') - CHECKOUT_DELIVERY_CODES.indexOf(right.delivery_type_code ?? right.code ?? '')),
+    availableCheckoutDeliveryMethods(deliveryMethods.value?.data, countryCode.value),
 );
 
 const selectedDeliveryMethod = computed<DeliveryMethod | null>(
@@ -426,9 +426,11 @@ const onDeliveryMethodSelected = (object: { id: number; title?: string; code?: s
   if (method) selectDeliveryMethod(method);
 };
 
-// Авто-выбор первого метода
+// Авто-выбор первого метода. Если выбранный способ пропал из списка (покупатель сменил страну
+// на не-Россию, и Яндекс.Доставка исчезла), выбираем первый из оставшихся.
 watch(deliveryMethodsList, (list) => {
-  if (list.length && !deliveryMethodId.value) selectDeliveryMethod(list[0]);
+  const stillAvailable = list.some((method) => method.id === deliveryMethodId.value);
+  if (list.length && !stillAvailable) selectDeliveryMethod(list[0]);
 }, { immediate: true });
 
 // ─── Яндекс.Доставка: флаги ────────────────────────────────────────────────
