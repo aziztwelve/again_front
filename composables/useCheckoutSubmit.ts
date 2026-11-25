@@ -1,5 +1,6 @@
 import type { Country } from '~/types/countries';
 import type { CheckoutForm, CheckoutPayload, CheckoutResult } from '~/types/order';
+import { POCHTA_DELIVERY_CODES } from '~/utils/checkoutDeliveryMethods';
 
 /**
  * Композабл с логикой submit'а чекаута: клиентская валидация формы,
@@ -143,6 +144,16 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
         if (!form.user.first_name) missing.push('имя');
         if (!form.user.last_name) missing.push('фамилию');
         if (!form.user.phone) missing.push('телефон');
+        // Почта России: без отделения (для «в отделение») и без выбранного варианта доставки
+        // заказ уходил без цены и данных для отправки.
+        if (needsDelivery && POCHTA_DELIVERY_CODES.includes(String(form.delivery_method_code))) {
+            if (String(form.delivery_method_code) === 'russian_post_office' && !form.pochta_delivery_data?.pvz) {
+                missing.push('отделение Почты России (кнопка «Выбрать отделение»)');
+            }
+            if (!form.pochta_delivery_data?.tariff_code) {
+                missing.push('вариант доставки Почтой России (выберите тариф под адресом)');
+            }
+        }
         // Самовывоз: без выбранного пункта выдачи заказ оформить нельзя.
         if (needsDelivery && ['cdek_pickup', 'cdek_postamat', 'yandex_pickup'].includes(String(form.delivery_method_code))) {
             const hasPoint = !!(
@@ -230,6 +241,10 @@ export function useCheckoutSubmit(deps: CheckoutSubmitDeps) {
 
             if (form.cdek_delivery_data) {
                 payload.delivery_data = form.cdek_delivery_data;
+            }
+
+            if (form.pochta_delivery_data) {
+                payload.delivery_data = form.pochta_delivery_data;
             }
 
             // Яндекс.Доставка (ПВЗ): передаём выбранный пункт выдачи.

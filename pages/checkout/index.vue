@@ -43,6 +43,7 @@
                   v-model:yandex-offer="form.yandex_offer"
                   v-model:yandex-delivery-data="form.yandex_delivery_data"
                   v-model:cdek-delivery-data="form.cdek_delivery_data"
+                  v-model:pochta-delivery-data="form.pochta_delivery_data"
                   v-model:pvz-code="form.pvz_code"
                   v-model:pvz-address="form.pvz_address"
                   v-model:geo-country-id="form.country_id"
@@ -184,6 +185,7 @@ const form = reactive<CheckoutForm>({
   yandex_offer: null,
   yandex_delivery_data: null,
   cdek_delivery_data: null,
+  pochta_delivery_data: null,
   pvz_code: null,
   pvz_address: null,
 });
@@ -212,6 +214,7 @@ watch(() => cartStore.requiresDelivery, (needsDelivery) => {
     yandex_offer: null,
     yandex_delivery_data: null,
     cdek_delivery_data: null,
+    pochta_delivery_data: null,
     pvz_code: null,
     pvz_address: null,
   });

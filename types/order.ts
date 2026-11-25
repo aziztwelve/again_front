@@ -139,6 +139,7 @@ export interface CheckoutForm extends CheckoutConsents {
     pvz_address?: string | null;
     yandex_delivery_data?: Record<string, unknown> | null;
     cdek_delivery_data?: Record<string, unknown> | null;
+    pochta_delivery_data?: Record<string, unknown> | null;
 }
 
 // Тело POST /public/orders.

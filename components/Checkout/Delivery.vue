@@ -131,6 +131,60 @@
         </div>
       </div>
 
+      <!-- ======= ПОЧТА РОССИИ ======= -->
+      <div v-if="isPochta" class="checkout__cdek">
+        <template v-if="isPochtaOffice">
+          <div v-if="!cityName" class="checkout__yandex-hint">
+            <span class="checkout__yandex-hint-icon">📍</span>
+            Укажите населённый пункт, чтобы выбрать отделение Почты России.
+          </div>
+          <div v-else-if="pochtaOfficesLoading" class="checkout__yandex-loading">
+            <span class="checkout__yandex-loading-spinner"></span>
+            Ищем отделения Почты России...
+          </div>
+          <div v-else-if="pochtaOfficesError" class="checkout__yandex-error">{{ pochtaOfficesError }}</div>
+          <div v-else-if="!pochtaOffices.length" class="checkout__yandex-hint">
+            В этом населённом пункте не нашли отделений Почты России. Выберите другой способ доставки или населённый пункт.
+          </div>
+          <template v-else>
+            <button v-if="!pochtaSelectedOffice" type="button" class="checkout__delivery-map-btn btn _border _thin" @click="pochtaModalOpen = true">
+              Выбрать отделение
+            </button>
+            <div v-else class="checkout__selected-pvz">
+              <div class="checkout__selected-pvz-header">
+                <span class="checkout__selected-pvz-icon">✓</span>
+                <span class="checkout__selected-pvz-title">Отделение Почты России {{ pochtaSelectedOffice.code }}</span>
+                <button type="button" class="checkout__selected-pvz-change" @click="pochtaModalOpen = true">Изменить</button>
+              </div>
+              <div class="checkout__selected-pvz-address">{{ pochtaSelectedOffice.address }}</div>
+              <div v-if="pochtaSelectedOffice.hours" class="checkout__selected-pvz-address">{{ pochtaSelectedOffice.hours }}</div>
+            </div>
+          </template>
+        </template>
+        <div v-if="isPochtaCourier && !(cityName && address)" class="checkout__yandex-hint">
+          <span class="checkout__yandex-hint-icon">🚚</span>
+          Заполните населённый пункт и адрес доставки, чтобы рассчитать стоимость.
+        </div>
+        <div v-if="pochtaLoading" class="checkout__yandex-loading">
+          <span class="checkout__yandex-loading-spinner"></span>
+          Рассчитываем доставку Почтой России...
+        </div>
+        <div v-if="pochtaError" class="checkout__yandex-error">{{ pochtaError }}</div>
+        <div v-if="pochtaTariffs.length" class="checkout__yandex-offers">
+          <div class="checkout__yandex-offers-title">Выберите вариант доставки Почтой России</div>
+          <div class="checkout__yandex-offers-list">
+            <div v-for="tariff in pochtaTariffs" :key="tariff.tariff_code" class="checkout__yandex-offer" :class="{ '_selected': pochtaSelectedTariff?.tariff_code === tariff.tariff_code }" @click="selectPochtaTariff(tariff)">
+              <div class="checkout__yandex-offer-check"><span v-if="pochtaSelectedTariff?.tariff_code === tariff.tariff_code">✓</span></div>
+              <div class="checkout__yandex-offer-info">
+                <div class="checkout__yandex-offer-name">{{ tariff.display_name || tariff.tariff_name }}</div>
+                <div v-if="pochtaPeriod(tariff.period)" class="checkout__yandex-offer-date">{{ pochtaPeriod(tariff.period) }}</div>
+              </div>
+              <div class="checkout__yandex-offer-price">{{ formatPrice(tariff.price) }} ₽</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Подсказка для ПВЗ: нужно выбрать пункт -->
       <div v-if="isYandexPickup && !selectedPvz" class="checkout__yandex-hint">
         <span class="checkout__yandex-hint-icon">📍</span>
@@ -222,6 +276,7 @@
         @close="showPvzModal = false"
         @select="onPvzSelect"
     />
+    <CheckoutCdekPvzModal :is-open="pochtaModalOpen" :points="pochtaModalPoints" :selected-code="pochtaSelectedOffice?.code" @close="pochtaModalOpen = false" @select="onPochtaOfficePicked" />
     <CheckoutCdekPvzModal :is-open="showCdekPvzModal" :points="cdekPvzPoints" :nearby="cdekPvzNearby" :point-type="currentCode === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ'" :selected-code="selectedCdekPvzCode" @close="showCdekPvzModal = false" @select="onCdekPvzSelect" />
   </div>
 </template>
@@ -229,6 +284,7 @@
 <script setup lang="ts">
 import { until } from '@vueuse/core';
 import { availableCheckoutDeliveryMethods } from '~/utils/checkoutDeliveryMethods';
+import { usePochtaCheckout, pochtaPeriod, type PochtaOffice } from '~/composables/usePochtaCheckout';
 import type { Countries } from '~/types/countries';
 
 interface DeliveryMethod {
@@ -318,6 +374,7 @@ const yandexOffer = defineModel<{
 } | null>('yandexOffer', { default: null });
 const yandexDeliveryData = defineModel<Record<string, unknown> | null>('yandexDeliveryData', { default: null });
 const cdekDeliveryData = defineModel<Record<string, unknown> | null>('cdekDeliveryData', { default: null });
+const pochtaDeliveryData = defineModel<Record<string, unknown> | null>('pochtaDeliveryData', { default: null });
 
 const pvzCode    = defineModel<string | null>('pvzCode',    { default: null });
 const pvzAddress = defineModel<string | null>('pvzAddress', { default: null });
@@ -441,7 +498,41 @@ const isYandexDelivery = computed(() => isYandexPickup.value || isYandexCourier.
 const isCdekPickup = computed(() => ['cdek_pickup', 'cdek_postamat'].includes(currentCode.value));
 const isCdekCourier = computed(() => currentCode.value === 'cdek_courier');
 const isCdekDelivery = computed(() => isCdekPickup.value || isCdekCourier.value);
-const isPickupDelivery = computed(() => isYandexPickup.value || isCdekPickup.value);
+
+// ─── Почта России ─────────────────────────────────────────────────────────────
+// Отделения, тарифы и данные доставки ведёт composables/usePochtaCheckout.ts.
+const {
+  isPochta, isOffice: isPochtaOffice, isCourier: isPochtaCourier, isInternational: isPochtaInternational,
+  offices: pochtaOffices, officesLoading: pochtaOfficesLoading, officesError: pochtaOfficesError,
+  selectedOffice: pochtaSelectedOffice, modalOpen: pochtaModalOpen,
+  tariffs: pochtaTariffs, selectedTariff: pochtaSelectedTariff, loading: pochtaLoading, error: pochtaError,
+  chooseOffice: choosePochtaOffice, selectTariff: selectPochtaTariff,
+} = usePochtaCheckout({
+  code: currentCode,
+  cityName,
+  countryCode,
+  address,
+  // Адрес отделения подставляется в форму, как адрес ПВЗ у СДЭК и Яндекса.
+  onOfficeChosen: (office) => {
+    address.value = office?.address ?? '';
+    pvzCode.value = office?.code ?? null;
+    pvzAddress.value = office?.address ?? null;
+  },
+  onDeliveryData: (data) => { pochtaDeliveryData.value = data; },
+});
+const pochtaModalPoints = computed(() => pochtaOffices.value.map((office) => ({
+  code: office.code,
+  name: `Отделение ${office.code}`,
+  work_time: office.hours,
+  type: office.type,
+  location: { address: office.address, latitude: office.latitude, longitude: office.longitude },
+})));
+const onPochtaOfficePicked = (point: { code: string }) => {
+  const office = pochtaOffices.value.find((item: PochtaOffice) => item.code === point.code);
+  if (office) choosePochtaOffice(office);
+};
+
+const isPickupDelivery = computed(() => isYandexPickup.value || isCdekPickup.value || isPochtaOffice.value);
 
 // Для курьера нужны населённый пункт и адрес.
 const canCalculateYandex = computed(() =>
