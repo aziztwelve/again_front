@@ -63,7 +63,7 @@ import {
   getPrivacyPolicyLink,
   getOfertaLink,
 } from '~/utils/getPolicyLink';
-import { PAYMENT_OPTIONS, type PaymentOption } from '~/constants/payment';
+import { PAYMENT_OPTIONS, ROBOKASSA_OPTION, type PaymentOption } from '~/constants/payment';
 
 withDefaults(defineProps<{
   isLoading?: boolean,
@@ -81,7 +81,30 @@ const paymentMethod = defineModel<string>('paymentMethod');
 // Список — единый источник правды (см. ~/constants/payment.ts). Тот же
 // справочник используется в pages/orders/[token].vue для маппинга кода
 // в человекочитаемое название.
-const paymentOptions = PAYMENT_OPTIONS;
+// Robokassa показываем только если бэкенд разрешил этому покупателю
+// (закрытый тест по списку email; пустой список на бэке — способ виден всем).
+// Запрос только в браузере: ответ зависит от токена покупателя.
+const authStore = useAuthStore();
+const { data: extraOptions, refresh: refreshExtraOptions } = await useApi<{ success: boolean; robokassa: boolean }>(
+  '/public/checkout/payment-options',
+  { server: false, key: 'checkout-payment-options' },
+);
+
+const paymentOptions = computed<PaymentOption[]>(() => {
+  if (extraOptions.value?.robokassa !== true) return PAYMENT_OPTIONS;
+  const [first, ...rest] = PAYMENT_OPTIONS;
+  return [first, ROBOKASSA_OPTION, ...rest];
+});
+
+// Вошёл или вышел — список мог измениться.
+watch(() => authStore.token, () => refreshExtraOptions());
+
+// Выбранный способ пропал из списка (например, вышли из аккаунта) — берём первый.
+watch(paymentOptions, (options) => {
+  if (paymentMethod.value && !options.some((o) => o.code === paymentMethod.value)) {
+    selectPayment(options[0]);
+  }
+});
 
 const selectPayment = (opt: PaymentOption) => {
   paymentMethod.value = opt.code;
@@ -90,7 +113,7 @@ const selectPayment = (opt: PaymentOption) => {
 // Преселектим первую опцию.
 onMounted(() => {
   if (!paymentMethod.value) {
-    selectPayment(paymentOptions[0]);
+    selectPayment(paymentOptions.value[0]);
   }
 });
 

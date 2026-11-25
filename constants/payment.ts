@@ -18,6 +18,17 @@ export interface PaymentOption {
     text?: string;
 }
 
+/**
+ * Robokassa (SberPay, иностранная карта, Подели в iframe). В PAYMENT_OPTIONS не входит:
+ * бэкенд решает, показывать ли её (GET /public/checkout/payment-options) — пока магазин
+ * Robokassa настраивается, способ виден только клиентам из ROBOKASSA_ALLOWED_EMAILS,
+ * а когда список пуст — всем. Позицию в списке задаёт CheckoutPayment (вторая).
+ */
+export const ROBOKASSA_OPTION: PaymentOption = {
+    code: 'robokassa',
+    title: 'Оплата SberPay, иностранная карта, Рассрочка Подели',
+};
+
 export const PAYMENT_OPTIONS: PaymentOption[] = [
     { code: 'card_ru', title: 'Оплата картами РФ, TPay, СБП' },
     { code: 'yandex_pay', title: 'Яндекс Пэй и Сплит', text: 'Оплата частями, картами Visa, Mastercard, МИР' },
@@ -30,11 +41,7 @@ export const PAYMENT_OPTIONS: PaymentOption[] = [
  */
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
     ...Object.fromEntries(PAYMENT_OPTIONS.map((o) => [o.code, o.title])),
-    // Robokassa пока скрыта из чекаута (ждём активации магазина и боевых паролей);
-    // подпись нужна заказам, которые уже оформлены с этим способом.
-    // Вернуть пункт в PAYMENT_OPTIONS:
-    //   { code: 'robokassa', title: 'Оплата SberPay, иностранная карта, Рассрочка Подели' },
-    robokassa: 'Оплата SberPay, иностранная карта, Рассрочка Подели',
+    robokassa: ROBOKASSA_OPTION.title,
     // Коды отдельных методов CloudPayments (заказы до объединения опций
     // чекаута в «Оплата картами РФ, TPay, СБП»):
     cloudpayments_tpay: 'T-Pay',
