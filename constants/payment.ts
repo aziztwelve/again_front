@@ -20,7 +20,6 @@ export interface PaymentOption {
 
 export const PAYMENT_OPTIONS: PaymentOption[] = [
     { code: 'card_ru', title: 'Оплата картами РФ, TPay, СБП' },
-    { code: 'robokassa', title: 'Оплата SberPay, иностранная карта, Рассрочка Подели' },
     { code: 'yandex_pay', title: 'Яндекс Пэй и Сплит', text: 'Оплата частями, картами Visa, Mastercard, МИР' },
 ];
 
@@ -31,6 +30,11 @@ export const PAYMENT_OPTIONS: PaymentOption[] = [
  */
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
     ...Object.fromEntries(PAYMENT_OPTIONS.map((o) => [o.code, o.title])),
+    // Robokassa пока скрыта из чекаута (ждём активации магазина и боевых паролей);
+    // подпись нужна заказам, которые уже оформлены с этим способом.
+    // Вернуть пункт в PAYMENT_OPTIONS:
+    //   { code: 'robokassa', title: 'Оплата SberPay, иностранная карта, Рассрочка Подели' },
+    robokassa: 'Оплата SberPay, иностранная карта, Рассрочка Подели',
     // Коды отдельных методов CloudPayments (заказы до объединения опций
     // чекаута в «Оплата картами РФ, TPay, СБП»):
     cloudpayments_tpay: 'T-Pay',

@@ -221,7 +221,7 @@ definePageMeta({
 const route = useRoute();
 const token = route.params.token as string;
 
-const { data, pending } = await useApi<PublicOrderResponse>(
+const { data, pending, refresh: refreshOrder } = await useApi<PublicOrderResponse>(
     `/public/orders/${token}`,
 );
 
@@ -438,7 +438,8 @@ const watchRobokassaPayment = async () => {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     await new Promise((resolve) => window.setTimeout(resolve, 6000));
     if (watchId !== robokassaWatchId) return;
-    await refreshNuxtData();
+    // refreshNuxtData() перезапустил бы и POST intent (useApi = useFetch) — создавал бы платёж каждые 6 с
+    await refreshOrder();
     if (order.value?.payment_status?.value === 'paid') {
       showToast('Платёж принят. Спасибо за заказ!');
       await onOrderPaid();
@@ -486,7 +487,7 @@ const pollOrderPaymentStatus = async () => {
   // Success URL оплату не подтверждает: Result URL может прийти с задержкой,
   // поэтому несколько раз перечитываем заказ, пока он не станет оплаченным.
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    await refreshNuxtData();
+    await refreshOrder();
     if (order.value?.payment_status?.value === 'paid') {
       await onOrderPaid();
       break;
