@@ -53,6 +53,7 @@ export interface PublicOrder {
     payment_status: PublicOrderStatusInfo;
     payment_method: string | null;
     cloudpayments_available: boolean;
+    robokassa_available?: boolean;
     yandex_pay: YandexPayConfig;
     total_amount: number;
     /** items_discount + promo_discount (на бэке = order.discount_amount). */

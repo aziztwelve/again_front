@@ -34,11 +34,11 @@
                     class="order-view__state order-view__state--minor"
                 >{{ paymentStatusLabel }}</span>
                 <button
-                    v-if="canBePaid && isCloudPaymentsOrder"
+                    v-if="canBePaid && (isCloudPaymentsOrder || isRobokassaOrder)"
                     type="button"
                     class="order-view__pay-button"
                     :disabled="isPaymentStarting"
-                    @click="startCloudPayments"
+                    @click="isRobokassaOrder ? startRobokassa() : startCloudPayments()"
                 >
                   {{ isPaymentStarting ? 'Открываем оплату…' : 'Оплатить онлайн' }}
                 </button>
@@ -255,7 +255,13 @@ onMounted(async () => {
   }
 
   if (route.query.payment) {
-    await pollYandexPayStatus();
+    // Возврат со страницы оплаты: заказ оплачивает вебхук, а не редирект.
+    if (order.value?.payment_method === 'robokassa') {
+      // После отказа/отмены ждать вебхук незачем.
+      if (route.query.payment !== 'fail') await pollOrderPaymentStatus();
+    } else {
+      await pollYandexPayStatus();
+    }
   }
 
   await mountYandexPayButton();
@@ -269,6 +275,7 @@ const orderStatusLabel = computed(() => order.value?.status?.label || null);
 const paymentStatusLabel = computed(() => order.value?.payment_status?.label || null);
 const canBePaid = computed(() => ['pending', 'failed'].includes(order.value?.payment_status?.value ?? ''));
 const isCloudPaymentsOrder = computed(() => order.value?.cloudpayments_available === true);
+const isRobokassaOrder = computed(() => order.value?.robokassa_available === true);
 const isYandexPayOrder = computed(() => order.value?.yandex_pay?.available === true);
 
 const paymentMethodLabel = computed(() => getPaymentMethodLabel(order.value?.payment_method));
@@ -378,6 +385,113 @@ const startCloudPayments = async () => {
     showToast(error?.message || 'Не удалось открыть форму оплаты. Попробуйте ещё раз.');
   } finally {
     isPaymentStarting.value = false;
+  }
+};
+
+// Robokassa iframe: бэк возвращает поля с подписью, скрипт Robokassa открывает
+// оплату в модальном окне поверх страницы (SberPay, иностранная карта, Подели
+// покупатель выбирает внутри окна). Колбэка о результате у iframe нет, поэтому
+// после открытия окна мы сами перечитываем заказ, пока Result URL не пометит
+// его оплаченным.
+type RobokassaGlobal = { StartPayment: (params: Record<string, unknown>) => void };
+
+const ROBOKASSA_IFRAME_SRC = 'https://auth.robokassa.ru/Merchant/bundle/robokassa_iframe.js';
+
+const loadRobokassaIframe = (): Promise<RobokassaGlobal> => new Promise((resolve, reject) => {
+  const ready = () => (window as any).Robokassa as RobokassaGlobal | undefined;
+  if (ready()?.StartPayment) {
+    resolve(ready() as RobokassaGlobal);
+    return;
+  }
+
+  const fail = () => reject(new Error('Не удалось загрузить окно оплаты.'));
+  const done = () => (ready()?.StartPayment ? resolve(ready() as RobokassaGlobal) : fail());
+
+  const existing = document.querySelector<HTMLScriptElement>('script[data-robokassa-iframe]');
+  if (existing) {
+    existing.addEventListener('load', done, { once: true });
+    existing.addEventListener('error', fail, { once: true });
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = ROBOKASSA_IFRAME_SRC;
+  script.async = true;
+  script.dataset.robokassaIframe = 'true';
+  script.onload = done;
+  script.onerror = fail;
+  document.head.appendChild(script);
+});
+
+// Заказ оплачен: если в локальной корзине осталось то же, что в заказе, убираем её.
+const onOrderPaid = async () => {
+  if (cartStore.isOrderedCart()) {
+    await cartStore.setEmptyCart();
+  }
+};
+
+let robokassaWatchId = 0;
+
+const watchRobokassaPayment = async () => {
+  const watchId = ++robokassaWatchId;
+  // До ~10 минут: покупатель может долго выбирать способ и подтверждать в приложении банка.
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    await new Promise((resolve) => window.setTimeout(resolve, 6000));
+    if (watchId !== robokassaWatchId) return;
+    await refreshNuxtData();
+    if (order.value?.payment_status?.value === 'paid') {
+      showToast('Платёж принят. Спасибо за заказ!');
+      await onOrderPaid();
+      return;
+    }
+  }
+};
+
+onBeforeUnmount(() => {
+  robokassaWatchId += 1;
+});
+
+const startRobokassa = async () => {
+  if (!order.value || isPaymentStarting.value) return;
+  isPaymentStarting.value = true;
+
+  try {
+    const { data: intent, error } = await useApi<{
+      success: boolean;
+      message?: string;
+      fields?: Record<string, string | number>;
+    }>(
+        `/public/orders/${token}/robokassa/intent`,
+        { method: 'POST', body: {} },
+    );
+    if (error.value || !intent.value?.success || !intent.value.fields) {
+      throw new Error(intent.value?.message || 'Не удалось подготовить оплату.');
+    }
+
+    const robokassa = await loadRobokassaIframe();
+    await recordOrderActivity('payment_started');
+
+    // useApi отдаёт реактивный Proxy — передаём скрипту обычный объект.
+    robokassa.StartPayment(JSON.parse(JSON.stringify(intent.value.fields)));
+    void watchRobokassaPayment();
+  } catch (error: any) {
+    showToast(error?.message || 'Не удалось открыть оплату. Попробуйте ещё раз.');
+  } finally {
+    // Окно можно закрыть и открыть снова: каждая попытка — новый платёж.
+    isPaymentStarting.value = false;
+  }
+};
+
+const pollOrderPaymentStatus = async () => {
+  // Success URL оплату не подтверждает: Result URL может прийти с задержкой,
+  // поэтому несколько раз перечитываем заказ, пока он не станет оплаченным.
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await refreshNuxtData();
+    if (order.value?.payment_status?.value === 'paid') {
+      await onOrderPaid();
+      break;
+    }
+    if (attempt < 3) await new Promise((resolve) => window.setTimeout(resolve, 3000));
   }
 };
 
