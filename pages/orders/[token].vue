@@ -432,13 +432,24 @@ const onOrderPaid = async () => {
 
 let robokassaWatchId = 0;
 
+// Сверка оплаты с Robokassa на бэкенде (Result URL может задержаться или не дойти).
+const syncRobokassaStatus = async () => {
+  try {
+    await useApi(`/public/orders/${token}/robokassa/status`, { method: 'POST', body: {} });
+  } catch {
+    // Result URL остаётся источником истины; сверка — страховка.
+  }
+};
+
 const watchRobokassaPayment = async () => {
   const watchId = ++robokassaWatchId;
   // До ~10 минут: покупатель может долго выбирать способ и подтверждать в приложении банка.
   for (let attempt = 0; attempt < 100; attempt += 1) {
     await new Promise((resolve) => window.setTimeout(resolve, 6000));
     if (watchId !== robokassaWatchId) return;
-    // refreshNuxtData() перезапустил бы и POST intent (useApi = useFetch) — создавал бы платёж каждые 6 с
+    // Раз в ~30 с спрашиваем у Robokassa напрямую, остальное время только перечитываем заказ.
+    // refreshNuxtData() перезапустил бы и POST intent (useApi = useFetch) — создавал бы платёж каждые 6 с.
+    if (attempt % 5 === 4) await syncRobokassaStatus();
     await refreshOrder();
     if (order.value?.payment_status?.value === 'paid') {
       showToast('Платёж принят. Спасибо за заказ!');
@@ -487,6 +498,7 @@ const pollOrderPaymentStatus = async () => {
   // Success URL оплату не подтверждает: Result URL может прийти с задержкой,
   // поэтому несколько раз перечитываем заказ, пока он не станет оплаченным.
   for (let attempt = 0; attempt < 4; attempt += 1) {
+    await syncRobokassaStatus();
     await refreshOrder();
     if (order.value?.payment_status?.value === 'paid') {
       await onOrderPaid();
