@@ -264,6 +264,8 @@ export const usePromotionStore = defineStore('promotionStore', () => {
         try {
             const items = cartItems.map((item) => ({
                 product_id: item.id,
+                // Акция может действовать только на отдельные размеры/объёмы.
+                product_variant_id: item.selected_variant?.id ?? item.product_variant_id ?? null,
                 quantity: item.quantity ?? 1,
                 price: item.selected_variant?.price ?? item.price,
             }));
