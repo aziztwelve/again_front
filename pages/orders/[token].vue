@@ -393,7 +393,10 @@ const startCloudPayments = async () => {
 // покупатель выбирает внутри окна). Колбэка о результате у iframe нет, поэтому
 // после открытия окна мы сами перечитываем заказ, пока Result URL не пометит
 // его оплаченным.
-type RobokassaGlobal = { StartPayment: (params: Record<string, unknown>) => void };
+type RobokassaGlobal = {
+  StartPayment: (params: Record<string, unknown>) => void;
+  Render: (params: Record<string, unknown>) => void;
+};
 
 const ROBOKASSA_IFRAME_SRC = 'https://auth.robokassa.ru/Merchant/bundle/robokassa_iframe.js';
 
@@ -484,7 +487,13 @@ const startRobokassa = async () => {
     await recordOrderActivity('payment_started');
 
     // useApi отдаёт реактивный Proxy — передаём скрипту обычный объект.
-    robokassa.StartPayment(JSON.parse(JSON.stringify(intent.value.fields)));
+    const params = JSON.parse(JSON.stringify(intent.value.fields)) as Record<string, unknown>;
+    // Settings (список способов оплаты) учитывает только Render: StartPayment перезаписывает его.
+    if (params.Settings) {
+      robokassa.Render(params);
+    } else {
+      robokassa.StartPayment(params);
+    }
     void watchRobokassaPayment();
   } catch (error: any) {
     showToast(error?.message || 'Не удалось открыть оплату. Попробуйте ещё раз.');
