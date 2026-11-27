@@ -2,11 +2,11 @@
   <Teleport to="body">
     <div v-if="isOpen" class="cdek-modal">
       <button class="cdek-modal__overlay" type="button" aria-label="Закрыть" @click="$emit('close')" />
-      <section class="cdek-modal__content" role="dialog" aria-modal="true" aria-label="Выбор пункта СДЭК">
-        <header><h3>Пункты самовывоза</h3><button type="button" aria-label="Закрыть" @click="$emit('close')">×</button></header>
+      <section class="cdek-modal__content" role="dialog" aria-modal="true" :aria-label="dialogLabel">
+        <header><h3>{{ title }}</h3><button type="button" aria-label="Закрыть" @click="$emit('close')">×</button></header>
         <div class="cdek-modal__toolbar"><input v-model="query" type="search" placeholder="Поиск по адресу или названию" autofocus><div class="cdek-modal__tabs"><button type="button" :class="{ _active: view === 'list' }" @click="view = 'list'">Список</button><button type="button" :class="{ _active: view === 'map' }" @click="openMap">Карта</button></div></div>
     <p v-if="nearby && filtered.length" class="cdek-modal__nearby">В выбранном населённом пункте нет точек СДЭК. Показываем ближайшие {{ pointType === 'POSTAMAT' ? 'постаматы' : 'ПВЗ' }} в регионе.</p>
-    <p v-if="!filtered.length" class="cdek-modal__empty">В этом населённом пункте нет доступных ПВЗ СДЭК. Выберите курьерскую доставку или другой населённый пункт.</p>
+    <p v-if="!filtered.length" class="cdek-modal__empty">{{ emptyText }}</p>
         <div v-else-if="view === 'list'" class="cdek-modal__list"><button v-for="point in filtered" :key="point.code" type="button" class="cdek-modal__point" :class="{ _selected: selected?.code === point.code }" @click="select(point, true)"><span class="cdek-modal__radio"><i v-if="selected?.code === point.code" /></span><span><b>{{ point.name || point.code }}</b><em>{{ address(point) }}</em><small v-if="point.work_time">{{ point.work_time }}</small></span></button></div>
         <div v-else class="cdek-modal__map-wrap">
           <iframe
@@ -19,7 +19,7 @@
           <div v-else-if="mapError" class="cdek-modal__map-error">Не удалось загрузить карту. Выберите пункт в режиме «Список».</div>
           <div v-else ref="mapEl" class="cdek-modal__map" />
         </div>
-        <footer><div v-if="selected" class="cdek-modal__chosen"><b>{{ selected.name || selected.code }}</b><span>{{ address(selected) }}</span></div><button type="button" class="btn _primary" :disabled="!selected" @click="confirm">Выбрать этот {{ pointType === 'POSTAMAT' ? 'постамат' : 'пункт' }}</button></footer>
+        <footer><div v-if="selected" class="cdek-modal__chosen"><b>{{ selected.name || selected.code }}</b><span>{{ address(selected) }}</span></div><button type="button" class="btn _primary" :disabled="!selected" @click="confirm">{{ confirmText }}</button></footer>
       </section>
     </div>
   </Teleport>
@@ -28,7 +28,16 @@
 <script setup lang="ts">
 import { nextTick } from 'vue'
 interface Point { code: string; name?: string; work_time?: string; location?: { address?: string; address_full?: string; latitude?: number | string; longitude?: number | string } }
-const props = defineProps<{ isOpen: boolean; points: Point[]; nearby?: boolean; pointType?: string; selectedCode?: string | null }>()
+const props = withDefaults(defineProps<{
+  isOpen: boolean; points: Point[]; nearby?: boolean; pointType?: string; selectedCode?: string | null
+  // Тексты окна: по умолчанию — для пунктов СДЭК, отделения Почты России передают свои.
+  title?: string; dialogLabel?: string; emptyText?: string; confirmLabel?: string
+}>(), {
+  title: 'Пункты самовывоза',
+  dialogLabel: 'Выбор пункта СДЭК',
+  emptyText: 'В этом населённом пункте нет доступных ПВЗ СДЭК. Выберите курьерскую доставку или другой населённый пункт.',
+})
+const confirmText = computed(() => props.confirmLabel ?? `Выбрать этот ${props.pointType === 'POSTAMAT' ? 'постамат' : 'пункт'}`)
 const emit = defineEmits<{ close: []; select: [point: Point] }>()
 const query = ref(''); const selected = ref<Point | null>(null); const view = ref<'list' | 'map'>('list')
 const address = (point: Point) => point.location?.address ?? point.location?.address_full ?? ''

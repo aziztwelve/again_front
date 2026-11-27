@@ -13,6 +13,8 @@
     <div class="cart-progress__line">
       <div :style="{ '--width': widthPercent }"></div>
     </div>
+    <!-- Правила бесплатной доставки есть только у этих служб; на Почту России они не действуют. -->
+    <div class="cart-progress__note">Бесплатная доставка действует только для СДЭК и Яндекс.Доставки</div>
   </div>
 </template>
 
@@ -81,6 +83,13 @@ watch(() => [cartStore.cart.length, cartStore.total], refresh);
   @media (max-width: $mobile) {
     font-size: 1.3rem;
   }
+}
+
+.cart-progress__note {
+  margin-top: .8rem;
+  font-size: 1.1rem;
+  line-height: normal;
+  color: #7a7a7a;
 }
 
 .cart-progress__line {

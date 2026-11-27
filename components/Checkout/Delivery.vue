@@ -29,7 +29,7 @@
       <!-- Адрес: для ПВЗ подставляется автоматически, для курьера — обязателен (улица + дом) -->
       <FormInput
           name="address"
-          :placeholder="isPickupDelivery ? 'Адрес (заполняется при выборе ПВЗ)' : 'Улица, дом*'"
+          :placeholder="isPickupDelivery ? `Адрес (заполняется при выборе ${isPochtaOffice ? 'отделения' : 'ПВЗ'})` : 'Улица, дом*'"
           :readonly="isPickupDelivery"
           v-model="address"
       />
@@ -276,7 +276,7 @@
         @close="showPvzModal = false"
         @select="onPvzSelect"
     />
-    <CheckoutCdekPvzModal :is-open="pochtaModalOpen" :points="pochtaModalPoints" :selected-code="pochtaSelectedOffice?.code" @close="pochtaModalOpen = false" @select="onPochtaOfficePicked" />
+    <CheckoutCdekPvzModal :is-open="pochtaModalOpen" :points="pochtaModalPoints" :selected-code="pochtaSelectedOffice?.code" title="Отделения Почты России" dialog-label="Выбор отделения Почты России" empty-text="Отделения не найдены. Измените запрос или населённый пункт." confirm-label="Выбрать это отделение" @close="pochtaModalOpen = false" @select="onPochtaOfficePicked" />
     <CheckoutCdekPvzModal :is-open="showCdekPvzModal" :points="cdekPvzPoints" :nearby="cdekPvzNearby" :point-type="currentCode === 'cdek_postamat' ? 'POSTAMAT' : 'PVZ'" :selected-code="selectedCdekPvzCode" @close="showCdekPvzModal = false" @select="onCdekPvzSelect" />
   </div>
 </template>
