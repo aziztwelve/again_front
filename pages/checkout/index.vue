@@ -83,10 +83,7 @@
               />
             </div>
             <div class="checkout__total">
-              <CheckoutTotal
-                  :with-button="false"
-                  v-model:promo-code="form.promo_code"
-              />
+              <CheckoutTotal :with-button="false" />
 
               <CheckoutGiftCard/>
 
@@ -189,6 +186,13 @@ const form = reactive<CheckoutForm>({
   pvz_code: null,
   pvz_address: null,
 });
+
+// Промокод вводят и убирают прямо на этой странице (меняется только корзина). Заказ и расчёт
+// бесплатной доставки берут его из формы, поэтому форма всегда повторяет корзину: иначе
+// покупатель видит скидку, а заказ создаётся без неё.
+watch(() => cartStore.promoCode, (code) => {
+  form.promo_code = code;
+}, { immediate: true });
 
 // Корзина стала «только электронная карта» (или покупатель переключил тип карты на электронную):
 // блок доставки исчезает, поэтому стираем всё, что в нём было выбрано, и убираем строку «Доставка»
